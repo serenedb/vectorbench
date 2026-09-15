@@ -17,7 +17,7 @@ from . import __version__, attributes, metrics
 from .engine import Participant
 from .families import Family, Group
 from .prepare import dataset_dir, load_manifest
-from .queries import knob_names, ladder_points, load_blocks, resolve_block, resolve_settings, substitute_index, substitute_knobs
+from .queries import knob_names, ladder_for, ladder_points, load_blocks, resolve_block, resolve_settings, substitute_index, substitute_knobs
 from .results import ResultFile, host_description, now_date, os_name
 from .workers import PassSpec, WorkerPool
 
@@ -169,8 +169,9 @@ class Runner:
             for g in self.selected_groups():
                 block = resolve_block(self.blocks, g)
                 st = resolve_settings(self.p.settings, self.family, self.size, g)
-                pts = [{}] if g.exact else ladder_points(st["ladder"])
-                out.append({"view": view, "group": g.key, "supported": block is not None, "points": len(pts), "ladder": st["ladder"] if not g.exact else {}})
+                ladder = ladder_for(block, st["ladder"]) if block is not None else st["ladder"]
+                pts = [{}] if g.exact else ladder_points(ladder)
+                out.append({"view": view, "group": g.key, "supported": block is not None, "points": len(pts), "ladder": ladder if not g.exact else {}})
         return out
 
     # ------------------------------------------------------------ general
@@ -259,7 +260,7 @@ class Runner:
         except KeyError as e:
             rf.upsert_group({**base, "status": "error", "reason": str(e)})
             return
-        points = [{}] if g.exact else ladder_points(st["ladder"])
+        points = [{}] if g.exact else ladder_points(ladder_for(block, st["ladder"]))
         missing = knob_names(block) - set(points[0]) if not g.exact else set()
         if missing:
             rf.upsert_group({**base, "status": "error", "reason": f"block uses knobs {sorted(missing)} that the ladder does not define"})

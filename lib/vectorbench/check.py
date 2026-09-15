@@ -13,7 +13,7 @@ from . import attributes, metrics
 from .engine import Participant
 from .families import Family
 from .prepare import dataset_dir, load_manifest
-from .queries import ladder_points, load_blocks, resolve_block, resolve_settings, substitute_index, substitute_knobs
+from .queries import ladder_for, ladder_points, load_blocks, resolve_block, resolve_settings, substitute_index, substitute_knobs
 from .runner import GroundTruth, check_plan
 from .workers import PassSpec, WorkerPool
 
@@ -62,7 +62,7 @@ def run_check(p: Participant, family: Family, size: str, data_dir: Path, queries
             pool.set_group(args)
             st = resolve_settings(p.settings, family, size, g)
             block = substitute_index(block, {**st["index"], "dims": family.dims, "metric": family.metric})
-            knobs = {} if g.exact else ladder_points(st["ladder"])[-1]  # the most thorough point
+            knobs = {} if g.exact else ladder_points(ladder_for(block, st["ladder"]))[-1]  # the most thorough point
             pool.prepare(substitute_knobs(block, knobs) if knobs else block)
             plan = pool.explain(g.k)
             plan_bad = check_plan(plan, g, p.settings.get("plan_rules") or {}) if plan is not None else None

@@ -95,6 +95,13 @@ def resolve_settings(settings: dict[str, Any], family: Family, size: str, group:
     return cur
 
 
+def ladder_for(block: str, ladder: dict[str, list[Any]]) -> dict[str, list[Any]]:
+    """The knobs of `ladder` that `block` names: a knob a block does not use is not a knob of that
+    group, so a ladder shared across groups does not multiply points where a knob is irrelevant."""
+    names = knob_names(block)
+    return {k: v for k, v in ladder.items() if k in names}
+
+
 def ladder_points(ladder: dict[str, list[Any]]) -> list[dict[str, Any]]:
     """Cartesian product of the knob lists, in the order written."""
     if not ladder:

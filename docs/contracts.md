@@ -177,7 +177,8 @@ datasets:
 Resolution for a (dataset size, group): `defaults` < `datasets.<family>.<size>` < its `groups["*/<k>"]`
 < `groups["<filter>/*"]` < `groups["<filter>/<k>"]`, later keys winning. `"*/<k>"` is for knobs tied to
 k, such as a beam that is also the result ceiling. A ladder with several knobs is the cartesian product
-in the order written; keep ladders to about seven points. Exact groups ignore ladders.
+in the order written, over the knobs the group's block names (a knob the block does not mention is
+not a knob of that group); keep ladders to about seven points per knob. Exact groups ignore ladders.
 
 `plan_rules` (optional): lists of substrings the plan returned by `Client.explain` must contain,
 under `always`, `approximate` (non-exact groups), `exact`, `filtered` (filter != none); an entry that is
