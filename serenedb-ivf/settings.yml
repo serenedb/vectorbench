@@ -27,7 +27,7 @@ plan_rules:
 defaults:
   # storage: search (rows live in the index; relation items) | view (index over read_parquet; relation items_vec)
   #          | table (transactional table + secondary index; relation items_vec on releases that do not rewrite base scans)
-  index: {storage: search, relation: items, quant: sq8, posting_size: 1024, sample_factor: 0.2}
+  index: {storage: search, relation: items, quant: sq8, posting_size: 1024, sample_factor: 0.2, compression: false}
   # consecutive integers up to 16 keep every bracket within the density rule; beyond that recall moves slowly
   ladder: {nprobe: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 18, 20, 24, 28, 32, 40, 48, 64, 96, 128]}
 

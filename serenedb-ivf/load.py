@@ -36,6 +36,9 @@ SAMPLE = os.environ.get("VB_INDEX_SAMPLE_FACTOR")
 M = os.environ.get("VB_INDEX_M")
 EFC = os.environ.get("VB_INDEX_EF_CONSTRUCTION")
 STORAGE = os.environ.get("VB_INDEX_STORAGE", "search")
+# compression=false stores the index's raw vectors uncompressed: rerank and exact reads skip the codec
+# at the price of disk (index option of both opclasses).
+COMPRESSION = os.environ.get("VB_INDEX_COMPRESSION")
 THREADS = int(os.environ.get("VB_INDEX_THREADS") or (os.cpu_count() or 8))
 # sdb_metrics keys a search table's index by the table oid, a secondary or view index by the index oid.
 METRIC_REL = "items" if STORAGE == "search" else "items_vec"
@@ -55,6 +58,8 @@ def connect() -> psycopg.Connection:
 
 def opclass() -> str:
     opts = [f"metric = '{METRIC}'", f"quant = '{QUANT}'"]
+    if COMPRESSION is not None:
+        opts.append(f"compression = {'true' if str(COMPRESSION).lower() in ('1', 'true', 'yes') else 'false'}")
     if KIND == "hnsw":
         if M:
             opts.append(f"m = {int(M)}")

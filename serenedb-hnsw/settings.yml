@@ -25,7 +25,7 @@ plan_rules:
   exact_not: ["Score:"]        # exact rows are brute force through the columnstore, never the ANN index
 
 defaults:
-  index: {storage: search, relation: items, quant: sq8, m: 32, ef_construction: 200}
+  index: {storage: search, relation: items, quant: sq8, m: 32, ef_construction: 200, compression: false}
   # ef is the search beam and also the result ceiling, so every value must be >= k; the ladder is
   # given as multiples of k in the query text: {ef} is substituted, then max(ef, k) is applied by SereneDB.
   ladder: {ef: [16, 24, 32, 48, 64, 96, 128, 192, 256, 384, 512]}
