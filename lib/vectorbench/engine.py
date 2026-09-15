@@ -159,8 +159,10 @@ class Participant:
         """Peak memory of the engine, bytes: the container cgroup's memory.peak (memory.current as a
         fallback), or in native mode the server process's VmHWM from its pid file."""
         env = env or {}
-        if env.get("VB_BINARY"):
-            pidfile = Path(env.get("VECTORBENCH_ENGINE_DIR", "")) / "serened.pid"
+        # Native mode is a SereneDB participant's choice; VB_BINARY in the environment of another
+        # participant (a shared shell) means nothing without the pid file the native scripts write.
+        pidfile = Path(env.get("VECTORBENCH_ENGINE_DIR", "")) / "serened.pid"
+        if env.get("VB_BINARY") and pidfile.is_file():
             try:
                 pid = int(pidfile.read_text().strip())
                 for line in Path(f"/proc/{pid}/status").read_text().splitlines():
