@@ -1,0 +1,51 @@
+{
+ "dataset": "wiki-v3-1024-1m",
+ "participant": "qdrant-hnsw",
+ "load_time": 251.52293209899653,
+ "load_phases": {
+  "ingest": 49.339,
+  "index": 201.358
+ },
+ "disk_bytes": 4903202816,
+ "disk_info": {
+  "segments": 8,
+  "points": 1000000,
+  "indexed_vectors": 1000000,
+  "index": {
+   "m": 16,
+   "ef_construct": 128,
+   "quant": "none",
+   "on_disk_vectors": false,
+   "on_disk_hnsw": false,
+   "segments": 8,
+   "full_scan_threshold_kb": 10,
+   "max_segment_size_kb": null
+  },
+  "payload_indexes": [
+   "cat10",
+   "cat100",
+   "cat1000",
+   "cluster",
+   "lang",
+   "num"
+  ],
+  "indexing_threshold_kb": 1,
+  "upload_workers": 4
+ },
+ "memory_peak_load": 11836805120,
+ "version": "1.19.1",
+ "date": "2026-09-15",
+ "index": {
+  "params": {
+   "m": 16,
+   "ef_construct": 128,
+   "quant": "none",
+   "on_disk_vectors": false,
+   "on_disk_hnsw": false,
+   "segments": 8,
+   "full_scan_threshold_kb": 10,
+   "dims": 1024,
+   "metric": "ip"
+  }
+ }
+}
