@@ -29,30 +29,30 @@ defaults:
   # ef is the search beam and also the result ceiling (floored at k by SereneDB). `mode` is how a WHERE is
   # honoured (sdb_hnsw_filter_mode): auto scans a selective predicate's rows or walks the graph scoring
   # every neighbour; bridge crosses rejected rows for one hop only, cheaper at moderate selectivity and
-  # weaker at high recall, so the k = 100 and k = 1000 groups declare both and the frontier picks. At
-  # k = 10 auto already reaches the row targets at the smallest beam, so only auto is declared. Only
-  # the filtered blocks name {mode}, so unfiltered groups measure ef alone.
-  ladder: {ef: [16, 24, 32, 48, 64, 96, 128, 192, 256, 384, 512], mode: [auto]}
+  # weaker at high recall, so the k = 100 and k = 1000 groups declare it too; walk forces the graph walk
+  # where auto would scan (a correlated predicate's rows sit where the walk goes). The frontier picks
+  # per row. Only the filtered blocks name {mode}, so unfiltered groups measure ef alone.
+  ladder: {ef: [16, 24, 32, 48, 64, 96, 128, 192, 256, 384, 512], mode: [auto, walk]}
 
 # ef is floored at k, so the k=100 and k=1000 groups need their own ladders; the anchors share them.
 datasets:
   sift-128:
     100k: &sift_100k
-      ladder: {ef: [16, 20, 24, 28, 32, 40, 48, 64, 96, 128, 192, 256], mode: [auto]}
+      ladder: {ef: [16, 20, 24, 28, 32, 40, 48, 64, 96, 128, 192, 256], mode: [auto, walk]}
       groups:
-        "*/100":  &k100  {ladder: {ef: [100, 128, 160, 200, 256, 320, 400, 512, 768], mode: [auto, bridge]}}
-        "*/1000": &k1000 {ladder: {ef: [1000, 1200, 1500, 2000, 2500, 3000, 4000], mode: [auto, bridge]}}
+        "*/100":  &k100  {ladder: {ef: [100, 128, 160, 200, 256, 320, 400, 512, 768], mode: [auto, bridge, walk]}}
+        "*/1000": &k1000 {ladder: {ef: [1000, 1200, 1500, 2000, 2500, 3000, 4000], mode: [auto, bridge, walk]}}
     1m:
-      ladder: {ef: [16, 20, 24, 28, 32, 40, 48, 64, 96, 128, 192, 256, 384], mode: [auto]}
+      ladder: {ef: [16, 20, 24, 28, 32, 40, 48, 64, 96, 128, 192, 256, 384], mode: [auto, walk]}
       groups: {"*/100": *k100, "*/1000": *k1000}
     10m:
-      ladder: {ef: [16, 20, 24, 28, 32, 40, 48, 64, 96, 128, 192, 256, 384, 512], mode: [auto]}
+      ladder: {ef: [16, 20, 24, 28, 32, 40, 48, 64, 96, 128, 192, 256, 384, 512], mode: [auto, walk]}
       groups: {"*/100": *k100, "*/1000": *k1000}
   wiki-v3-1024:
     100k: *sift_100k
     1m:
-      ladder: {ef: [16, 20, 24, 28, 32, 40, 48, 64, 96, 128, 192, 256, 384], mode: [auto]}
+      ladder: {ef: [16, 20, 24, 28, 32, 40, 48, 64, 96, 128, 192, 256, 384], mode: [auto, walk]}
       groups: {"*/100": *k100, "*/1000": *k1000}
     10m:
-      ladder: {ef: [16, 20, 24, 28, 32, 40, 48, 64, 96, 128, 192, 256, 384, 512], mode: [auto]}
+      ladder: {ef: [16, 20, 24, 28, 32, 40, 48, 64, 96, 128, 192, 256, 384, 512], mode: [auto, walk]}
       groups: {"*/100": *k100, "*/1000": *k1000}
