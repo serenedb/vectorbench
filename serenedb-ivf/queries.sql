@@ -7,8 +7,9 @@ SET sdb_ivf_search_nprobe = {nprobe};
 SELECT id FROM {index.relation} ORDER BY emb <#> $q LIMIT $k;
 
 -- group: exact/none/*
--- Brute force: the DOUBLE casts keep the ANN pushdown out of the plan (no Score:), so every row is scored exactly.
-SELECT id FROM {index.relation} ORDER BY emb::DOUBLE[{index.dims}] <#> $qd LIMIT $k;
+-- Exact: the engine's own brute force (sdb_ann_exact), every stored vector scored, split across workers.
+SET sdb_ann_exact = on;
+SELECT id FROM {index.relation} ORDER BY emb <#> $q LIMIT $k;
 
 -- group: eq-10/*
 SET sdb_ivf_search_nprobe = {nprobe};
@@ -19,7 +20,8 @@ SET sdb_ivf_search_nprobe = {nprobe};
 SELECT id FROM {index.relation} WHERE cat100 = $v ORDER BY emb <#> $q LIMIT $k;
 
 -- group: exact/eq-1/*
-SELECT id FROM {index.relation} WHERE cat100 = $v ORDER BY emb::DOUBLE[{index.dims}] <#> $qd LIMIT $k;
+SET sdb_ann_exact = on;
+SELECT id FROM {index.relation} WHERE cat100 = $v ORDER BY emb <#> $q LIMIT $k;
 
 -- group: eq-0.1/*
 SET sdb_ivf_search_nprobe = {nprobe};

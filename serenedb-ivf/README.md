@@ -46,8 +46,10 @@ Phases reported: `ddl`, `ingest`, `compaction`. Info reported: rows, segments, f
   `ef` alone trades recall for time.
 - `compression = false` in both opclasses stores the index's raw vectors uncompressed, so rescoring
   and exact reads skip the columnstore codec (ALP on FLOAT[N]) at the price of disk.
-- `exact` groups are brute force through the columnstore: the `::DOUBLE[dims]` cast keeps the ANN
-  pushdown out of the plan (no `Score:` in EXPLAIN), every row is scored exactly.
+- `exact` groups set `sdb_ann_exact = on`: the engine scores every stored vector (or every row the
+  WHERE admits) instead of walking the index, splitting each segment across the scan's workers;
+  EXPLAIN shows `Exact: brute force over the stored vectors`. This is the same brute-force mode
+  Qdrant's `exact = true` provides.
 - HNSW with a WHERE (`sdb_hnsw_filter_mode`, default `auto`): the predicate folds into one bitset (the
   claimed index filter plus column predicates on stored columns); a selective one is answered by
   scoring its rows directly, otherwise the graph walk scores every neighbour and admits only rows the

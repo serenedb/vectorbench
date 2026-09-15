@@ -22,7 +22,7 @@ plan_rules:
   always: [IRESEARCH_SCAN]
   approximate: ["Score:"]
   filtered: [["Index Filter", "Column Filter"]]   # a predicate answered by the term index or by the columnstore, never above the scan
-  exact_not: ["Score:"]        # exact rows are brute force through the columnstore, never the ANN index
+  exact: ["Exact:"]            # exact rows use the engine's brute force (sdb_ann_exact), never the ANN graph or clusters
 
 defaults:
   index: {storage: search, relation: items, quant: sq8, m: 32, ef_construction: 200, compression: false}
