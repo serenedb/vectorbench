@@ -11,6 +11,8 @@ from typing import Any
 
 import numpy as np
 import psycopg
+from psycopg.types.array import ListBinaryDumper
+from psycopg.types.numeric import Float4BinaryDumper
 
 OPERATORS = {"ip": "<#>", "l2": "<->", "cosine": "<=>"}
 PARAM_RE = re.compile(r"\$(qd|q|k|v|lo|hi|v2|s)\b")
@@ -32,6 +34,10 @@ class Client:
             autocommit=True,
             prepare_threshold=0,
         )
+        # The query vector travels as a binary float4 array, not as text: the server then reads
+        # dims floats instead of parsing dims decimal strings (about 0.1 ms per query at 128 dims).
+        self.conn.adapters.register_dumper(float, Float4BinaryDumper)
+        self.conn.adapters.register_dumper(list, ListBinaryDumper)
 
     def prepare_group(self, block: str) -> Any:
         assert self.conn is not None
