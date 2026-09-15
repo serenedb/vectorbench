@@ -41,10 +41,19 @@ Phases reported: `ddl`, `ingest`, `compaction`. Info reported: rows, segments, f
   back silently to a scan. `client.py` rewrites the operator from `VECTORBENCH_METRIC`.
 - Everything is per segment (centroid tree, rerank). Recall and latency depend on the segment count,
   which is why `load` compacts and reports `segments`.
-- `sdb_rerank_factor` (default 4.0) sets the exact-rescoring pool to `factor * k` for quantized
-  indexes; at k = 1000 that is 4,000 raw-vector reads per query.
-- `exact` groups use `SET sdb_disable_top_k_optimization = true` on the same index: the engine's own
-  streaming oracle path.
+- `sdb_rerank_factor` (default 4.0) sets the exact-rescoring pool to `factor * k` for quantized IVF
+  indexes. HNSW ignores it: its beam (`sdb_hnsw_ef_search`, floored at k) is the rescoring pool, so
+  `ef` alone trades recall for time.
+- `compression = false` in both opclasses stores the index's raw vectors uncompressed, so rescoring
+  and exact reads skip the columnstore codec (ALP on FLOAT[N]) at the price of disk.
+- `exact` groups are brute force through the columnstore: the `::DOUBLE[dims]` cast keeps the ANN
+  pushdown out of the plan (no `Score:` in EXPLAIN), every row is scored exactly.
+- HNSW with a WHERE (`sdb_hnsw_filter_mode`, default `auto`): the predicate folds into one bitset (the
+  claimed index filter plus column predicates on stored columns); a selective one is answered by
+  scoring its rows directly, otherwise the graph walk scores every neighbour and admits only rows the
+  bitset passes. `scan`, `walk`, `prune` and `twohop` force one path.
+- A numeric range whose finest trie level would expand to more than 1024 terms is left to the
+  column filter (`Column Filter:` in EXPLAIN) instead of a granular-range term union.
 - The shipped docs lag the code: the GUC is `sdb_ivf_search_nprobe` (not `sdb_nprobe`), and there is
   no `nlist` option; cluster count follows from `posting_size`.
 
