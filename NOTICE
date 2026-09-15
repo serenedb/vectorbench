@@ -1,0 +1,28 @@
+VectorBench
+Copyright 2026 SereneDB
+
+Licensed under the Apache License, Version 2.0 (see LICENSE).
+
+This benchmark draws on prior work as follows. No source code from the projects below is included
+unless stated; the driver, adapters and page are original work under Apache-2.0.
+
+1. ClickBench (https://github.com/ClickHouse/ClickBench), CC-BY-NC-SA-4.0: the runner shape (one
+   directory per system with install/start/stop/check/load scripts), the tuning rules for participants,
+   the relative-coloured result table and the geometric-mean ranking. Design pattern only.
+
+2. SearchBench (https://github.com/serenedb/searchbench), Apache-2.0: the adapter contract, the
+   results-file-per-engine layout and the React frontend architecture, from which parts of
+   frontend/ are adapted.
+
+3. ann-benchmarks (https://github.com/erikbern/ann-benchmarks), MIT, and big-ann-benchmarks
+   (https://github.com/harsha-simhadri/big-ann-benchmarks), MIT: the recall-versus-throughput frontier
+   reading, the tie-aware recall definition and the dataset conventions. Ideas only.
+
+4. Qdrant's ann-filtering-benchmark-datasets (https://github.com/qdrant/ann-filtering-benchmark-datasets)
+   and VectorDBBench (https://github.com/zilliztech/VectorDBBench): filter selectivity ladders and
+   filtered-search methodology. Ideas only.
+
+Datasets are downloaded by `vectorbench prepare` from their publishers and are not part of this
+repository: BIGANN/SIFT (INRIA, big-ann-benchmarks distribution), Cohere Wikipedia embeddings
+(Hugging Face, Apache-2.0 dataset card over CC-BY-SA Wikipedia text). Each family's yml names its
+source; check the publisher's terms before redistributing prepared data.

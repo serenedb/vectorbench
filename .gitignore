@@ -1,0 +1,17 @@
+# python
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+# node
+node_modules/
+frontend/.build/
+# benchmark artefacts
+*.partial.json
+*/results/*.npz
+*/trace/
+*.log
+# local data never lives in the repo
+data/
+.dev-run-logs/
+frontend/artifact.html
