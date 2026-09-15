@@ -1,0 +1,356 @@
+{
+  "_comment": "Shared test vectors for docs/contracts.md section 9. Each case: points (recall, value, knobs), direction, r (row recall) and the expected crossing. Values compared with relative tolerance 1e-6.",
+  "cases": [
+    {
+      "name": "interpolate between two neighbours, higher is better",
+      "direction": "higher",
+      "r": 0.95,
+      "points": [
+        {
+          "recall": 0.9,
+          "value": 1000.0,
+          "knobs": {
+            "ef": 32
+          }
+        },
+        {
+          "recall": 0.94,
+          "value": 800.0,
+          "knobs": {
+            "ef": 48
+          }
+        },
+        {
+          "recall": 0.96,
+          "value": 600.0,
+          "knobs": {
+            "ef": 64
+          }
+        },
+        {
+          "recall": 0.99,
+          "value": 200.0,
+          "knobs": {
+            "ef": 128
+          }
+        }
+      ],
+      "expect": {
+        "status": "interpolated",
+        "value": 692.8203230275509,
+        "a_recall": 0.94,
+        "b_recall": 0.96
+      }
+    },
+    {
+      "name": "exact point hit",
+      "direction": "higher",
+      "r": 0.96,
+      "points": [
+        {
+          "recall": 0.94,
+          "value": 800.0,
+          "knobs": {
+            "ef": 48
+          }
+        },
+        {
+          "recall": 0.96,
+          "value": 600.0,
+          "knobs": {
+            "ef": 64
+          }
+        }
+      ],
+      "expect": {
+        "status": "point",
+        "value": 600.0
+      }
+    },
+    {
+      "name": "not reached",
+      "direction": "higher",
+      "r": 0.99,
+      "points": [
+        {
+          "recall": 0.9,
+          "value": 1000.0,
+          "knobs": {
+            "ef": 32
+          }
+        },
+        {
+          "recall": 0.97,
+          "value": 500.0,
+          "knobs": {
+            "ef": 96
+          }
+        }
+      ],
+      "expect": {
+        "status": "not_reached",
+        "reached": 0.97
+      }
+    },
+    {
+      "name": "only above: every point beyond the row recall takes the lowest-recall point",
+      "direction": "higher",
+      "r": 0.9,
+      "points": [
+        {
+          "recall": 0.955,
+          "value": 700.0,
+          "knobs": {
+            "ef": 64
+          }
+        },
+        {
+          "recall": 0.99,
+          "value": 200.0,
+          "knobs": {
+            "ef": 128
+          }
+        }
+      ],
+      "expect": {
+        "status": "above",
+        "value": 700.0
+      }
+    },
+    {
+      "name": "bracket too wide with a non-integer knob",
+      "direction": "higher",
+      "r": 0.95,
+      "points": [
+        {
+          "recall": 0.92,
+          "value": 900.0,
+          "knobs": {
+            "oversampling": 1.5
+          }
+        },
+        {
+          "recall": 0.98,
+          "value": 300.0,
+          "knobs": {
+            "oversampling": 2.5
+          }
+        }
+      ],
+      "expect": {
+        "status": "bracket_too_wide",
+        "gap": 0.06
+      }
+    },
+    {
+      "name": "wide bracket allowed for adjacent integer knob values",
+      "direction": "higher",
+      "r": 0.95,
+      "points": [
+        {
+          "recall": 0.92,
+          "value": 900.0,
+          "knobs": {
+            "nprobe": 2
+          }
+        },
+        {
+          "recall": 0.98,
+          "value": 300.0,
+          "knobs": {
+            "nprobe": 3
+          }
+        }
+      ],
+      "expect": {
+        "status": "interpolated",
+        "value": 519.6152422706632,
+        "a_recall": 0.92,
+        "b_recall": 0.98
+      }
+    },
+    {
+      "name": "wide bracket not allowed when integer knob values are not adjacent",
+      "direction": "higher",
+      "r": 0.95,
+      "points": [
+        {
+          "recall": 0.92,
+          "value": 900.0,
+          "knobs": {
+            "nprobe": 2
+          }
+        },
+        {
+          "recall": 0.98,
+          "value": 300.0,
+          "knobs": {
+            "nprobe": 4
+          }
+        }
+      ],
+      "expect": {
+        "status": "bracket_too_wide",
+        "gap": 0.06
+      }
+    },
+    {
+      "name": "dominated point is ignored (filtered search that got slower and worse)",
+      "direction": "higher",
+      "r": 0.95,
+      "points": [
+        {
+          "recall": 0.94,
+          "value": 800.0,
+          "knobs": {
+            "ef": 48
+          }
+        },
+        {
+          "recall": 0.93,
+          "value": 500.0,
+          "knobs": {
+            "ef": 56
+          }
+        },
+        {
+          "recall": 0.96,
+          "value": 600.0,
+          "knobs": {
+            "ef": 64
+          }
+        }
+      ],
+      "expect": {
+        "status": "interpolated",
+        "value": 692.8203230275509,
+        "a_recall": 0.94,
+        "b_recall": 0.96
+      }
+    },
+    {
+      "name": "lower is better (latency): frontier keeps the smallest values, interpolation identical in form",
+      "direction": "lower",
+      "r": 0.95,
+      "points": [
+        {
+          "recall": 0.94,
+          "value": 1.0,
+          "knobs": {
+            "ef": 48
+          }
+        },
+        {
+          "recall": 0.96,
+          "value": 4.0,
+          "knobs": {
+            "ef": 64
+          }
+        },
+        {
+          "recall": 0.95,
+          "value": 9.0,
+          "knobs": {
+            "ef": 60
+          }
+        }
+      ],
+      "expect": {
+        "status": "interpolated",
+        "value": 2.0,
+        "a_recall": 0.94,
+        "b_recall": 0.96
+      }
+    },
+    {
+      "name": "lower is better: a point with higher recall and lower latency dominates a slower lower-recall point",
+      "direction": "lower",
+      "r": 0.93,
+      "points": [
+        {
+          "recall": 0.92,
+          "value": 5.0,
+          "knobs": {
+            "ef": 40
+          }
+        },
+        {
+          "recall": 0.96,
+          "value": 4.0,
+          "knobs": {
+            "ef": 64
+          }
+        },
+        {
+          "recall": 0.99,
+          "value": 8.0,
+          "knobs": {
+            "ef": 128
+          }
+        }
+      ],
+      "expect": {
+        "status": "above",
+        "value": 4.0
+      }
+    },
+    {
+      "name": "no usable points",
+      "direction": "higher",
+      "r": 0.95,
+      "points": [
+        {
+          "recall": null,
+          "value": 100.0,
+          "knobs": {
+            "ef": 10
+          }
+        }
+      ],
+      "expect": {
+        "status": "none"
+      }
+    },
+    {
+      "name": "dominated points keep the declared ladder dense: density on all points, value from the frontier",
+      "direction": "higher",
+      "r": 0.95,
+      "points": [
+        {
+          "recall": 0.9,
+          "value": 1000.0,
+          "knobs": {
+            "ef": 32
+          }
+        },
+        {
+          "recall": 0.94,
+          "value": 700.0,
+          "knobs": {
+            "ef": 40
+          }
+        },
+        {
+          "recall": 0.96,
+          "value": 750.0,
+          "knobs": {
+            "ef": 48
+          }
+        },
+        {
+          "recall": 0.99,
+          "value": 300.0,
+          "knobs": {
+            "ef": 96
+          }
+        }
+      ],
+      "expect": {
+        "status": "interpolated",
+        "value": 786.8362975662361,
+        "a_recall": 0.9,
+        "b_recall": 0.96
+      }
+    }
+  ]
+}

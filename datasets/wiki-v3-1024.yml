@@ -1,0 +1,77 @@
+family: wiki-v3-1024
+title: Cohere Wikipedia 2023-11, embed-multilingual-v3
+description: >
+  Paragraph embeddings of Wikipedia from Cohere's embed-multilingual-v3 model, 1024 dimensions,
+  unit-normalized (prepare measures norm 1.0), searched by inner product, which equals cosine here.
+  Seven languages interleaved in 10k-row chunks so every prefix is multilingual.
+dims: 1024
+metric: ip
+source:
+  kind: hf
+  repo: Cohere/wikipedia-2023-11-embed-multilingual-v3
+  langs: [en, de, fr, es, ru, ja, zh]
+  columns: {emb: emb, title: title}
+  interleave_rows: 10000
+  query_pool: last_shard_per_lang
+# Prefix sizes that exist for this family; 100k is for development only.
+sizes: {100k: 100000, 1m: 1000000, 10m: 10000000, 100m: 100000000}
+# Predicate definitions. The driver derives each query's arguments ($v, $lo, $hi, $s) from them,
+# computes the filtered ground truth with them, and checks returned ids against them.
+# Engines never read this block; they express each case in their own queries file.
+filter_cases:
+  none: {}
+  eq-10: {op: eq, field: cat10}
+  eq-1: {op: eq, field: cat100}
+  eq-0.1: {op: eq, field: cat1000}
+  range-10: {op: range, field: num, fraction: 0.10}
+  range-1: {op: range, field: num, fraction: 0.01}
+  and-1: {op: and, terms: [{op: eq, field: cat10}, {op: range, field: num, fraction: 0.10}]}
+  corr: {op: eq, field: cluster, value: query_cluster}
+  xcorr: {op: eq, field: cluster, value: far_cluster}
+  lang: {op: eq, field: lang, value: query_lang}
+  xlang: {op: eq, field: lang, value: other_lang}
+# Table rows: (filter case, k, recall). Ids are stable once published. `exact` means brute force.
+queries:
+  # no filter
+  - {id: V01, filter: none, k: 10, recall: 0.90}
+  - {id: V02, filter: none, k: 10, recall: 0.95}
+  - {id: V03, filter: none, k: 10, recall: 0.99}
+  - {id: V04, filter: none, k: 10, recall: exact}
+  - {id: V05, filter: none, k: 100, recall: 0.90}
+  - {id: V06, filter: none, k: 100, recall: 0.95}
+  - {id: V07, filter: none, k: 100, recall: 0.99}
+  - {id: V08, filter: none, k: 1000, recall: 0.90}
+  - {id: V09, filter: none, k: 1000, recall: 0.95}
+  - {id: V10, filter: none, k: 1000, recall: 0.99}
+  # filtered, core tier, recall 0.95
+  - {id: V11, filter: eq-10, k: 10, recall: 0.95}
+  - {id: V12, filter: eq-10, k: 100, recall: 0.95}
+  - {id: V13, filter: eq-10, k: 1000, recall: 0.95}
+  - {id: V14, filter: eq-1, k: 10, recall: 0.95}
+  - {id: V15, filter: eq-1, k: 100, recall: 0.95}
+  - {id: V16, filter: eq-1, k: 1000, recall: 0.95}
+  - {id: V17, filter: eq-0.1, k: 10, recall: 0.95}
+  - {id: V18, filter: eq-0.1, k: 100, recall: 0.95}
+  - {id: V19, filter: eq-0.1, k: 1000, recall: 0.95}
+  - {id: V20, filter: range-10, k: 10, recall: 0.95}
+  - {id: V21, filter: range-10, k: 100, recall: 0.95}
+  - {id: V22, filter: range-10, k: 1000, recall: 0.95}
+  - {id: V23, filter: range-1, k: 10, recall: 0.95}
+  - {id: V24, filter: range-1, k: 100, recall: 0.95}
+  - {id: V25, filter: range-1, k: 1000, recall: 0.95}
+  - {id: V26, filter: and-1, k: 10, recall: 0.95}
+  - {id: V27, filter: and-1, k: 100, recall: 0.95}
+  - {id: V28, filter: and-1, k: 1000, recall: 0.95}
+  - {id: V29, filter: corr, k: 10, recall: 0.95}
+  - {id: V30, filter: corr, k: 100, recall: 0.95}
+  - {id: V31, filter: corr, k: 1000, recall: 0.95}
+  - {id: V32, filter: xcorr, k: 10, recall: 0.95}
+  - {id: V33, filter: xcorr, k: 100, recall: 0.95}
+  - {id: V34, filter: xcorr, k: 1000, recall: 0.95}
+  # filtered, the two hard ones at 0.99, and the filtered exact anchor
+  - {id: V35, filter: eq-1, k: 10, recall: 0.99}
+  - {id: V36, filter: xcorr, k: 10, recall: 0.99}
+  - {id: V37, filter: eq-1, k: 10, recall: exact}
+  # family-specific: real language attribute
+  - {id: V38, filter: lang, k: 10, recall: 0.95}
+  - {id: V39, filter: xlang, k: 10, recall: 0.95}
