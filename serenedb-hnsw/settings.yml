@@ -21,7 +21,7 @@ connection:
 plan_rules:
   always: [IRESEARCH_SCAN]
   approximate: ["Score:"]
-  filtered: ["Index Filter"]
+  filtered: [["Index Filter", "Column Filter"]]   # a predicate answered by the term index or by the columnstore, never above the scan
   exact_not: ["Score:"]        # exact rows are brute force through the columnstore, never the ANN index
 
 defaults:

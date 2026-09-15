@@ -115,8 +115,10 @@ def check_plan(plan: str, g: Group, rules: dict[str, Any]) -> str | None:
     kinds = ["always", "exact" if g.exact else "approximate"] + (["filtered"] if g.filter != "none" else [])
     for kind in kinds:
         for needle in rules.get(kind) or []:
-            if needle not in plan:
-                return f"plan does not contain {needle!r}"
+            # a list entry is a set of alternatives: any one of them satisfies the rule
+            alternatives = needle if isinstance(needle, (list, tuple)) else [needle]
+            if not any(alt in plan for alt in alternatives):
+                return f"plan does not contain {' or '.join(repr(a) for a in alternatives)}"
         for needle in rules.get(kind + "_not") or []:
             if needle in plan:
                 return f"plan contains {needle!r}"

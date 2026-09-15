@@ -38,7 +38,8 @@ cd serenedb-ivf && VECTORBENCH_DATASET=sift-128-100k ./benchmark.sh --index
 (cd frontend && npm ci && npm run build)      # -> frontend/index.html, open it in a browser
 ```
 
-Useful flags for `run`: `--groups none/10,eq-1/*` to run a subset, `--views latency` for one view,
+Useful flags for `run`: `--groups none/10,eq-1/*` to run a subset (those groups replace their
+predecessors in the participant's existing result file, the rest stay), `--views latency` for one view,
 `--query-limit 1000 --passes 1 --deadline 8 --budget 8` for development budgets, `--dry-run` to
 print the expanded plan, `--label` to keep two builds of one participant side by side,
 `--index-set key=value` to override a key of the participant's index settings (for example

@@ -76,13 +76,17 @@ class ResultFile:
         self.partial = path.with_name(path.stem + ".partial.json")
         self.obj: dict[str, Any] = dict(header)
         self.obj.setdefault("groups", [])
-        if self.partial.exists():
-            try:
-                prev = json.loads(self.partial.read_text())
+        # Resume an interrupted run from its partial file, or start a subset rerun (`--groups`) from
+        # the published file, so the groups run replace their predecessors and the rest stay.
+        for source in (self.partial, self.path):
+            if source.exists():
+                try:
+                    prev = json.loads(source.read_text())
+                except json.JSONDecodeError:
+                    continue
                 if prev.get("dataset") == header.get("dataset"):
                     self.obj["groups"] = prev.get("groups", [])
-            except json.JSONDecodeError:
-                pass
+                break
         self.flush()
 
     def set(self, **fields: Any) -> None:

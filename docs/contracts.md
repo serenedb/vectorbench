@@ -180,7 +180,8 @@ k, such as a beam that is also the result ceiling. A ladder with several knobs i
 in the order written; keep ladders to about seven points. Exact groups ignore ladders.
 
 `plan_rules` (optional): lists of substrings the plan returned by `Client.explain` must contain,
-under `always`, `approximate` (non-exact groups), `exact`, `filtered` (filter != none); the `<kind>_not`
+under `always`, `approximate` (non-exact groups), `exact`, `filtered` (filter != none); an entry that is
+itself a list names alternatives, any one of which satisfies it; the `<kind>_not`
 variants list substrings that must be absent. The driver runs
 `explain` once per group on the first ladder point, stores the plan in the group record (`plan`), and
 fails the group with `plan check failed: ...` when a rule is not met, so a query that silently fell back
