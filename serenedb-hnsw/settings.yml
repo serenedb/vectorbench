@@ -1,0 +1,45 @@
+# SereneDB HNSW participant. Scripts are symlinks to ../serenedb-ivf; only this file and queries.sql differ.
+participant:
+  name: SereneDB HNSW
+  system: SereneDB
+  family: hnsw
+  tags: [C++, SereneDB, Postgres-wire]
+
+env:
+  port: 5498
+  container: vectorbench-serenedb-hnsw
+  image: serenedb/serenedb:26.09.1
+  index_kind: hnsw
+
+connection:
+  host: 127.0.0.1
+  port: 5498
+  user: postgres
+  dbname: postgres
+
+# EXPLAIN of the first point of every group must contain these, or the group fails (docs/contracts.md section 6).
+plan_rules:
+  always: [IRESEARCH_SCAN]
+  approximate: ["Score:"]
+  filtered: ["Index Filter"]
+  exact_not: ["Score:"]        # exact rows are brute force through the columnstore, never the ANN index
+
+defaults:
+  index: {storage: search, relation: items, quant: sq8, m: 32, ef_construction: 200}
+  # ef is the search beam and also the result ceiling, so every value must be >= k; the ladder is
+  # given as multiples of k in the query text: {ef} is substituted, then max(ef, k) is applied by SereneDB.
+  ladder: {ef: [16, 24, 32, 48, 64, 96, 128, 192, 256, 384, 512]}
+
+datasets:
+  sift-128:
+    100k:
+      ladder: {ef: [16, 24, 32, 48, 64, 96, 128, 192, 256]}
+      groups:
+        "none/100":  {ladder: {ef: [100, 128, 160, 200, 256, 320, 400, 512, 768]}}
+        "none/1000": {ladder: {ef: [1000, 1200, 1500, 2000, 2500, 3000, 4000]}}
+  wiki-v3-1024:
+    100k:
+      ladder: {ef: [16, 24, 32, 48, 64, 96, 128, 192, 256]}
+      groups:
+        "none/100":  {ladder: {ef: [100, 128, 160, 200, 256, 320, 400, 512, 768]}}
+        "none/1000": {ladder: {ef: [1000, 1200, 1500, 2000, 2500, 3000, 4000]}}

@@ -1,0 +1,43 @@
+#!/usr/bin/env bash
+# Start the engine detached and return at once; the driver polls ./check for readiness and times the
+# gap (that is the startup sample), so this script must not wait itself.
+set -euo pipefail
+cd "$(dirname "$0")"
+source ./common.sh
+
+if [[ -n "$VB_BINARY" ]]; then
+    if pid="$(native_pid)" && [[ -n "$pid" ]]; then exit 0; fi
+    mkdir -p "$VECTORBENCH_ENGINE_DIR/data"
+    cmd=("$VB_BINARY" "$VECTORBENCH_ENGINE_DIR/data" "--listen=postgres://127.0.0.1:${VB_PORT}" "--log_storage=stdout")
+    [[ -n "$VECTORBENCH_CPUSET" ]] && cmd=(taskset -c "$VECTORBENCH_CPUSET" "${cmd[@]}")
+    setsid nohup "${cmd[@]}" >>"$VECTORBENCH_ENGINE_DIR/serened.log" 2>&1 </dev/null &
+    echo $! > "$PIDFILE"
+    exit 0
+fi
+
+if docker inspect "$VB_CONTAINER" >/dev/null 2>&1; then
+    state="$(docker inspect -f '{{.State.Status}}' "$VB_CONTAINER")"
+    if [[ "$state" == "running" ]]; then exit 0; fi
+    docker start "$VB_CONTAINER" >/dev/null
+    exit 0
+fi
+
+mkdir -p "$VECTORBENCH_ENGINE_DIR"
+# The image's baked flagfile forces port 7890; ours wins because it is mounted over it.
+printf -- '--server_directory=/var/lib/serenedb\n--listen=postgres://0.0.0.0:%s\n--log_storage=stdout\n' \
+    "$VB_PORT" > "$VECTORBENCH_ENGINE_DIR/serened.conf"
+
+caps=()
+[[ -n "$VECTORBENCH_CPUSET" ]] && caps+=(--cpuset-cpus "$VECTORBENCH_CPUSET")
+[[ -n "$VECTORBENCH_MEMORY" ]] && caps+=(--memory "$VECTORBENCH_MEMORY" --memory-swap "$VECTORBENCH_MEMORY")
+corpus=()
+[[ -n "$VECTORBENCH_DATASET_DIR" ]] && corpus=(-v "${VECTORBENCH_DATASET_DIR}:${VECTORBENCH_DATASET_DIR}:ro")
+
+docker run -d \
+    --name "$VB_CONTAINER" \
+    --network host \
+    "${caps[@]}" \
+    -v "${VECTORBENCH_ENGINE_DIR}:/var/lib/serenedb" \
+    -v "${VECTORBENCH_ENGINE_DIR}/serened.conf:/etc/serenedb/serened.conf:ro" \
+    "${corpus[@]}" \
+    "$VB_IMAGE" >/dev/null

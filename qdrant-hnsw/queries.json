@@ -1,0 +1,15 @@
+{
+  "none/*": {"filter": null, "params": {"hnsw_ef": "{hnsw_ef}"}},
+  "eq-10/*": {"filter": {"must": [{"key": "cat10", "match": {"value": "$v"}}]}, "params": {"hnsw_ef": "{hnsw_ef}"}},
+  "eq-1/*": {"filter": {"must": [{"key": "cat100", "match": {"value": "$v"}}]}, "params": {"hnsw_ef": "{hnsw_ef}"}},
+  "eq-0.1/*": {"filter": {"must": [{"key": "cat1000", "match": {"value": "$v"}}]}, "params": {"hnsw_ef": "{hnsw_ef}"}},
+  "range-10/*": {"filter": {"must": [{"key": "num", "range": {"gte": "$lo", "lte": "$hi"}}]}, "params": {"hnsw_ef": "{hnsw_ef}"}},
+  "range-1/*": {"filter": {"must": [{"key": "num", "range": {"gte": "$lo", "lte": "$hi"}}]}, "params": {"hnsw_ef": "{hnsw_ef}"}},
+  "and-1/*": {"filter": {"must": [{"key": "cat10", "match": {"value": "$v"}}, {"key": "num", "range": {"gte": "$lo", "lte": "$hi"}}]}, "params": {"hnsw_ef": "{hnsw_ef}"}},
+  "corr/*": {"filter": {"must": [{"key": "cluster", "match": {"value": "$v"}}]}, "params": {"hnsw_ef": "{hnsw_ef}"}},
+  "xcorr/*": {"filter": {"must": [{"key": "cluster", "match": {"value": "$v"}}]}, "params": {"hnsw_ef": "{hnsw_ef}"}},
+  "lang/*": {"filter": {"must": [{"key": "lang", "match": {"value": "$s"}}]}, "params": {"hnsw_ef": "{hnsw_ef}"}},
+  "xlang/*": {"filter": {"must": [{"key": "lang", "match": {"value": "$s"}}]}, "params": {"hnsw_ef": "{hnsw_ef}"}},
+  "exact/none/*": {"filter": null, "params": {"exact": true}},
+  "exact/eq-1/*": {"filter": {"must": [{"key": "cat100", "match": {"value": "$v"}}]}, "params": {"exact": true}}
+}

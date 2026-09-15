@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+# Graceful stop; returns when the engine has exited.
+set -euo pipefail
+cd "$(dirname "$0")"
+source ./common.sh
+
+if [[ -n "$VB_BINARY" ]]; then
+    pid="$(native_pid)"
+    [[ -n "$pid" ]] || exit 0
+    kill -TERM "$pid" 2>/dev/null || true
+    for _ in $(seq 1 1200); do kill -0 "$pid" 2>/dev/null || { rm -f "$PIDFILE"; exit 0; }; sleep 0.1; done
+    echo "serened $pid did not exit within 120s; killing" >&2
+    kill -9 "$pid" 2>/dev/null || true
+    rm -f "$PIDFILE"
+    exit 0
+fi
+
+docker stop -t 120 "$VB_CONTAINER" >/dev/null 2>&1 || true

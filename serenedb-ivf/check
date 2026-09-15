@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+# Exit 0 iff the engine answers a query. Polled every 100 ms by the driver, so it stays cheap.
+set -euo pipefail
+cd "$(dirname "$0")"
+source ./common.sh
+engine_answers

@@ -1,0 +1,24 @@
+#!/usr/bin/env bash
+# Readiness probe, polled every 100 ms by the driver: exit 0 iff Qdrant answers a real search on the
+# collection. Before the first ./load there is no collection; then the server answering at all is
+# readiness. Cheap on purpose: one curl in the steady state.
+set -euo pipefail
+
+: "${VB_PORT:=6533}"
+: "${VB_COLLECTION:=items}"
+: "${VECTORBENCH_DIMS:=0}"
+
+base="http://127.0.0.1:${VB_PORT}"
+curl=(curl -sf --max-time 2)
+
+if [[ "$VECTORBENCH_DIMS" -gt 0 ]]; then
+    # A zero vector of the right width: fine for Dot and Euclid, and it must go through the index.
+    zeros=$(printf '%*s' "$VECTORBENCH_DIMS" '' | sed 's/ /0,/g'); zeros=${zeros%,}
+    "${curl[@]}" -o /dev/null -X POST -H 'Content-Type: application/json' \
+        -d "{\"query\":[${zeros}],\"limit\":1,\"with_payload\":false}" \
+        "${base}/collections/${VB_COLLECTION}/points/query" && exit 0
+    out=$("${curl[@]}" "${base}/collections/${VB_COLLECTION}/exists") || exit 1
+    [[ "$out" == *'"exists":false'* ]]
+else
+    "${curl[@]}" -o /dev/null "${base}/readyz"
+fi

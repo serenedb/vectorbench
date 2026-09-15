@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+# Version of the running server (not the image tag).
+set -euo pipefail
+cd "$(dirname "$0")"
+source ./common.sh
+v="$(sql "SELECT version()" 2>/dev/null || true)"
+short="$(printf '%s' "$v" | sed -nE 's/.*SereneDB ([^ )]+).*/\1/p')"
+echo "${short:-${v:-unknown}}"

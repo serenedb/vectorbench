@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+# The whole recipe, inside one timer: create the search table with its vector index, ingest every
+# shard, refresh, compact, wait until compaction is idle and the segment count is stable. Prints the
+# VECTORBENCH_PHASES and VECTORBENCH_INFO tags (docs/contracts.md section 4).
+set -euo pipefail
+cd "$(dirname "$0")"
+source ./common.sh
+: "${VECTORBENCH_DATASET_DIR:?VECTORBENCH_DATASET_DIR must point at the prepared dataset}"
+exec "$PY" ./load.py

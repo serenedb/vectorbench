@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+# Bytes on disk: everything under the engine directory, i.e. the collection's segments (vectors, HNSW
+# graph, payload store, payload indexes), its bounded WAL and metadata. Allocated bytes, not apparent
+# size: Qdrant preallocates sparse WAL segments and storage chunks, which would count as data otherwise.
+# Measured inside the running container (which owns the files, as root); from the host when it is not
+# running.
+set -euo pipefail
+
+: "${VB_CONTAINER:=vectorbench-qdrant-hnsw}"
+: "${VECTORBENCH_ENGINE_DIR:?VECTORBENCH_ENGINE_DIR must be set (the engine storage directory)}"
+
+size=$(docker exec "$VB_CONTAINER" du -sB1 /qdrant/storage 2>/dev/null | awk '{print $1}') || size=""
+if [[ -z "$size" && -d "$VECTORBENCH_ENGINE_DIR" ]]; then
+    size=$(du -sB1 "$VECTORBENCH_ENGINE_DIR" 2>/dev/null | awk '{print $1}') || size=""
+fi
+echo "${size:-0}"

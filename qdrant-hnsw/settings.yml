@@ -1,0 +1,113 @@
+# Qdrant HNSW participant (docs/contracts.md section 6).
+# The driver exports every `env` key as VB_<KEY> and every resolved `index` key as VB_INDEX_<KEY> to the
+# scripts, and hands `connection` to client.py. One index configuration per dataset size; the ladder is
+# the search-time knob hnsw_ef, measured point by point.
+participant: {name: "Qdrant HNSW", system: Qdrant, family: hnsw, tags: [Rust, Qdrant]}
+
+env:
+  port: 6533                          # REST, published on 127.0.0.1 (check, version)
+  grpc_port: 6534                     # gRPC, published on 127.0.0.1 (load.py, client.py)
+  container: vectorbench-qdrant-hnsw
+  image: qdrant/qdrant:v1.19.1
+  collection: items
+  upload_workers: 4                   # processes uploading base shards in ./load
+
+connection: {host: 127.0.0.1, port: 6533, grpc_port: 6534, prefer_grpc: true, collection: items, timeout: 600}
+
+defaults:
+  # m / ef_construct: HNSW graph; quant: none | sq8 | binary (README); on_disk_*: mmap instead of RAM;
+  # segments: pinned default_segment_number; full_scan_threshold_kb: Qdrant's planner threshold (README).
+  # Optional keys: max_segment_size_kb (cap on a segment, README), async_scorer (io_uring rescorer, on_disk only).
+  index: {m: 16, ef_construct: 128, quant: none, on_disk_vectors: false, on_disk_hnsw: false, segments: 8,
+          full_scan_threshold_kb: 10}
+  ladder: {hnsw_ef: [8, 12, 16, 20, 24, 28, 32, 40, 48, 64, 96, 128, 192, 256, 384, 512]}
+
+# Per size: the default ladder serves k=10; k=100 and k=1000 groups get wider beams because Qdrant never
+# searches a segment with a beam narrower than what it asks that segment for (README, "hnsw_ef and limit").
+# YAML anchors keep the per-k ladders in one place per size.
+datasets:
+  wiki-v3-1024:
+    100k:
+      groups:
+        "none/100":      &w100k_k100  {ladder: {hnsw_ef: [32, 48, 64, 100, 128, 192, 256, 384]}}
+        "none/1000":     &w100k_k1000 {ladder: {hnsw_ef: [128, 256, 512, 1000, 1500, 2000, 3000]}}
+        "eq-10/100": *w100k_k100
+        "eq-1/100": *w100k_k100
+        "eq-0.1/100": *w100k_k100
+        "range-10/100": *w100k_k100
+        "range-1/100": *w100k_k100
+        "and-1/100": *w100k_k100
+        "corr/100": *w100k_k100
+        "xcorr/100": *w100k_k100
+        "eq-10/1000": *w100k_k1000
+        "eq-1/1000": *w100k_k1000
+        "eq-0.1/1000": *w100k_k1000
+        "range-10/1000": *w100k_k1000
+        "range-1/1000": *w100k_k1000
+        "and-1/1000": *w100k_k1000
+        "corr/1000": *w100k_k1000
+        "xcorr/1000": *w100k_k1000
+    1m:
+      ladder: {hnsw_ef: [24, 32, 48, 64, 96, 128, 192, 256, 384]}
+      groups:
+        "none/100":      &w1m_k100  {ladder: {hnsw_ef: [48, 64, 100, 128, 192, 256, 384, 512]}}
+        "none/1000":     &w1m_k1000 {ladder: {hnsw_ef: [256, 512, 1000, 1500, 2000, 3000, 4000]}}
+        "eq-10/100": *w1m_k100
+        "eq-1/100": *w1m_k100
+        "eq-0.1/100": *w1m_k100
+        "range-10/100": *w1m_k100
+        "range-1/100": *w1m_k100
+        "and-1/100": *w1m_k100
+        "corr/100": *w1m_k100
+        "xcorr/100": *w1m_k100
+        "eq-10/1000": *w1m_k1000
+        "eq-1/1000": *w1m_k1000
+        "eq-0.1/1000": *w1m_k1000
+        "range-10/1000": *w1m_k1000
+        "range-1/1000": *w1m_k1000
+        "and-1/1000": *w1m_k1000
+        "corr/1000": *w1m_k1000
+        "xcorr/1000": *w1m_k1000
+  sift-128:
+    100k:
+      ladder: {hnsw_ef: [8, 12, 16, 24, 32, 48, 64, 96, 128]}
+      groups:
+        "none/100":      &s100k_k100  {ladder: {hnsw_ef: [32, 48, 64, 100, 128, 192, 256]}}
+        "none/1000":     &s100k_k1000 {ladder: {hnsw_ef: [128, 256, 512, 1000, 1500, 2000, 3000]}}
+        "eq-10/100": *s100k_k100
+        "eq-1/100": *s100k_k100
+        "eq-0.1/100": *s100k_k100
+        "range-10/100": *s100k_k100
+        "range-1/100": *s100k_k100
+        "and-1/100": *s100k_k100
+        "corr/100": *s100k_k100
+        "xcorr/100": *s100k_k100
+        "eq-10/1000": *s100k_k1000
+        "eq-1/1000": *s100k_k1000
+        "eq-0.1/1000": *s100k_k1000
+        "range-10/1000": *s100k_k1000
+        "range-1/1000": *s100k_k1000
+        "and-1/1000": *s100k_k1000
+        "corr/1000": *s100k_k1000
+        "xcorr/1000": *s100k_k1000
+    1m:
+      ladder: {hnsw_ef: [12, 16, 24, 32, 48, 64, 96, 128, 192]}
+      groups:
+        "none/100":      &s1m_k100  {ladder: {hnsw_ef: [32, 48, 64, 100, 128, 192, 256, 384]}}
+        "none/1000":     &s1m_k1000 {ladder: {hnsw_ef: [256, 512, 1000, 1500, 2000, 3000, 4000]}}
+        "eq-10/100": *s1m_k100
+        "eq-1/100": *s1m_k100
+        "eq-0.1/100": *s1m_k100
+        "range-10/100": *s1m_k100
+        "range-1/100": *s1m_k100
+        "and-1/100": *s1m_k100
+        "corr/100": *s1m_k100
+        "xcorr/100": *s1m_k100
+        "eq-10/1000": *s1m_k1000
+        "eq-1/1000": *s1m_k1000
+        "eq-0.1/1000": *s1m_k1000
+        "range-10/1000": *s1m_k1000
+        "range-1/1000": *s1m_k1000
+        "and-1/1000": *s1m_k1000
+        "corr/1000": *s1m_k1000
+        "xcorr/1000": *s1m_k1000

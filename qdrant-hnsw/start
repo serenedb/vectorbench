@@ -1,0 +1,46 @@
+#!/usr/bin/env bash
+# Start the Qdrant container detached and return at once. Readiness is ./check's business: the driver
+# times startup from this call to the first successful ./check, so nothing here may wait.
+set -euo pipefail
+
+: "${VB_PORT:=6533}"
+: "${VB_GRPC_PORT:=6534}"
+: "${VB_CONTAINER:=vectorbench-qdrant-hnsw}"
+: "${VB_IMAGE:=qdrant/qdrant:v1.19.1}"
+: "${VECTORBENCH_ENGINE_DIR:?VECTORBENCH_ENGINE_DIR must be set (the engine storage directory)}"
+: "${VECTORBENCH_CPUSET:=}"
+: "${VECTORBENCH_MEMORY:=}"
+: "${VB_INDEX_ASYNC_SCORER:=false}"
+
+# Host networking like every other participant (no userland proxy on the query path); Qdrant listens
+# on the configured ports on loopback.
+# Resume the existing container if there is one (its storage is the bind mount either way).
+state=$(docker inspect -f '{{.State.Status}}' "$VB_CONTAINER" 2>/dev/null || true)
+case "$state" in
+    running) exit 0 ;;
+    "")      ;;
+    *)       docker start "$VB_CONTAINER" >/dev/null; exit 0 ;;
+esac
+
+limits=()
+[[ -n "$VECTORBENCH_CPUSET" ]] && limits+=(--cpuset-cpus "$VECTORBENCH_CPUSET")
+# --memory-swap equal to --memory means no swap for the container.
+[[ -n "$VECTORBENCH_MEMORY" ]] && limits+=(--memory "$VECTORBENCH_MEMORY" --memory-swap "$VECTORBENCH_MEMORY")
+
+# Qdrant's io_uring rescorer (async_scorer, an index setting of settings.yml) needs io_uring_setup, which
+# Docker's default seccomp profile denies; without this option Qdrant silently uses the synchronous path.
+async_scorer=false
+case "${VB_INDEX_ASYNC_SCORER,,}" in 1|true|yes|on) async_scorer=true ;; esac
+
+mkdir -p "$VECTORBENCH_ENGINE_DIR"
+docker run -d --name "$VB_CONTAINER" \
+    "${limits[@]}" \
+    --security-opt seccomp=unconfined \
+    --network host \
+    -v "${VECTORBENCH_ENGINE_DIR}:/qdrant/storage" \
+    -e QDRANT__SERVICE__HOST=127.0.0.1 \
+    -e QDRANT__SERVICE__HTTP_PORT="${VB_PORT}" \
+    -e QDRANT__SERVICE__GRPC_PORT="${VB_GRPC_PORT}" \
+    -e QDRANT__TELEMETRY_DISABLED=true \
+    -e QDRANT__STORAGE__PERFORMANCE__ASYNC_SCORER="$async_scorer" \
+    "$VB_IMAGE" >/dev/null

@@ -1,0 +1,40 @@
+# SereneDB IVF participant. See docs/contracts.md section 6 for the resolution rules.
+participant:
+  name: SereneDB IVF
+  system: SereneDB
+  family: ivf
+  tags: [C++, SereneDB, Postgres-wire]
+
+env:
+  port: 5499
+  container: vectorbench-serenedb-ivf
+  image: serenedb/serenedb:26.09.1
+  index_kind: ivf          # read by ./load to pick the DDL
+
+connection:
+  host: 127.0.0.1
+  port: 5499
+  user: postgres
+  dbname: postgres
+
+# EXPLAIN of the first point of every group must contain these, or the group fails (docs/contracts.md section 6).
+plan_rules:
+  always: [IRESEARCH_SCAN]
+  approximate: ["Score:"]
+  filtered: ["Index Filter"]
+  exact_not: ["Score:"]        # exact rows are brute force through the columnstore, never the ANN index
+
+defaults:
+  # storage: search (rows live in the index; relation items) | view (index over read_parquet; relation items_vec)
+  #          | table (transactional table + secondary index; relation items_vec on releases that do not rewrite base scans)
+  index: {storage: search, relation: items, quant: sq8, posting_size: 1024, sample_factor: 0.2}
+  # consecutive integers up to 16 keep every bracket within the density rule; beyond that recall moves slowly
+  ladder: {nprobe: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 18, 20, 24, 28, 32, 40, 48, 64, 96, 128]}
+
+datasets:
+  sift-128:
+    100k: {ladder: {nprobe: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 18, 20, 24, 28, 32, 40, 48, 64, 96, 128]}}
+    1m:   {ladder: {nprobe: [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 18, 20, 24, 28, 32, 40, 48, 64, 96, 128, 192]}}
+  wiki-v3-1024:
+    100k: {ladder: {nprobe: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 18, 20, 24, 28, 32, 40, 48, 64, 96, 128]}}
+    1m:   {ladder: {nprobe: [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 18, 20, 24, 28, 32, 40, 48, 64, 96, 128, 192]}}

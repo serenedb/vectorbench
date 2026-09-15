@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+# Graceful stop (SIGTERM, Qdrant flushes and exits); returns once the process is gone. The container is
+# kept, not removed, so ./start resumes it with its storage.
+set -euo pipefail
+
+: "${VB_CONTAINER:=vectorbench-qdrant-hnsw}"
+
+if docker inspect "$VB_CONTAINER" >/dev/null 2>&1; then
+    docker stop --time 300 "$VB_CONTAINER" >/dev/null
+fi
