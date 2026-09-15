@@ -1,22 +1,22 @@
 {
  "dataset": "sift-128-100k",
  "participant": "serenedb-hnsw",
- "load_time": 30.85258657399936,
+ "load_time": 31.268653900999198,
  "load_phases": {
-  "ddl": 0.026,
-  "ingest": 1.23,
-  "compaction": 29.434
+  "ddl": 0.027,
+  "ingest": 1.27,
+  "compaction": 29.824
  },
- "disk_bytes": 70425236,
+ "disk_bytes": 70428311,
  "disk_info": {
   "rows": 100000,
   "storage": "search",
   "segments": 1,
   "files": 5,
-  "index_bytes": 58395829,
+  "index_bytes": 58398901,
   "ddl": "CREATE INDEX items_vec ON items USING inverted(id, cat10, cat100, cat1000, num, cluster, lang, emb hnsw (metric = 'l2', quant = 'sq8', m = 32, ef_construction = 200))"
  },
- "memory_peak_load": 480952320,
+ "memory_peak_load": 488742912,
  "version": "26.09.0",
  "date": "2026-09-15",
  "index": {
