@@ -1,0 +1,33 @@
+{
+ "dataset": "sift-128-100k",
+ "participant": "serenedb-ivf",
+ "load_time": 13.067695465000725,
+ "load_phases": {
+  "ddl": 0.028,
+  "ingest": 0.123,
+  "compaction": 12.77
+ },
+ "disk_bytes": 41840659,
+ "disk_info": {
+  "rows": 100000,
+  "storage": "search",
+  "segments": 1,
+  "files": 6,
+  "index_bytes": 29811246,
+  "ddl": "CREATE INDEX items_vec ON items USING inverted(id, cat10, cat100, cat1000, num, cluster, lang, emb ivf (metric = 'l2', quant = 'sq8'))"
+ },
+ "memory_peak_load": 406577152,
+ "version": "26.09.0",
+ "date": "2026-09-15",
+ "index": {
+  "params": {
+   "storage": "search",
+   "relation": "items",
+   "quant": "sq8",
+   "posting_size": 1024,
+   "sample_factor": 0.2,
+   "dims": 128,
+   "metric": "l2"
+  }
+ }
+}

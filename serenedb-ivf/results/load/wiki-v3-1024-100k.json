@@ -1,0 +1,33 @@
+{
+ "dataset": "wiki-v3-1024-100k",
+ "participant": "serenedb-ivf",
+ "load_time": 17.806975288000103,
+ "load_phases": {
+  "ddl": 0.027,
+  "ingest": 0.867,
+  "compaction": 16.764
+ },
+ "disk_bytes": 474015161,
+ "disk_info": {
+  "rows": 100000,
+  "storage": "search",
+  "segments": 1,
+  "files": 6,
+  "index_bytes": 461985742,
+  "ddl": "CREATE INDEX items_vec ON items USING inverted(id, cat10, cat100, cat1000, num, cluster, lang, emb ivf (metric = 'ip', quant = 'sq8'))"
+ },
+ "memory_peak_load": 2161160192,
+ "version": "26.09.0",
+ "date": "2026-09-15",
+ "index": {
+  "params": {
+   "storage": "search",
+   "relation": "items",
+   "quant": "sq8",
+   "posting_size": 1024,
+   "sample_factor": 0.2,
+   "dims": 1024,
+   "metric": "ip"
+  }
+ }
+}

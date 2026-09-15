@@ -1,0 +1,51 @@
+{
+ "dataset": "sift-128-100k",
+ "participant": "qdrant-hnsw",
+ "load_time": 34.33924202600065,
+ "load_phases": {
+  "ingest": 6.448,
+  "index": 27.051
+ },
+ "disk_bytes": 151887872,
+ "disk_info": {
+  "segments": 8,
+  "points": 100000,
+  "indexed_vectors": 100000,
+  "index": {
+   "m": 16,
+   "ef_construct": 128,
+   "quant": "none",
+   "on_disk_vectors": false,
+   "on_disk_hnsw": false,
+   "segments": 8,
+   "full_scan_threshold_kb": 10,
+   "max_segment_size_kb": null
+  },
+  "payload_indexes": [
+   "cat10",
+   "cat100",
+   "cat1000",
+   "cluster",
+   "lang",
+   "num"
+  ],
+  "indexing_threshold_kb": 1,
+  "upload_workers": 4
+ },
+ "memory_peak_load": null,
+ "version": "1.19.1",
+ "date": "2026-09-15",
+ "index": {
+  "params": {
+   "m": 16,
+   "ef_construct": 128,
+   "quant": "none",
+   "on_disk_vectors": false,
+   "on_disk_hnsw": false,
+   "segments": 8,
+   "full_scan_threshold_kb": 10,
+   "dims": 128,
+   "metric": "l2"
+  }
+ }
+}
