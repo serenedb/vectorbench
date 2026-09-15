@@ -83,12 +83,13 @@ def _merge(base: dict[str, Any], over: dict[str, Any] | None) -> dict[str, Any]:
 
 
 def resolve_settings(settings: dict[str, Any], family: Family, size: str, group: Group | None = None) -> dict[str, Any]:
-    """defaults < datasets.<family>.<size> < groups[<filter>/*] < groups[<filter>/<k>] (exact groups share the filter's settings)."""
+    """defaults < datasets.<family>.<size> < groups[*/<k>] < groups[<filter>/*] < groups[<filter>/<k>]
+    (exact groups share the filter's settings)."""
     cur = _merge({}, settings.get("defaults"))
     ds = ((settings.get("datasets") or {}).get(family.name) or {}).get(size)
     cur = _merge(cur, ds)
     if group is not None and ds and ds.get("groups"):
-        for key in (f"{group.filter}/*", f"{group.filter}/{group.k}"):
+        for key in (f"*/{group.k}", f"{group.filter}/*", f"{group.filter}/{group.k}"):
             if key in ds["groups"]:
                 cur = _merge(cur, ds["groups"][key])
     return cur

@@ -174,9 +174,10 @@ datasets:
            groups: {"eq-0.1/*": {ladder: {nprobe: [8, 16, 32, 64, 128, 256]}}}}
 ```
 
-Resolution for a (dataset size, group): `defaults` < `datasets.<family>.<size>` < its `groups[<key>]`
-(exact key first, then `<filter>/*`). A ladder with several knobs is the cartesian product in the order
-written; keep ladders to about seven points. Exact groups ignore ladders.
+Resolution for a (dataset size, group): `defaults` < `datasets.<family>.<size>` < its `groups["*/<k>"]`
+< `groups["<filter>/*"]` < `groups["<filter>/<k>"]`, later keys winning. `"*/<k>"` is for knobs tied to
+k, such as a beam that is also the result ceiling. A ladder with several knobs is the cartesian product
+in the order written; keep ladders to about seven points. Exact groups ignore ladders.
 
 `plan_rules` (optional): lists of substrings the plan returned by `Client.explain` must contain,
 under `always`, `approximate` (non-exact groups), `exact`, `filtered` (filter != none); the `<kind>_not`
