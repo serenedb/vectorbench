@@ -61,16 +61,23 @@ def frontier(points: list[Point], direction: str) -> list[Point]:
     return kept
 
 
+def _is_int(v: Any) -> bool:
+    if isinstance(v, bool):
+        return False
+    return isinstance(v, int) or (isinstance(v, float) and v.is_integer())
+
+
 def _adjacent_int(a: Point, b: Point) -> bool:
-    if len(a.knobs) != 1 or len(b.knobs) != 1 or set(a.knobs) != set(b.knobs):
+    """Two declared points are adjacent on the ladder when every knob but one agrees and that one is
+    an integer knob differing by exactly one: the participant could not have declared a point between
+    them."""
+    if not a.knobs or set(a.knobs) != set(b.knobs):
         return False
-    (va,) = a.knobs.values()
-    (vb,) = b.knobs.values()
-    if isinstance(va, bool) or isinstance(vb, bool):
+    differing = [k for k in a.knobs if a.knobs[k] != b.knobs[k]]
+    if len(differing) != 1:
         return False
-    if not (isinstance(va, int) or (isinstance(va, float) and va.is_integer())):
-        return False
-    if not (isinstance(vb, int) or (isinstance(vb, float) and vb.is_integer())):
+    va, vb = a.knobs[differing[0]], b.knobs[differing[0]]
+    if not (_is_int(va) and _is_int(vb)):
         return False
     return abs(int(va) - int(vb)) == 1
 

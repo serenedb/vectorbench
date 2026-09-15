@@ -108,12 +108,16 @@ function isIntegerValue(v: unknown): v is number {
 }
 
 /** Step 7: both points have exactly one knob, the same one, integer valued, differing by 1. */
+/** Adjacent on the ladder: every knob but one agrees and that one is an integer knob differing by
+ * exactly one, so the participant could not have declared a point between them. */
 export function adjacentInt(a: Point, b: Point): boolean {
-  const ka = Object.keys(a.knobs);
-  const kb = Object.keys(b.knobs);
-  if (ka.length !== 1 || kb.length !== 1 || ka[0] !== kb[0]) return false;
-  const va = a.knobs[ka[0]];
-  const vb = b.knobs[kb[0]];
+  const ka = Object.keys(a.knobs).sort();
+  const kb = Object.keys(b.knobs).sort();
+  if (ka.length === 0 || ka.length !== kb.length || ka.some((k, i) => k !== kb[i])) return false;
+  const differing = ka.filter((k) => a.knobs[k] !== b.knobs[k]);
+  if (differing.length !== 1) return false;
+  const va = a.knobs[differing[0]];
+  const vb = b.knobs[differing[0]];
   if (!isIntegerValue(va) || !isIntegerValue(vb)) return false;
   return Math.abs(va - vb) === 1;
 }

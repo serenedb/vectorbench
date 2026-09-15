@@ -44,13 +44,16 @@ test('frontier keeps strictly better points only and re-sorts by recall', () => 
   assert.deepEqual(dominated(pts, 'higher').map((p) => p.index), [0, 1]);
 });
 
-test('adjacent integer knobs need one integer knob each, the same one', () => {
+test('adjacent on the ladder: the same knobs, one integer knob apart by one', () => {
   const p = (knobs) => ({ recall: 0.9, value: 1, knobs, index: 0 });
   assert.ok(adjacentInt(p({ nprobe: 4 }), p({ nprobe: 5 })));
   assert.ok(!adjacentInt(p({ nprobe: 4 }), p({ ef: 5 })));
-  assert.ok(!adjacentInt(p({ nprobe: 4, rerank: 2 }), p({ nprobe: 5, rerank: 2 })));
+  assert.ok(adjacentInt(p({ nprobe: 4, rerank: 2 }), p({ nprobe: 5, rerank: 2 })));
+  assert.ok(!adjacentInt(p({ nprobe: 4, rerank: 2 }), p({ nprobe: 5, rerank: 3 })));
+  assert.ok(!adjacentInt(p({ nprobe: 4, mode: 'auto' }), p({ nprobe: 4, mode: 'bridge' })));
   assert.ok(!adjacentInt(p({ nprobe: 4.5 }), p({ nprobe: 5.5 })));
   assert.ok(!adjacentInt(p({ nprobe: '4' }), p({ nprobe: '5' })));
+  assert.ok(!adjacentInt(p({}), p({})));
 });
 
 test('cell(): group statuses, exact rows and the metric picker', () => {

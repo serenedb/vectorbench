@@ -351,6 +351,62 @@
         "a_recall": 0.9,
         "b_recall": 0.96
       }
+    },
+    {
+      "name": "wide bracket allowed when two-knob points differ in one adjacent integer knob",
+      "direction": "higher",
+      "r": 0.95,
+      "points": [
+        {
+          "recall": 0.92,
+          "value": 900.0,
+          "knobs": {
+            "nprobe": 2,
+            "mode": "auto"
+          }
+        },
+        {
+          "recall": 0.98,
+          "value": 300.0,
+          "knobs": {
+            "nprobe": 3,
+            "mode": "auto"
+          }
+        }
+      ],
+      "expect": {
+        "status": "interpolated",
+        "value": 519.6152422706632,
+        "a_recall": 0.92,
+        "b_recall": 0.98
+      }
+    },
+    {
+      "name": "wide bracket not allowed when two-knob points differ in the non-integer knob",
+      "direction": "higher",
+      "r": 0.95,
+      "points": [
+        {
+          "recall": 0.92,
+          "value": 900.0,
+          "knobs": {
+            "nprobe": 2,
+            "mode": "auto"
+          }
+        },
+        {
+          "recall": 0.98,
+          "value": 300.0,
+          "knobs": {
+            "nprobe": 2,
+            "mode": "bridge"
+          }
+        }
+      ],
+      "expect": {
+        "status": "bracket_too_wide",
+        "gap": 0.06
+      }
     }
   ]
 }

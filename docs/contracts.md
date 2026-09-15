@@ -255,8 +255,8 @@ latency statistics), and the row's recall `r`.
    If `a is b` (recall equals `r`): `{status: "point", value}`.
 7. Density is checked on **all** usable points (dominated ones included), since it measures what the
    participant declared: let `da`, `db` be the points bracketing `r` by recall among all points and
-   `gap = db.recall - da.recall`; `adjacent_int` is true when both have exactly one knob, both values
-   are integers and differ by 1. If `gap > 0.02 and not adjacent_int`: `{status: "bracket_too_wide",
+   `gap = db.recall - da.recall`; `adjacent_int` is true when both points declare the same knobs, all
+   but one agree, and that one is an integer knob whose values differ by 1 (adjacent on the ladder). If `gap > 0.02 and not adjacent_int`: `{status: "bracket_too_wide",
    gap}`. The value is then read between the frontier points `a`, `b` bracketing `r`.
 8. `value = exp(ln(va) + (r - ra) / (rb - ra) * (ln(vb) - ln(va)))`;
    `{status: "interpolated", value, a, b}`.
