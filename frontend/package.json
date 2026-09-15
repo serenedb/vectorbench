@@ -1,0 +1,43 @@
+{
+  "name": "@vectorbench/frontend",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./results": "./src/entities/results/model/source.ts"
+  },
+  "scripts": {
+    "predev": "npm run build -w @serenedb/ui",
+    "dev": "vite --host 127.0.0.1",
+    "prebuild": "npm run build -w @serenedb/ui",
+    "build": "node scripts/build.mjs",
+    "sample": "node scripts/sample-results.mjs",
+    "typecheck": "tsc --noEmit",
+    "test": "node --test tests/*.test.mjs"
+  },
+  "dependencies": {
+    "@serenedb/ui": "*",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0",
+    "react-router-dom": "^7.6.0"
+  },
+  "devDependencies": {
+    "@tailwindcss/vite": "^4.1.11",
+    "@types/node": "^22.15.0",
+    "@types/react": "^19.1.0",
+    "@types/react-dom": "^19.1.0",
+    "@vitejs/plugin-react": "^4.5.0",
+    "playwright": "^1.49.0",
+    "tailwindcss": "^4.1.11",
+    "typescript": "^5.9.3",
+    "vite": "^6.3.5",
+    "yaml": "^2.9.1"
+  },
+  "workspaces": [
+    "deps/serene-design"
+  ],
+  "engines": {
+    "node": ">=22"
+  }
+}
