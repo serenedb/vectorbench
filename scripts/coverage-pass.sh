@@ -32,11 +32,8 @@ run() {  # run <participant> <dataset> [extra args...]
   local p=$1 d=$2; shift 2
   clear_containers
   if [ "$p" = serenedb-hnsw ] || [ "$p" = serenedb-ivf ]; then export VB_BINARY=$B; else unset VB_BINARY; fi
-  # Two hours to build one dataset. At these sizes an engine that wants longer has answered the
-  # question, and the run is published as load_aborted rather than holding the machine overnight.
   .venv/bin/python -m vectorbench.cli run --participant "$p" --dataset "$d" --index \
     --clients 32 --query-limit 1000 --passes 1 --deadline 6 --budget 6 --min-queries 500 \
-    --load-timeout 7200 \
     "$@" > "$L/rerun_${p}_${d}$(printf '%s' "${LABEL:-}").log" 2>&1
   say "$p $d exit $?"
 }
