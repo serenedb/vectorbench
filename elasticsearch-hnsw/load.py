@@ -8,6 +8,7 @@ Prints the two load tags of docs/contracts.md section 4 on stdout."""
 
 from __future__ import annotations
 
+import datetime as dt
 import http.client
 import json
 import os
@@ -26,6 +27,21 @@ DIMS = int(os.environ["VECTORBENCH_DIMS"])
 METRIC = os.environ.get("VECTORBENCH_METRIC", "ip").lower()
 BULK_DOCS = int(os.environ.get("VB_BULK_DOCS", "500"))
 SETTLE_POLLS = 4  # consecutive 5-second polls with an unchanged segment count
+
+
+# Qdrant keeps every attribute in its payload and SereneDB keeps every column in the table, so these
+# two engines keep them too, or load time and index size would not be comparable. `ts` and `title`
+# are not used by any filter case, so they are stored without an inverted index: declared with
+# indexing off and carried in `_source`, which is the same shape as an unindexed Qdrant payload.
+# `_source` excludes the vector, which Lucene already stores in its own file and Qdrant never
+# duplicates into the payload.
+def json_value(v: Any) -> Any:
+    """A parquet cell as JSON. Timestamps travel as epoch milliseconds."""
+    if isinstance(v, np.datetime64):
+        return int(v.astype("datetime64[ms]").astype("int64"))
+    if isinstance(v, dt.datetime):
+        return int(v.timestamp() * 1000)
+    return v.item() if hasattr(v, "item") else v
 
 
 def log(msg: str) -> None:
@@ -100,27 +116,21 @@ def create_index(es: Es, cfg: IndexConfig) -> None:
         "cat10": {"type": "integer"}, "cat100": {"type": "integer"},
         "cat1000": {"type": "integer"}, "cluster": {"type": "integer"},
         "num": {"type": "integer"}, "lang": {"type": "keyword"},
+        # Carried but never searched, so no inverted index and no doc values.
+        "ts": {"type": "date", "index": False, "doc_values": False},
+        "title": {"type": "keyword", "index": False, "doc_values": False},
     }
     settings = {"index": {
         "number_of_shards": cfg.shards, "number_of_replicas": 0,
         "refresh_interval": "-1",             # no refresh while ingesting
         "translog": {"durability": "async"},
     }}
-    # Turning _source off keeps a hit down to an id and a score. 9.x spells it as a mode and
-    # deprecates the boolean, so the modern form is tried first and the old one is the fallback.
-    errors: list[str] = []
-    for name, source in (("mode", {"mode": "disabled"}), ("enabled", {"enabled": False})):
-        body = {"settings": settings,
-                "mappings": {"_source": source, "properties": properties}}
-        out = es.json("PUT", f"/{INDEX}", body, allow_fail=True)
-        if isinstance(out, dict) and "__error__" in out:
-            errors.append(f"_source.{name}: {out['__error__'][:200]}")
-            es.json("DELETE", f"/{INDEX}", allow_fail=True)
-            continue
-        log(f"index {INDEX}: {json.dumps(options)}, similarity {similarity()}, "
-            f"{cfg.shards} shard(s), _source by {name}")
-        return
-    raise SystemExit("no mapping was accepted:\n  " + "\n  ".join(errors))
+    body = {"settings": settings,
+            "mappings": {"_source": {"excludes": ["emb"]}, "properties": properties}}
+    out = es.json("PUT", f"/{INDEX}", body, allow_fail=True)
+    if isinstance(out, dict) and "__error__" in out:
+        raise SystemExit(f"mapping refused: {out['__error__'][:400]}")
+    log(f"index {INDEX}: {json.dumps(options)}, similarity {similarity()}, {cfg.shards} shard(s)")
 
 
 def shards() -> list[str]:
@@ -141,8 +151,7 @@ def ingest(es: Es, cfg: IndexConfig) -> int:
             stop = min(start + BULK_DOCS, rows)
             lines: list[str] = []
             for i in range(start, stop):
-                doc = {name: (v[i].item() if hasattr(v[i], "item") else v[i])
-                       for name, v in cols.items() if name != "id"}
+                doc = {name: json_value(v[i]) for name, v in cols.items() if name != "id"}
                 doc["emb"] = emb[i].tolist()
                 lines.append(json.dumps({"index": {"_id": str(int(cols["id"][i]))}}))
                 lines.append(json.dumps(doc, separators=(",", ":")))
