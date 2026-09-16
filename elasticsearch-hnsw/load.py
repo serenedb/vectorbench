@@ -68,7 +68,7 @@ class Es:
         self.conn = http.client.HTTPConnection(HOST, PORT, timeout=1200)
 
     def request(self, method: str, path: str, body: bytes | None = None,
-                content_type: str = "application/json") -> dict:
+                content_type: str = "application/json", allow_fail: bool = False):
         headers = {"Content-Type": content_type}
         if body is not None:
             headers["Content-Length"] = str(len(body))
@@ -76,11 +76,15 @@ class Es:
         resp = self.conn.getresponse()
         data = resp.read()
         if resp.status >= 300:
-            raise SystemExit(f"{method} {path} -> {resp.status}: {data[:500].decode(errors='replace')}")
+            text = data[:600].decode(errors="replace")
+            if allow_fail:
+                return {"__error__": text, "__status__": resp.status}
+            raise SystemExit(f"{method} {path} -> {resp.status}: {text}")
         return json.loads(data) if data else {}
 
-    def json(self, method: str, path: str, body: dict | None = None) -> dict:
-        return self.request(method, path, json.dumps(body).encode() if body is not None else None)
+    def json(self, method: str, path: str, body: dict | None = None, allow_fail: bool = False):
+        payload = json.dumps(body).encode() if body is not None else None
+        return self.request(method, path, payload, allow_fail=allow_fail)
 
 
 def similarity() -> str:
@@ -90,28 +94,35 @@ def similarity() -> str:
 
 
 def create_index(es: Es, cfg: IndexConfig) -> None:
-    es.request("DELETE", f"/{INDEX}") if False else None
-    try:
-        es.json("DELETE", f"/{INDEX}")
-    except SystemExit:
-        pass  # not there yet
+    es.json("DELETE", f"/{INDEX}", allow_fail=True)
     options: dict[str, object] = {"type": cfg.type, "m": cfg.m, "ef_construction": cfg.ef_construction}
-    body = {
-        "settings": {"index": {
-            "number_of_shards": cfg.shards, "number_of_replicas": 0,
-            "refresh_interval": "-1",             # no refresh while ingesting
-            "translog": {"durability": "async"},
-        }},
-        "mappings": {"_source": {"enabled": False}, "properties": {
-            "emb": {"type": "dense_vector", "dims": DIMS, "index": True,
-                    "similarity": similarity(), "index_options": options},
-            "cat10": {"type": "integer"}, "cat100": {"type": "integer"},
-            "cat1000": {"type": "integer"}, "cluster": {"type": "integer"},
-            "num": {"type": "integer"}, "lang": {"type": "keyword"},
-        }},
+    properties = {
+        "emb": {"type": "dense_vector", "dims": DIMS, "index": True,
+                "similarity": similarity(), "index_options": options},
+        "cat10": {"type": "integer"}, "cat100": {"type": "integer"},
+        "cat1000": {"type": "integer"}, "cluster": {"type": "integer"},
+        "num": {"type": "integer"}, "lang": {"type": "keyword"},
     }
-    es.json("PUT", f"/{INDEX}", body)
-    log(f"index {INDEX}: {json.dumps(options)}, similarity {similarity()}, {cfg.shards} shard(s)")
+    settings = {"index": {
+        "number_of_shards": cfg.shards, "number_of_replicas": 0,
+        "refresh_interval": "-1",             # no refresh while ingesting
+        "translog": {"durability": "async"},
+    }}
+    # Turning _source off keeps a hit down to an id and a score. 9.x spells it as a mode and
+    # deprecates the boolean, so the modern form is tried first and the old one is the fallback.
+    errors: list[str] = []
+    for name, source in (("mode", {"mode": "disabled"}), ("enabled", {"enabled": False})):
+        body = {"settings": settings,
+                "mappings": {"_source": source, "properties": properties}}
+        out = es.json("PUT", f"/{INDEX}", body, allow_fail=True)
+        if isinstance(out, dict) and "__error__" in out:
+            errors.append(f"_source.{name}: {out['__error__'][:200]}")
+            es.json("DELETE", f"/{INDEX}", allow_fail=True)
+            continue
+        log(f"index {INDEX}: {json.dumps(options)}, similarity {similarity()}, "
+            f"{cfg.shards} shard(s), _source by {name}")
+        return
+    raise SystemExit("no mapping was accepted:\n  " + "\n  ".join(errors))
 
 
 def shards() -> list[str]:
