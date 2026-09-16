@@ -363,3 +363,20 @@ The budget is enforced by a watchdog, not by waiting on the process with a timeo
 output is drained first, so a recipe that hangs, or one that prints progress forever, never reaches
 such a wait at all. `tests/test_load_budget.py` covers both shapes and checks that a grandchild of
 the recipe does not outlive it.
+
+## 16. Build matching
+
+`vectorbench compare` reads the build each side recorded and prints a mismatch banner before any
+numbers when they differ. Three things have to agree: `m`, `ef_construction`, and the bits per
+dimension of the stored codes, which each engine spells differently (`sq8`, `int8_hnsw`, `4x`,
+`scalar`, and so on) and which the comparison maps to a number.
+
+This is not belt and braces. A Qdrant load record from before the participants were aligned carries
+`quant: none`, so a comparison against it would have measured our eight-bit index against their full
+precision one and read the size difference as ours. A mismatch is a fact about the run, not about
+the settings files, so it is read from what the loaders recorded rather than from what the settings
+declare.
+
+A run in flight writes `<name>.partial.json` beside the published file and promotes it at the end,
+so both exist at once. The partial is the fresher of the two and is used, with the participant
+marked `RUN IN PROGRESS`, because an unfinished run must never read as a result.

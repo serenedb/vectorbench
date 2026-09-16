@@ -182,6 +182,15 @@ def main() -> int:
             "files": metric_value(cur, "num_files", METRIC_REL),
             "index_bytes": metric_value(cur, "index_size", METRIC_REL),
             "ddl": ddl,
+            # The build, structurally as well as in the DDL string, so a comparison can check that
+            # both sides built the same index instead of trusting the settings files to agree.
+            "index": {
+                "kind": KIND, "metric": METRIC, "quant": QUANT,
+                "m": int(M) if M else None,
+                "ef_construction": int(EFC) if EFC else None,
+                "compression": str(COMPRESSION).lower() in ("1", "true", "yes"),
+                "storage": STORAGE,
+            },
         }
     print("VECTORBENCH_PHASES=" + json.dumps({k: round(v, 3) for k, v in phases.items()}), flush=True)
     print("VECTORBENCH_INFO=" + json.dumps(info), flush=True)

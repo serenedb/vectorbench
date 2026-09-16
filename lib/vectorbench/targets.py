@@ -67,10 +67,20 @@ class GroupReading:
         return sum(1 for s in self.statuses.values() if s == "bracket_too_wide")
 
 
-def load_dataset_results(dataset: str, root: Path = REPO_ROOT) -> dict[str, dict[str, Any]]:
-    """Participant id -> result file, for every participant that ran this dataset."""
+def load_dataset_results(dataset: str, root: Path = REPO_ROOT,
+                         include_partial: bool = True) -> dict[str, dict[str, Any]]:
+    """Participant id -> result file, for every participant that ran this dataset.
+
+    A run in flight writes `<name>.partial.json` beside the published `<name>.json` and promotes it
+    at the end, so both can exist at once and the partial is the fresher of the two. It is taken
+    when `include_partial`, and the document is marked so a reader is never told an unfinished run
+    is a result.
+    """
     out: dict[str, dict[str, Any]] = {}
     for p in sorted(root.glob("*/results/*.json")):
+        partial = p.name.endswith(".partial.json")
+        if partial and not include_partial:
+            continue
         try:
             doc = json.loads(p.read_text())
         except (OSError, ValueError):
@@ -78,6 +88,10 @@ def load_dataset_results(dataset: str, root: Path = REPO_ROOT) -> dict[str, dict
         if doc.get("dataset") != dataset:
             continue
         pid = str(doc.get("participant") or p.parent.parent.name)
+        if partial:
+            doc = dict(doc, __partial__=True)
+        elif out.get(pid, {}).get("__partial__"):
+            continue  # a published file never replaces the fresher partial
         out[pid] = doc
     return out
 
