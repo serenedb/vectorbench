@@ -157,3 +157,26 @@ def test_groundtruth_matches_naive(metric):
     assert np.allclose(res["eq-10"]["dists"], exp_d, rtol=1e-4, atol=1e-4)
     assert np.array_equal(res["eq-10"]["ids"], exp_ids)
     assert np.array_equal(res["eq-10"]["matches"], mask.sum(axis=1))
+
+
+@pytest.mark.parametrize("metric", ["l2", "ip"])
+@pytest.mark.parametrize("block_rows,depth", [(30, 100), (100, 100), (137, 100)])
+def test_groundtruth_blocks_narrower_than_depth(metric, block_rows, depth):
+    """A block reduced to its own top-`depth` has a second path for blocks no wider than depth, and
+    the boundary where the two meet is where an off-by-one would hide."""
+    rng = np.random.default_rng(7)
+    n = 900
+    base = rng.standard_normal((n, 8)).astype(np.float32)
+    queries = rng.standard_normal((11, 8)).astype(np.float32)
+    ids = np.arange(n)
+
+    def blocks():
+        for s in range(0, n, block_rows):
+            e = min(s + block_rows, n)
+            yield ids[s:e], base[s:e], {}
+
+    res = G.compute(queries, blocks(), metric, depth=depth,
+                    cases={"none": G.none_mask()}, query_batch=4)
+    exp_ids, exp_d = G.naive_topk(queries, base, metric, depth)
+    assert np.allclose(res["none"]["dists"], exp_d, rtol=1e-4, atol=1e-4)
+    assert np.array_equal(res["none"]["ids"], exp_ids)

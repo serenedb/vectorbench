@@ -23,13 +23,26 @@ class TopK:
         self.ids = np.full((nq, depth), -1, dtype=np.int64)
 
     def update(self, qsel: slice, dists: np.ndarray, ids: np.ndarray) -> None:
-        """Merge a block: `dists` [nq_sel, rows] (inf where masked out), `ids` [rows]."""
-        cur_d = self.dists[qsel]
-        cur_i = self.ids[qsel]
-        cand_d = np.concatenate([cur_d, dists], axis=1)
-        cand_i = np.concatenate([cur_i, np.broadcast_to(ids[None, :], dists.shape)], axis=1)
-        if cand_d.shape[1] > self.depth:
-            part = np.argpartition(cand_d, self.depth - 1, axis=1)[:, : self.depth]
+        """Merge a block: `dists` [nq_sel, rows] (inf where masked out), `ids` [rows].
+
+        The block is reduced to its own top-`depth` before the running top is touched. Pairing the
+        ids with the full block first, as the obvious version does, materialises an int64 array the
+        width of the block for every filter case of every block: at ten million rows and ten cases
+        that is the single largest cost of preparing a dataset, and none of it is needed, because
+        all but `depth` of those ids are about to be discarded.
+        """
+        depth = self.depth
+        if dists.shape[1] > depth:
+            part = np.argpartition(dists, depth - 1, axis=1)[:, :depth]
+            blk_d = np.take_along_axis(dists, part, axis=1)
+            blk_i = ids[part]
+        else:
+            blk_d = dists
+            blk_i = np.broadcast_to(ids[None, :], dists.shape)
+        cand_d = np.concatenate([self.dists[qsel], blk_d], axis=1)
+        cand_i = np.concatenate([self.ids[qsel], blk_i], axis=1)
+        if cand_d.shape[1] > depth:
+            part = np.argpartition(cand_d, depth - 1, axis=1)[:, :depth]
             cand_d = np.take_along_axis(cand_d, part, axis=1)
             cand_i = np.take_along_axis(cand_i, part, axis=1)
         self.dists[qsel] = cand_d
