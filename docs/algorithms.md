@@ -106,6 +106,39 @@ rescore against full precision vectors whose oversample factor is chosen from th
 the user does not set one, 1.0 at 1000 dimensions or more, 2.0 from 768, and 3.0 below that, with the
 first pass clamped to between 100 and 10000 candidates.
 
+### What the engines actually did when asked
+
+Probed on throwaway containers before any of them ran a measurement, because the documented
+defaults did not survive contact.
+
+**None of the three reorders unless told to, per query.** Every one of them answers from the
+quantized codes, so recall stops short of one no matter how wide the beam, and any bar above that
+ceiling is unreadable rather than lost.
+
+| engine | ceiling without reordering | the knob |
+|---|---|---|
+| OpenSearch, Lucene 4x | recall 0.812, against 0.999 with it on | `rescore: {oversample_factor: N}` |
+| Qdrant, scalar 8-bit | recall 0.9695 at k=10, 0.9847 at k=1000 | `params.quantization: {rescore, oversampling}` |
+| Elasticsearch, int8 | declared an oversample no query carried | `rescore_vector: {oversample: N}`, per query |
+
+The Elasticsearch case is worth separating: the oversample is a search parameter, not an index
+option, so declaring it where the mapping is built has no effect at all.
+
+**OpenSearch's two engines do not accept the same compression levels**, and the gap lands exactly on
+the width everyone else uses:
+
+| compression | bits per dimension | faiss | lucene |
+|---|---|---|---|
+| 1x | 32, float | yes | yes |
+| 2x | 16, fp16 | yes | no |
+| 4x | 8, byte | no | yes |
+| 8x | 4 | yes | no |
+| 16x | 2 | yes | no |
+| 32x | 1, binary | yes | yes |
+
+So a matched eight-bit build on OpenSearch runs on Lucene, and the faiss build is a different
+quantization by necessity rather than by choice.
+
 ## Segments, and how many cores answer one query
 
 **Qdrant** splits a shard into segments, defaulting to CPU count over two clamped to between 2 and 8,
