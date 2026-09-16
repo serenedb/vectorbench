@@ -37,9 +37,9 @@ export function BenchPage() {
       defaultDataset: BENCH?.defaultDataset ?? null,
       tagsFor: (id) => {
         const d = datasetById(id);
-        return d ? allChipTags(d.family) : EMPTY_TAGS;
+        return d ? allChipTags(d) : EMPTY_TAGS;
       },
-      rowsFor: (id) => new Set(datasetById(id)?.family.queries.map((q) => q.id) ?? []),
+      rowsFor: (id) => new Set(datasetById(id)?.queries.map((q) => q.id) ?? []),
     }),
     [],
   );
@@ -49,7 +49,7 @@ export function BenchPage() {
   const dataset = datasetById(state.dataset ?? BENCH?.defaultDataset);
   const metric = metricFor(state.view, state.latencyMetric);
   const grid: Grid | null = useMemo(() => (dataset ? computeGrid(dataset, state.view, metric) : null), [dataset, state.view, metric]);
-  const rows = useMemo(() => (dataset ? visibleRows(dataset.family, state.chips) : []), [dataset, state.chips]);
+  const rows = useMemo(() => (dataset ? visibleRows(dataset.queries, state.chips) : []), [dataset, state.chips]);
   const scores = useMemo<Record<Section, SectionScores> | null>(() => {
     if (!dataset || !grid) return null;
     return {
@@ -81,7 +81,7 @@ export function BenchPage() {
 
   const detail = state.detail;
   const detailResult = detail?.kind === 'cell' ? dataset.results.find((r) => r.id === detail.pid) : undefined;
-  const detailRow = detail?.kind === 'cell' ? dataset.family.queries.find((q) => q.id === detail.qid) : undefined;
+  const detailRow = detail?.kind === 'cell' ? dataset.queries.find((q) => q.id === detail.qid) : undefined;
 
   return (
     <div className="vb-app">

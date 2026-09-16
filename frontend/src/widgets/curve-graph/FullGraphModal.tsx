@@ -13,7 +13,7 @@ import { useSize } from './useSize';
 
 export function FullGraphModal({ dataset, results, grid, state, dispatch }: { dataset: DatasetModel; results: readonly ResultModel[]; grid: Grid; state: BenchState; dispatch: Dispatch<BenchAction> }): ReactNode {
   const selected = state.graphRows ?? [];
-  const rows = useMemo(() => dataset.family.queries.filter((q) => selected.includes(q.id)), [dataset, selected]);
+  const rows = useMemo(() => dataset.queries.filter((q) => selected.includes(q.id)), [dataset, selected]);
   const data = useMemo(() => buildGraphData(results, rows, grid), [results, rows, grid]);
   const [ref, size] = useSize<HTMLDivElement>();
   const close = () => dispatch({ type: 'graph-close' });
@@ -30,7 +30,7 @@ export function FullGraphModal({ dataset, results, grid, state, dispatch }: { da
           {(['nofilter', 'filtered'] as const).map((section) => (
             <div key={section}>
               <div className="rs">{section === 'nofilter' ? 'NO FILTER' : 'FILTERED'}</div>
-              {dataset.family.queries
+              {dataset.queries
                 .filter((q) => q.section === section)
                 .map((q) => (
                   <label key={q.id} title={q.key}>

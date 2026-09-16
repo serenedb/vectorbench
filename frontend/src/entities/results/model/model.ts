@@ -78,6 +78,8 @@ export interface ResultModel {
   datasetId: string;
   family: FamilyModel;
   size: string;
+  /** The family's rows resolved for this result's size (same list as its dataset's). */
+  queries: QueryRow[];
   /** `groupLookupKey(view, key)` → group. */
   groups: ReadonlyMap<string, RawGroup>;
   raw: RawResult;
@@ -88,6 +90,10 @@ export interface DatasetModel {
   family: FamilyModel;
   size: string;
   rows: number;
+  /** The family's rows resolved for this size: skipped rows dropped, recall bars overridden. */
+  queries: QueryRow[];
+  /** Chip values present in this size's rows, in display order. */
+  chips: ChipGroups;
   /** In file order; the page sorts them (scores.ts). */
   results: ResultModel[];
 }
@@ -169,8 +175,26 @@ function buildFamily(id: string, raw: unknown): FamilyModel {
     })
     .sort((a, b) => a.rows - b.rows);
   const filterCases = Object.keys(f.filter_cases);
+  const queries = buildRows(f.queries, id, filterCases);
+  return {
+    id,
+    title: typeof f.title === 'string' && f.title ? f.title : id,
+    description: typeof f.description === 'string' ? f.description : '',
+    dims: typeof f.dims === 'number' ? f.dims : NaN,
+    metric: typeof f.metric === 'string' ? f.metric : '',
+    sizes,
+    filterCases,
+    queries,
+    chips: chipGroups(filterCases, queries),
+    raw: f,
+  };
+}
+
+/** Validate and decorate a row list. `id` and `filterCases` only shape the error messages and
+    reject a row naming a case the family does not declare. */
+function buildRows(rows: readonly Query[], id: string, filterCases: readonly string[]): QueryRow[] {
   const seen = new Set<string>();
-  const queries: QueryRow[] = f.queries.map((q, i) => {
+  return rows.map((q, i) => {
     if (!isObj(q)) throw new ContractError(`family ${id}: query #${i} must be an object`);
     const qid = str(q.id, `family ${id}: query #${i} id`);
     if (seen.has(qid)) throw new ContractError(`family ${id}: duplicate query id ${qid}`);
@@ -194,18 +218,18 @@ function buildFamily(id: string, raw: unknown): FamilyModel {
       tags: tagsOf(query),
     };
   });
-  return {
-    id,
-    title: typeof f.title === 'string' && f.title ? f.title : id,
-    description: typeof f.description === 'string' ? f.description : '',
-    dims: typeof f.dims === 'number' ? f.dims : NaN,
-    metric: typeof f.metric === 'string' ? f.metric : '',
-    sizes,
-    filterCases,
-    queries,
-    chips: chipGroups(filterCases, queries),
-    raw: f,
-  };
+}
+
+/** The family's rows as one dataset size declares them: rows the size skips are dropped and the
+    bars it overrides are applied, so a size's row list is what was actually measured there
+    (contracts section 13). */
+export function queriesForSize(family: FamilyModel, size: string): QueryRow[] {
+  const raw = family.raw;
+  const skip = new Set((raw.skip_by_size ?? {})[size] ?? []);
+  const over = (raw.recall_by_size ?? {})[size] ?? {};
+  const kept = raw.queries.filter((q) => !skip.has(q.id));
+  const applied = kept.map((q) => (q.id in over ? { ...q, recall: over[q.id] } : q));
+  return buildRows(applied, family.id, family.filterCases);
 }
 
 function chipGroups(filterCases: string[], queries: QueryRow[]): ChipGroups {
@@ -254,6 +278,7 @@ function buildResult(raw: unknown, i: number, families: Map<string, FamilyModel>
     datasetId: dataset,
     family,
     size,
+    queries: queriesForSize(family, size),
     groups,
     raw: r,
   };
@@ -310,7 +335,13 @@ export function buildBenchmark(input: unknown): Benchmark {
     for (const s of fam.sizes) {
       const id = `${fam.id}-${s.name}`;
       const list = byDataset.get(id);
-      if (list) datasets.push({ id, family: fam, size: s.name, rows: s.rows, results: list });
+      if (list) {
+        const queries = queriesForSize(fam, s.name);
+        datasets.push({
+          id, family: fam, size: s.name, rows: s.rows, results: list,
+          queries, chips: chipGroups(fam.filterCases, queries),
+        });
+      }
     }
   }
   const seen = new Map<string, ParticipantInfo>();

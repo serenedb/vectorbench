@@ -169,11 +169,11 @@ test('scores and coverage (section 10) and the column order', () => {
   }
   assert.equal(order.at(-1), 'serenedb-hnsw'); // supports nothing filtered
   // chips narrow the rows and the scores recompute over them
-  const k10 = visibleRows(wiki.family, new Set([chipTag('k', '10')]));
+  const k10 = visibleRows(wiki.queries, new Set([chipTag('k', '10')]));
   assert.ok(k10.length > 0 && k10.every((q) => q.k === 10));
-  const both = visibleRows(wiki.family, new Set([chipTag('k', '10'), chipTag('recall', 'exact')]));
+  const both = visibleRows(wiki.queries, new Set([chipTag('k', '10'), chipTag('recall', 'exact')]));
   assert.deepEqual(both.map((q) => q.id), ['V04', 'V37']);
-  const or = visibleRows(wiki.family, new Set([chipTag('recall', '0.9'), chipTag('recall', '0.99')]));
+  const or = visibleRows(wiki.queries, new Set([chipTag('recall', '0.9'), chipTag('recall', '0.99')]));
   assert.ok(or.every((q) => q.recall === 0.9 || q.recall === 0.99));
   const narrowed = sectionScores(grid, wiki.results, k10.filter((r) => r.section === 'filtered'), 'filtered');
   assert.equal(narrowed.coverage.get('serenedb-ivf').total, k10.filter((r) => r.section === 'filtered').length);
@@ -200,7 +200,7 @@ test('URL codec round-trips the selectors and chips', () => {
   const env = {
     datasets: bench.datasets.map((d) => d.id),
     defaultDataset: bench.defaultDataset,
-    tagsFor: (id) => allChipTags(dataset(id).family),
+    tagsFor: (id) => allChipTags(dataset(id)),
     rowsFor: (id) => new Set(dataset(id).family.queries.map((q) => q.id)),
   };
   assert.deepEqual(shortState(INITIAL_STATE, env, 'light'), { v: 1 });

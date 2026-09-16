@@ -65,6 +65,8 @@ class Family:
     queries: list[QueryRow]
     # size -> query id -> recall, overriding the row's own target for that dataset size.
     recall_by_size: dict[str, dict[str, float | str]] = field(default_factory=dict)
+    # size -> query ids the shape makes meaningless there (see queries_for).
+    skip_by_size: dict[str, list[str]] = field(default_factory=dict)
     path: Path | None = None
     extra: dict[str, Any] = field(default_factory=dict)
 
@@ -81,12 +83,20 @@ class Family:
 
         A target that is trivially met by the cheapest ladder point, or that no participant can
         reach, measures nothing; `recall_by_size` lets a family carry a different target per
-        dataset size without duplicating the row list. See `vectorbench targets`.
+        dataset size without duplicating the row list.
+
+        `skip_by_size` drops rows whose shape is meaningless at this size: a 0.1% filter over a
+        million rows leaves a thousand matches, so k=1000 asks for all of them and there is no
+        nearest-neighbour problem left to measure. Every engine declines such a row, so keeping it
+        would score a hole nobody could fill while hiding that the same row is informative at ten
+        million. See `vectorbench targets`.
         """
         over = self.recall_by_size.get(size) or {}
+        skip = set(self.skip_by_size.get(size) or ())
+        rows = [q for q in self.queries if q.id not in skip]
         if not over:
-            return list(self.queries)
-        return [replace(q, recall=over[q.id]) if q.id in over else q for q in self.queries]
+            return rows
+        return [replace(q, recall=over[q.id]) if q.id in over else q for q in rows]
 
     def groups(self) -> list[Group]:
         """Distinct groups in query-list order."""
@@ -117,6 +127,7 @@ class Family:
                 {"id": q.id, "filter": q.filter, "k": q.k, "recall": q.recall} for q in self.queries
             ],
             "recall_by_size": {s: dict(o) for s, o in self.recall_by_size.items()},
+            "skip_by_size": {s: list(o) for s, o in self.skip_by_size.items()},
         }
 
 
@@ -157,10 +168,19 @@ def load_family_file(path: Path) -> Family:
                 raise ValueError(f"{path}: recall_by_size[{size}] names unknown query {qid!r}")
             out[qid] = _parse_recall(value, qid)
         by_size[size] = out
+    skips: dict[str, list[str]] = {}
+    for size, drop in (raw.get("skip_by_size") or {}).items():
+        size = str(size)
+        if size not in raw["sizes"]:
+            raise ValueError(f"{path}: skip_by_size names unknown size {size!r}")
+        for qid in drop or ():
+            if str(qid) not in ids:
+                raise ValueError(f"{path}: skip_by_size[{size}] names unknown query {qid!r}")
+        skips[size] = [str(q) for q in drop or ()]
     known = {
         "family", "title", "description", "dims", "metric", "source", "sizes", "queries_count",
         "gt_depth", "shard_rows", "cluster_k", "cluster_train_rows", "filter_cases", "queries",
-        "recall_by_size",
+        "recall_by_size", "skip_by_size",
     }
     fam = Family(
         name=str(raw["family"]),
@@ -178,6 +198,7 @@ def load_family_file(path: Path) -> Family:
         filter_cases={str(k): dict(v or {}) for k, v in raw["filter_cases"].items()},
         queries=queries,
         recall_by_size=by_size,
+        skip_by_size=skips,
         path=path,
         extra={k: v for k, v in raw.items() if k not in known},
     )

@@ -68,3 +68,12 @@ queries:
   - {id: V35, filter: eq-1, k: 10, recall: 0.99}
   - {id: V36, filter: xcorr, k: 10, recall: 0.99}
   - {id: V37, filter: eq-1, k: 10, recall: exact}
+
+# Rows whose shape is meaningless at a given size, so they are not part of that dataset's row list
+# and no participant is scored a hole for them. The rule is the driver's own: a filtered group is
+# degenerate when the median match set is smaller than ten times k, which leaves no
+# nearest-neighbour problem to measure. Read off the prepared ground truth; a size not listed here
+# still gets the check at run time.
+skip_by_size:
+  100k: [V16, V18, V19, V22, V25, V27, V28, V31, V34]
+  1m:   [V16, V18, V19, V25, V28]

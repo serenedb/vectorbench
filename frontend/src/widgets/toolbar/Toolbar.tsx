@@ -63,7 +63,7 @@ export function Toolbar({
     return { label: s.name, v: s.name, disabled: !has, title: has ? `${fmtInt(s.rows)} rows` : 'no results at this size yet' };
   });
   const pick = (id: string | null) => {
-    if (id) dispatch({ type: 'dataset', id, tags: allChipTags(bench.datasets.find((d) => d.id === id)!.family) });
+    if (id) dispatch({ type: 'dataset', id, tags: allChipTags(bench.datasets.find((d) => d.id === id)!) });
   };
 
   return (

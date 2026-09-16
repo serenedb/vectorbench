@@ -118,7 +118,9 @@ def propose(
     dataset = family.dataset_id(size)
     docs = load_dataset_results(dataset, root)
     rows = family.queries_for(size)
-    out: dict[str, Any] = {"dataset": dataset, "participants": sorted(docs), "rows": [], "changed": {}}
+    out: dict[str, Any] = {
+        "dataset": dataset, "participants": sorted(docs), "rows": [], "changed": {}, "skip": [],
+    }
     if not docs:
         return out
     # One reading per (group, candidate) is reused by every row on that group.
@@ -170,6 +172,8 @@ def propose(
             })
             if verdict == "replace":
                 out["changed"][q.id] = target
+            elif verdict == "degenerate":
+                out["skip"].append(q.id)
     out["rows"].sort(key=lambda r: r["id"])
     return out
 
@@ -204,12 +208,17 @@ def render(result: dict[str, Any]) -> str:
         )
         if r["advice"]:
             lines.append(f"{'':41}  ! {r['advice']}")
+    size = result["dataset"].rsplit("-", 1)[1]
     if result["changed"]:
         lines.append("")
         lines.append("recall_by_size:")
-        lines.append(f"  {result['dataset'].rsplit('-', 1)[1]}:")
+        lines.append(f"  {size}:")
         for qid, t in sorted(result["changed"].items()):
             lines.append(f"    {qid}: {t}")
+    if result["skip"]:
+        lines.append("")
+        lines.append("skip_by_size:")
+        lines.append(f"  {size}: [{', '.join(sorted(result['skip']))}]")
     return "\n".join(lines) + "\n"
 
 

@@ -34,6 +34,10 @@ export interface RawFamily {
   /** case name → predicate spec (section 3); `none` is `{}`. */
   filter_cases: Record<string, Record<string, unknown>>;
   queries: Query[];
+  /** size → row id → the recall bar that size reads its cells at (contracts section 13). */
+  recall_by_size?: Record<string, Record<string, Recall>>;
+  /** size → row ids whose shape is meaningless there, so that size does not declare them. */
+  skip_by_size?: Record<string, string[]>;
 }
 
 /** Every distribution is reported the same way (DESIGN.md 4.2 rule 8). */

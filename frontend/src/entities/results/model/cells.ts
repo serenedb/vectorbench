@@ -90,7 +90,7 @@ export function computeGrid(dataset: DatasetModel, view: View, metric: Metric): 
   const direction = directionOf(metric);
   const cells = new Map<string, Cell>();
   const best = new Map<string, number | null>();
-  for (const row of dataset.family.queries) {
+  for (const row of dataset.queries) {
     let b: number | null = null;
     for (const r of dataset.results) {
       const c = cellFor(r, row, view, metric);

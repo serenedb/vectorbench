@@ -56,7 +56,7 @@ const num = (v: unknown): number | null => (typeof v === 'number' && Number.isFi
 
 /** Every group of the participant in the section, in both views, is missing or `unsupported`. */
 function supportsNothing(r: ResultModel, section: Section): boolean {
-  const rows = r.family.queries.filter((q) => q.section === section);
+  const rows = r.queries.filter((q) => q.section === section);
   if (!rows.length) return false;
   for (const q of rows) {
     for (const view of ['throughput', 'latency'] as const) {

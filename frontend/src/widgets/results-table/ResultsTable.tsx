@@ -33,7 +33,7 @@ function colW(r: ResultModel): number {
 export function ResultsTable({ dataset, results, rows, grid, scores, state, dispatch }: ResultsTableProps): ReactNode {
   const gridCols = '262px ' + results.map((r) => colW(r) + 'px').join(' ');
   const specs = useMemo(() => tableRows(dataset, rows), [dataset, rows]);
-  const total = dataset.family.queries.length;
+  const total = dataset.queries.length;
   const meta = `${dataset.id} · ${results.length} participants · ${rows.length === total ? total + ' rows' : rows.length + ' of ' + total + ' rows'} · ${VIEW_LABELS[state.view]} · ${fmtInt(dataset.rows)} vectors`;
   const selectedPid = state.detail?.kind === 'cell' ? state.detail.pid : null;
   const selectedQid = state.detail?.kind === 'cell' ? state.detail.qid : null;
