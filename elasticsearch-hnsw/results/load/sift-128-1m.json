@@ -1,0 +1,33 @@
+{
+ "dataset": "sift-128-1m",
+ "participant": "elasticsearch-hnsw",
+ "load_time": 298.98796979700273,
+ "load_phases": {
+  "ingest": 272.666,
+  "index": 26.118
+ },
+ "disk_bytes": 889045729,
+ "disk_info": {
+  "segments": 9,
+  "index_bytes": 789562516,
+  "index": {
+   "type": "int8_hnsw",
+   "m": 16,
+   "ef_construction": 128,
+   "shards": 1
+  }
+ },
+ "memory_peak_load": 37611175936,
+ "version": "9.5.4",
+ "date": "2026-09-16",
+ "index": {
+  "params": {
+   "type": "int8_hnsw",
+   "m": 16,
+   "ef_construction": 128,
+   "shards": 1,
+   "dims": 128,
+   "metric": "l2"
+  }
+ }
+}

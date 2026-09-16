@@ -387,3 +387,17 @@ declare.
 A run in flight writes `<name>.partial.json` beside the published file and promotes it at the end,
 so both exist at once. The partial is the fresher of the two and is used, with the participant
 marked `RUN IN PROGRESS`, because an unfinished run must never read as a result.
+
+## 17. Settling after a restart
+
+The driver stops and starts the engine before every group, to sample startup, so every group begins
+with an engine that has just come up. `--settle <seconds>` then runs a discarded pass before the
+first point of that group, bounded below by a query floor so a slow group still gets enough
+requests to matter.
+
+This is not tuning, it is the difference between measuring an engine and measuring its warm-up. A
+JVM restarted cold runs interpreted until its hot methods are compiled, and the per-point warmup of
+a hundred queries per client does not get it there: Elasticsearch's first points of a group came
+back between 2700 and 13600 queries per second at neighbouring ladder values, with p99 swinging
+from 5 to 70 milliseconds. The settle applies to every participant, because the protocol has to be
+the same for all of them, and it costs about three seconds per group.

@@ -33,6 +33,11 @@ DEGENERATE_FACTOR = 10
 
 
 @dataclass
+# A time-bounded settle gives a slow group too few queries to compile anything, so it also has a
+# floor: at three hundred queries per second the floor is what decides, at ten thousand the clock is.
+SETTLE_MIN_QUERIES = 2000
+
+
 class RunOptions:
     data_dir: Path
     views: list[str] = field(default_factory=lambda: ["throughput", "latency"])
@@ -52,6 +57,12 @@ class RunOptions:
     # as `load_aborted` rather than silently holding the machine for hours: at the largest sizes an
     # engine that takes a day to index has answered the question already.
     load_timeout_s: float | None = None
+    # Seconds of discarded querying after each restart, before the first point of a group is
+    # measured. A JVM restarted cold runs interpreted until its hot methods are compiled, and 100
+    # warmup queries per client do not get it there, so without this Elasticsearch and OpenSearch
+    # would be measured partly on interpreted code. Applied to every participant, because the
+    # protocol has to be the same for all of them.
+    settle_s: float = 3.0
     dry_run: bool = False
 
 
@@ -290,6 +301,12 @@ class Runner:
                         bad = check_plan(plan, g, self.p.settings.get("plan_rules") or {})
                         if bad:
                             raise PlanCheckError(bad)
+                if li == 0 and self.opts.settle_s > 0:
+                    # Discarded: this is the engine reaching steady state after the restart, not a
+                    # measurement of anything.
+                    pool.run_pass(PassSpec(deadline_s=self.opts.settle_s,
+                                           min_queries=min(SETTLE_MIN_QUERIES, self.nq),
+                                           collect_ids=False, k=g.k))
                 pool.warmup(self.opts.warmup, g.k)
                 passes: list[dict[str, Any]] = []
                 first_ids: dict[int, list[int]] | None = None
