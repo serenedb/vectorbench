@@ -1,11 +1,10 @@
 #!/bin/bash
-# Full coverage pass, run after the current measurements finish so nothing overlaps.
-#   1. rebuild serened without the decoded column cache
-#   2. smoke the two engines that have never run, on the smallest dataset, so an integration
-#      bug costs minutes instead of an hour of indexing
-#   3. matched-build runs at 1m, then 100k, for every HNSW participant
-#   4. IVF for coverage
-# Every step records its exit status and the next one runs regardless.
+# The corrected coverage pass. Everything measured before it used at least one of:
+#   - a serened without the sampled column-predicate bound, so range rows always walked
+#   - a SereneDB ladder with no bridge mode at k=10
+#   - Elasticsearch and OpenSearch scoring exact rows in the wrong metric
+#   - no settle after the per-group restart, so a JVM was measured partly interpreted
+# so every participant is re-measured, not only the ones whose own code changed.
 set -uo pipefail
 L=/home/mironov/work/.vbscratch/logs
 R=/home/mironov/work/projects/serenedb/serenedb
@@ -13,55 +12,38 @@ cd /home/mironov/work/projects/serenedb/vectorbench
 export PYTHONPATH=$PWD/lib VECTORBENCH_DATA_DIR=/home/mironov/work/vectorbench-data
 B=$R/build_perf/bin/serened
 
-say() { echo "$* $(date +%H:%M)" >> $L/rerun.status; }
+say() { echo "$* $(date +%H:%M)" >> $L/pass2.status; }
+clear_containers() {
+  for c in $(docker ps -aq --filter name=vectorbench- 2>/dev/null); do docker rm -f "$c" >/dev/null 2>&1; done
+}
 
 say "=== rebuild"
-ninja -C $R/build_perf serened > $L/rebuild.log 2>&1
+ninja -C $R/build_perf serened > $L/rebuild2.log 2>&1
 rc=$?
 say "rebuild exit $rc"
-[ $rc -ne 0 ] && { tail -30 $L/rebuild.log >> $L/rerun.status; exit 1; }
+[ $rc -ne 0 ] && { tail -30 $L/rebuild2.log >> $L/pass2.status; exit 1; }
 
-# One engine at a time: Elasticsearch and OpenSearch both want port 9200.
-clear_containers() {
-  for c in $(docker ps -aq --filter name=vectorbench- 2>/dev/null); do
-    docker rm -f "$c" >/dev/null 2>&1
-  done
-}
-
-run() {  # run <participant> <dataset> [extra args...]
-  local p=$1 d=$2; shift 2
+run() {  # run <participant> <dataset>
   clear_containers
-  if [ "$p" = serenedb-hnsw ] || [ "$p" = serenedb-ivf ]; then export VB_BINARY=$B; else unset VB_BINARY; fi
-  .venv/bin/python -m vectorbench.cli run --participant "$p" --dataset "$d" --index \
+  if [ "$1" = serenedb-hnsw ] || [ "$1" = serenedb-ivf ]; then export VB_BINARY=$B; else unset VB_BINARY; fi
+  .venv/bin/python -m vectorbench.cli run --participant "$1" --dataset "$2" --index \
     --clients 32 --query-limit 1000 --passes 1 --deadline 6 --budget 6 --min-queries 500 \
-    "$@" > "$L/rerun_${p}_${d}$(printf '%s' "${LABEL:-}").log" 2>&1
-  say "$p $d exit $?"
+    --load-timeout 7200 > "$L/p2_$1_$2.log" 2>&1
+  say "$1 $2 exit $?"
 }
 
-# 2. smoke the new engines: one unfiltered group on the smallest dataset.
-LABEL=_smoke
-for p in elasticsearch-hnsw opensearch-hnsw; do
-  run "$p" sift-128-100k --groups 'none/10' --query-limit 200 --deadline 3 --budget 3 --min-queries 100 --label smoke
-done
-unset LABEL
-say "=== smoke done"
+HNSW="serenedb-hnsw qdrant-hnsw elasticsearch-hnsw opensearch-hnsw"
 
-# 3. the matched-build comparison, biggest value first: 1m, then 100k.
 for d in sift-128-1m wiki-v3-1024-1m sift-128-100k wiki-v3-1024-100k; do
-  for p in serenedb-hnsw qdrant-hnsw elasticsearch-hnsw opensearch-hnsw; do
-    run "$p" "$d"
-  done
-  say "=== $d done"
+  for p in $HNSW; do run "$p" "$d"; done
+  say "=== $d hnsw done"
 done
 
-# 4. IVF coverage at the sizes already prepared.
 for d in sift-128-100k wiki-v3-1024-100k sift-128-1m wiki-v3-1024-1m; do
   run serenedb-ivf "$d"
 done
 say "=== ivf small done"
 
-# 5. The missing size. sift at ten million is a 1.3 GB range download and a cheap ground truth;
-# wiki is 40 GB and hours of exact search, so it comes last and only if sift got through.
 prepare() {
   clear_containers
   .venv/bin/python -m vectorbench.cli prepare --dataset "$1" > "$L/prepare_$1.log" 2>&1
@@ -70,19 +52,32 @@ prepare() {
   return $rc
 }
 
-if prepare sift-128-10m; then
-  for p in serenedb-hnsw qdrant-hnsw elasticsearch-hnsw opensearch-hnsw serenedb-ivf; do
-    run "$p" sift-128-10m
-  done
-  say "=== sift-128-10m done"
-fi
+# Ten million, unfiltered first. The full row set there is about fifteen hours of measurement across
+# five participants and two families, and the unfiltered rows are both the headline and a tenth of
+# the work, so they land first and the filtered rows follow. A run without --index reuses the index
+# the unfiltered pass built, so the second phase pays no load time.
+UNFILTERED='none/10,none/100,none/1000,exact/none/10'
 
-if prepare wiki-v3-1024-10m; then
-  for p in serenedb-hnsw qdrant-hnsw elasticsearch-hnsw opensearch-hnsw serenedb-ivf; do
-    run "$p" wiki-v3-1024-10m
-  done
-  say "=== wiki-v3-1024-10m done"
-fi
+run_groups() {  # run_groups <participant> <dataset> <groups> [--index]
+  clear_containers
+  if [ "$1" = serenedb-hnsw ] || [ "$1" = serenedb-ivf ]; then export VB_BINARY=$B; else unset VB_BINARY; fi
+  local tag=$4
+  .venv/bin/python -m vectorbench.cli run --participant "$1" --dataset "$2" ${4:+--index} \
+    --groups "$3" --clients 32 --query-limit 1000 --passes 1 --deadline 6 --budget 6 \
+    --min-queries 500 --load-timeout 7200 > "$L/p2_$1_$2${tag:+_idx}.log" 2>&1
+  say "$1 $2 groups=${3%%,*}... exit $?"
+}
+
+for d in sift-128-10m wiki-v3-1024-10m; do
+  prepare "$d" || continue
+  for p in $HNSW serenedb-ivf; do run_groups "$p" "$d" "$UNFILTERED" index; done
+  say "=== $d unfiltered done"
+done
+for d in sift-128-10m wiki-v3-1024-10m; do
+  [ -d "$VECTORBENCH_DATA_DIR/$d" ] || continue
+  for p in $HNSW serenedb-ivf; do run_groups "$p" "$d" 'eq-10/*,eq-1/*,eq-0.1/*,range-10/*,range-1/*,and-1/*,corr/*,xcorr/*,lang/*,xlang/*,exact/eq-1/10'; done
+  say "=== $d filtered done"
+done
 
 clear_containers
-say RERUN_DONE
+say PASS2_DONE
