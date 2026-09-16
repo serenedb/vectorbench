@@ -6,7 +6,9 @@ import json
 import logging
 import os
 import re
+import signal
 import subprocess
+import threading
 import time
 from dataclasses import dataclass
 from pathlib import Path
@@ -20,6 +22,16 @@ log = logging.getLogger(__name__)
 
 SCRIPTS = ("install", "start", "stop", "check", "load", "data-size", "version")
 TAG_RE = re.compile(r"^VECTORBENCH_(PHASES|INFO)=(.*)$", re.M)
+
+
+class LoadTimeout(RuntimeError):
+    """A load recipe that passed its wall-clock budget. Carries the budget and the last output, so
+    the run can publish an honest `load_aborted` record instead of nothing at all."""
+
+    def __init__(self, message: str, budget: float, tail: str):
+        super().__init__(message)
+        self.budget = budget
+        self.tail = tail
 
 
 @dataclass
@@ -112,15 +124,45 @@ class Participant:
     def install(self, env: dict[str, str]) -> None:
         self.run("install", env, timeout=3600, capture=False)
 
-    def load(self, env: dict[str, str], timeout: float = 7 * 24 * 3600) -> LoadResult:
+    def load(self, env: dict[str, str], timeout: float | None = None) -> LoadResult:
+        """Run the participant's load recipe, optionally under a wall-clock budget.
+
+        The budget is enforced by a watchdog rather than by `proc.wait`, because the output is
+        drained first and a load that hangs never reaches the wait at all. The recipe runs in its
+        own session so the whole tree goes down, not just the shell that spawned it.
+        """
         t0 = time.perf_counter()
-        proc = subprocess.Popen([str(self.dir / "load")], cwd=self.dir, env=env, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
+        proc = subprocess.Popen([str(self.dir / "load")], cwd=self.dir, env=env,
+                                stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True,
+                                start_new_session=True)
+        expired = threading.Event()
+
+        def give_up() -> None:
+            expired.set()
+            try:
+                os.killpg(os.getpgid(proc.pid), signal.SIGKILL)
+            except (ProcessLookupError, PermissionError):
+                proc.kill()
+
+        watchdog = threading.Timer(timeout, give_up) if timeout else None
+        if watchdog is not None:
+            watchdog.daemon = True
+            watchdog.start()
         lines: list[str] = []
         assert proc.stdout is not None
-        for line in proc.stdout:
-            lines.append(line.rstrip("\n"))
-            log.info("[load] %s", line.rstrip("\n"))
-        rc = proc.wait(timeout=timeout)
+        try:
+            for line in proc.stdout:
+                lines.append(line.rstrip("\n"))
+                log.info("[load] %s", line.rstrip("\n"))
+            rc = proc.wait()
+        finally:
+            if watchdog is not None:
+                watchdog.cancel()
+        if expired.is_set():
+            raise LoadTimeout(
+                f"{self.id}: loading {env.get('VECTORBENCH_DATASET', 'the dataset')} passed the "
+                f"{timeout:.0f}s budget and was stopped", timeout,
+                "\n".join(lines[-40:]))
         seconds = time.perf_counter() - t0
         out = "\n".join(lines)
         if rc != 0:

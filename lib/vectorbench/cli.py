@@ -71,6 +71,7 @@ def cmd_run(args: argparse.Namespace) -> int:
         min_queries=args.min_queries,
         total_budget_s=args.budget,
         query_limit=args.query_limit,
+        load_timeout_s=args.load_timeout or None,
         dry_run=args.dry_run,
     )
     r = Runner(p, fam, size, opts)
@@ -186,6 +187,9 @@ def build_parser() -> argparse.ArgumentParser:
     s.add_argument("--min-queries", type=int, default=2000)
     s.add_argument("--budget", type=float, default=60.0, help="seconds per point across passes")
     s.add_argument("--query-limit", type=int, help="use only the first N queries (development)")
+    s.add_argument("--load-timeout", type=float, default=0.0,
+                   help="seconds the load recipe may take before the run is abandoned and published "
+                        "as load_aborted; 0 means no budget")
     s.add_argument("--dry-run", action="store_true")
     s.set_defaults(fn=cmd_run)
 

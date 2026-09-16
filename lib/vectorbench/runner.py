@@ -14,7 +14,7 @@ import numpy as np
 import pyarrow.parquet as pq
 
 from . import __version__, attributes, metrics
-from .engine import Participant
+from .engine import LoadTimeout, Participant
 from .families import Family, Group
 from .prepare import dataset_dir, load_manifest
 from .queries import knob_names, ladder_for, ladder_points, load_blocks, resolve_block, resolve_settings, substitute_index, substitute_knobs
@@ -48,6 +48,10 @@ class RunOptions:
     min_queries: int = PASS_MIN_QUERIES
     total_budget_s: float = TOTAL_BUDGET_S
     query_limit: int | None = None  # use only the first N queries (development)
+    # Wall-clock budget for the load recipe. A dataset that cannot be built inside it is published
+    # as `load_aborted` rather than silently holding the machine for hours: at the largest sizes an
+    # engine that takes a day to index has answered the question already.
+    load_timeout_s: float | None = None
     dry_run: bool = False
 
 
@@ -203,7 +207,7 @@ class Runner:
         log.info("start %s", self.p.id)
         self.p.start(self.env)
         log.info("load %s into %s", self.dataset, self.p.id)
-        lr = self.p.load(self.env)
+        lr = self.p.load(self.env, timeout=self.opts.load_timeout_s)
         mem = self.p.memory_peak(self.env)
         size = self.p.data_size(self.env)
         version = self.p.version(self.env)
@@ -336,7 +340,15 @@ class Runner:
     def run(self) -> Path:
         rf = ResultFile(self.p.result_path(self.dataset, self.opts.label), self.header())
         if self.opts.index:
-            self.do_load(rf)
+            try:
+                self.do_load(rf)
+            except LoadTimeout as e:
+                # An honest record beats an absent one: the page shows the participant could not
+                # build this dataset inside the budget, which is a result about the engine.
+                log.error("%s", e)
+                rf.set(load_aborted={"budget_s": e.budget, "tail": e.tail})
+                self.p.stop(self.env)
+                return rf.finish()
         else:
             self.apply_load_record(rf)
         startups: list[float] = []

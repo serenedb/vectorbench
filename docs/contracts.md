@@ -350,3 +350,16 @@ A row falls into one of five buckets:
 `unreadable` is reported separately from `loss` on purpose. A participant whose ladder stops short
 of the bar has not lost a race, it has failed to enter one, and the fix is its ladder or its build
 rather than its speed.
+
+## 15. Load budget
+
+`vectorbench run --load-timeout <seconds>` puts a wall-clock budget on the load recipe. A recipe
+that passes it is stopped, together with its whole process tree, and the run is published with a
+`load_aborted` record naming the budget and the last of the recipe's output. That is a result about
+the engine, not a missing cell: at the largest sizes an engine that cannot build the index in a
+working day has answered the question.
+
+The budget is enforced by a watchdog, not by waiting on the process with a timeout. The recipe's
+output is drained first, so a recipe that hangs, or one that prints progress forever, never reaches
+such a wait at all. `tests/test_load_budget.py` covers both shapes and checks that a grandchild of
+the recipe does not outlive it.
