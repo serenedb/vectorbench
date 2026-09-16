@@ -88,6 +88,12 @@ def load_dataset_results(dataset: str, root: Path = REPO_ROOT,
         if doc.get("dataset") != dataset:
             continue
         pid = str(doc.get("participant") or p.parent.parent.name)
+        # `--label` is for side-by-side builds of one participant, so a labelled result is its own
+        # column and must not stand in for the unlabelled one. An abandoned labelled partial was
+        # doing exactly that: shadowing a finished run with a tenth of its groups.
+        label = doc.get("label")
+        if label:
+            pid = f"{pid}:{label}"
         if partial:
             doc = dict(doc, __partial__=True)
         elif out.get(pid, {}).get("__partial__"):

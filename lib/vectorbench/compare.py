@@ -124,6 +124,8 @@ class Summary:
     them: str
     builds: dict[str, Build] = field(default_factory=dict)
     partial: dict[str, bool] = field(default_factory=dict)
+    # participant -> the budget it passed, when it never finished building the index
+    aborted: dict[str, float] = field(default_factory=dict)
     build_mismatch: list[str] = field(default_factory=list)
     rows: list[Row] = field(default_factory=list)
 
@@ -147,6 +149,8 @@ def compare(dataset: str, us: str, them: str, root: Path = REPO_ROOT,
     out = Summary(dataset, us, them)
     out.builds = {p: read_build(docs[p]) for p in (us, them)}
     out.partial = {p: bool(docs[p].get("__partial__")) for p in (us, them)}
+    out.aborted = {p: float((docs[p].get("load_aborted") or {}).get("budget_s") or 0)
+                   for p in (us, them) if docs[p].get("load_aborted")}
     out.build_mismatch = out.builds[us].differs_from(out.builds[them])
     for q in fam.queries_for(size):
         if section == "unfiltered" and q.filter != "none":
@@ -168,6 +172,9 @@ def render(s: Summary, verbose: bool = False) -> str:
     marks = {who: " (RUN IN PROGRESS)" if s.partial.get(who) else "" for who in (s.us, s.them)}
     lines = [f"{s.dataset}: {s.us}{marks[s.us]} vs {s.them}{marks[s.them]}   "
              f"(ratio above 1 means {s.us} is ahead)"]
+    for who, budget in s.aborted.items():
+        lines.append(f"  !! {who} never finished building this index inside {budget:.0f}s, so every "
+                     f"row below is unanswered for it, which is a result about the engine")
     if s.build_mismatch:
         lines.append("  !! BUILD MISMATCH: " + "; ".join(s.build_mismatch) +
                      " -- the numbers below compare two different indexes")
