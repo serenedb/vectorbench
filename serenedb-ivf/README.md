@@ -55,9 +55,8 @@ Phases reported: `ddl`, `ingest`, `compaction`. Info reported: rows, segments, f
   scoring its rows directly, otherwise the graph walk scores every neighbour and admits only rows the
   bitset passes. `scan`, `walk`, `prune` and `twohop` force one path.
 - A numeric range whose finest trie level would expand to more than 1024 terms is left to the
-  column filter (`Column Filter:` in EXPLAIN) instead of a granular-range term union. Such a column
-  is decoded once per segment into a plain array (`sdb_column_cache_mb`, default 1 GiB), so the
-  predicate is one compare per row.
+  column filter (`Column Filter:` in EXPLAIN) instead of a granular-range term union. The predicate
+  is then evaluated by the columnstore as the filter bitset fills, once per row per query.
 - The shipped docs lag the code: the GUC is `sdb_ivf_search_nprobe` (not `sdb_nprobe`), and there is
   no `nlist` option; cluster count follows from `posting_size`.
 
