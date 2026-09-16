@@ -15,6 +15,7 @@ column is a reason a measured difference is not an implementation difference.
 | Linking range | `min(point_level, entry_level) ..= 0` | `min(top, entry_top) .. 0` |
 | Descent | greedy beam-1, all links each round, move on strictly better | same, plus a visited set (see note) |
 | Level-0 beam | pop best, stop on `score < worst_of_beam`, admit into a fixed-ef queue, push to the frontier only what was admitted | same; our `size() >= ef &&` guard is implied by theirs, since nothing is evicted before the beam is full |
+| Admission tie | `FixedLengthPriorityQueue::push` rejects when `worst >= value`, and `ScoredPointOffset`'s `Ord` is the score alone | `cand.score <= nearest.front().score` rejects; the same rule |
 | Neighbour count fed to the scorer | `limit = level_m(level)`, a no-op for plain HNSW | no truncation, same result |
 | Selection | "not closer than base", best-first, stop at `level_m` | same |
 | Backlink pruning | append to a free slot, else re-run the heuristic over existing + new | same |
@@ -41,16 +42,28 @@ The reverse link's sort is now stable for the same reason: the links a previous
 heuristic kept arrive in its order, and a score tie must not reshuffle them or the
 pairs it already cleared stop lining up with the both-processed skip.
 
-**2. Rescore pool vs beam — fixed, and it was backwards.** Qdrant has two knobs:
-`quantization.oversampling` sizes a pool of `oversampling * k`, and the beam is then
-*widened* to hold it (`ef = max(hnsw_ef, pool)`); `quantization.rescore` says whether
-that pool is read back at full precision, and defaults to **false** for scalar
-quantization and true for binary. Ours capped the pool at the beam, which collapses
-the two knobs into one: asking to re-score 400 of a beam of 100 re-scored 100, so the
-recall the oversample was asked for never arrived. Now a pool wider than the beam
-raises `min_ef`, matching Qdrant exactly, and a new `sdb_hnsw_rescore` boolean
-expresses their `rescore`. The mapping is now total in both directions — their
-"re-score the whole beam" is our factor of 0 and is their `oversampling = ef/k`.
+**2. Rescore pool vs beam — fixed, and it was backwards.** All three engines agree on
+this and we were the odd one out. Qdrant: `oversampled_top = oversampling * k`, then
+`ef = max(hnsw_ef, oversampled_top)`. Elasticsearch, in `DenseVectorFieldMapper`:
+`adjustedK = min(ceil(k * oversample), 10000)`, `numCands = max(adjustedK, numCands)`.
+Ours *capped* the pool at the beam, which collapses two knobs into one: asking to
+re-score 400 of a beam of 100 re-scored 100, and the recall the oversample was asked
+for never arrived.
+
+`sdb_hnsw_rerank_factor` now means what their knob means, including the `0`:
+Elasticsearch accepts "greater than 1 or exactly 0" and reads 0 as no rescore, and
+Qdrant says the same thing with `quantization.rescore: false`. The default is 3, which
+is Elasticsearch's `DEFAULT_OVERSAMPLE`. What this replaced — a pool of the whole beam
+— is still expressible as `ef/k`, and is not a default any of the three keeps.
+
+Measured on sift-128-100k at k=10, m=16, ef_construction=128, sq8: factor 0 plateaus at
+0.9904 however wide the beam (the codes' own ceiling, and where Qdrant's scalar default
+sits); factor 1 reads the same, because re-scoring the top ten re-orders them but
+cannot change which ten they are; factor 3 reaches 1.0000 at ef 1024. Before the fix,
+factor 4 at ef 16 read 0.8717 against factor 1's 0.8683 — the beam was never widened,
+so the oversample did almost nothing. After it, factor 4 reads the same 0.9666 at every
+ef from 16 to 40, because all of them floor the beam at forty and all of them are
+therefore the same search.
 
 **3. Entry point: global maximum from the start vs running maximum — kept, ours.**
 Qdrant assigns a level as each point arrives and keeps whichever point has the
@@ -92,7 +105,27 @@ filtered comparison is between strategies rather than implementations.
   the filter — with no passing entry it returns nothing. We always start from the
   single global entry.
 
-## Not read, still open
+## Lucene, for the Elasticsearch rows
 
-Lucene/Elasticsearch's graph and its `rescore_vector.oversample` path, to the same
-depth. Until then the same caveat applies to any Elasticsearch row.
+Read at `lucene/core/src/java/org/apache/lucene/util/hnsw/`. Same algorithm, three
+differences worth knowing before reading an Elasticsearch row.
+
+- **Level sample.** `ml = 1/ln(M)` and `level = (int)(-log(u) * ml)` — truncated, where
+  Qdrant and we round. Lucene's levels are therefore lower on average for the same `M`,
+  which is a slightly flatter graph, not a worse one. `M` is the upper-level width and
+  level 0 gets `M * 2`, same split as the other two, and Elasticsearch's `m` is Lucene's
+  `maxConn` directly, so `m: 16` means the same thing in all three.
+- **Diversity.** `diversityCheck` drops a candidate when `bulkScore(...) >= score` —
+  non-strict always, where Qdrant is non-strict only between exact ties and we now match
+  Qdrant. On data without duplicates the three coincide; on duplicates Lucene and Qdrant
+  both avoid the sink and, before this work, we did not.
+- **The filtered walk is ours.** `searchLevel` adds a neighbour to `candidates` on score
+  alone and to `results` only when `acceptOrds` passes it — it walks *through* rejected
+  nodes rather than discarding them. That is our `through` mode, which we had taken for
+  a SereneDB invention; Qdrant is the one doing something different, discarding in its
+  plain path and bridging in ACORN-1.
+
+Confirmed identical: the beam's admission tie (`score >= nextUp(minCompetitive)` is
+`score > worst`, the same rule as the other two), the batch short-circuit (`bulkScore`
+max against `minCompetitive` cannot admit anything the per-node test would not), and
+marking visited at collection time, which is what we do and Qdrant does not.

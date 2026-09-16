@@ -31,12 +31,13 @@ defaults:
   # ef is the search beam and also the result ceiling (floored at k by SereneDB).
   #
   # rerank sizes the pool re-scored at full precision, as a multiple of k, and is the same knob as the
-  # Qdrant participant's `oversample`: the graph is walked on quantized codes and ceil(rerank * k) of
-  # the beam's hits are read back exactly, with the beam widened to hold the pool when the pool is the
-  # wider of the two. Both participants sweep 1 and 4, so neither engine reaches a recall by a route
-  # the other was not offered -- which was the whole complaint about sweeping our beam against their
-  # oversample. SereneDB can also re-score the whole beam (rerank 0), which Qdrant can only spell as
-  # oversampling = ef/k; it is left out because Qdrant's ladder does not sweep its equivalent.
+  # Qdrant participant's `oversample` and Elasticsearch's rescore_vector.oversample: the graph is
+  # walked on quantized codes and ceil(rerank * k) of the beam's hits are read back exactly, with the
+  # beam widened to hold the pool when the pool is the wider of the two. Both participants sweep 1 and
+  # 4, so neither engine reaches a recall by a route the other was not offered -- which was the whole
+  # complaint about sweeping our beam against their oversample. 1 re-orders the top k and so cannot
+  # change which k come back; it is measured because Qdrant's ladder measures its equivalent, and
+  # because the read it pays is real even when the recall it buys is not.
   #
   # mode is how a WHERE is honoured (sdb_hnsw_filter_mode): auto scans a selective predicate's rows or
   # walks the graph scoring every neighbour; bridge crosses rejected rows for one hop only, cheaper at

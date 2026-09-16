@@ -2,10 +2,11 @@
 -- setup, run once per point on every connection; the last is the query. {ef} and {rerank} come from
 -- the ladder; $q $k $v $lo $hi $s are bound per query by client.py.
 --
--- {rerank} is the rescore pool as a multiple of k, and is Qdrant's quantization.oversampling: the
--- beam is walked on quantized codes and ceil(rerank * k) of its hits are read back at full
--- precision, with the beam widened to hold the pool when the pool is the wider of the two. Both
--- participants sweep the same two values for it. docs/hnsw-parity.md has the mapping.
+-- {rerank} is the rescore pool as a multiple of k: Qdrant's quantization.oversampling and
+-- Elasticsearch's rescore_vector.oversample. The beam is walked on quantized codes and
+-- ceil(rerank * k) of its hits are read back at full precision, with the beam widened to hold the
+-- pool when the pool is the wider of the two, and 0 answering from the codes alone. All three
+-- engines spell it the same way; docs/hnsw-parity.md has the reading.
 
 -- group: none/*
 SET sdb_hnsw_ef_search = {ef};
