@@ -29,58 +29,59 @@ Two knobs, same meaning for everyone, from `docs/knobs.md`:
 | beam | `num_candidates` | `hnsw_ef` | `sdb_hnsw_ef_search` |
 | rescore pool, as a multiple of k | `rescore_vector.oversample` | `quantization.oversampling` | `sdb_hnsw_rerank_factor` |
 
-The pool knob did not exist on our side until today; the pool was the whole beam, so we could not
-express what the others run. That is now `sdb_hnsw_rerank_factor`, capped by the beam, with 0
-meaning the old behaviour.
+The pool knob did not exist on our side until this week; the pool was the whole beam, so we could
+not express what the others run. `sdb_hnsw_rerank_factor` now means exactly what their knob means,
+0 included -- `docs/hnsw-parity.md` has the reading of all three implementations that established
+it. Both HNSW participants sweep it today, at the same two values.
 
 Everything outside these two is either matched at build time (`m`, `ef_construction`,
 quantization), structurally different and to be stated rather than matched (segment count), or an
 engine's own filtered-search strategy (`acorn`, `visit_percentage`, `sdb_hnsw_filter_mode`), where
 each engine uses its best and the result records which.
 
-## Phase 1: calibrate, once per (dataset, size)
+## Phase 1: where the bars go, from one engine
 
-Per participant, per group.
+Bars are a property of the dataset and the index size, not of a participant, so one engine's sweep
+settles them. Qdrant is the one: it is the closest competitor, its knobs are the shared ones, and
+whatever recall band it can reach is a band the row can meaningfully ask about.
 
 1. **Probe recall, not speed.** Recall needs one pass over the query set and does not care how many
    clients make it, so probes run at full concurrency and cost a fraction of a second where a timed
    point costs five. No timing is kept.
-2. **For each rescore pool in a small set (1, 2, 4, 8), binary-search the beam** over the values the
-   participant declared, by index, so engine constraints hold. About `log2(rungs)` probes per bar,
-   memoised across bars.
-3. Output per (group, bar): every (beam, pool) that reaches it, per plan.
+2. Sweep Qdrant's declared beam rungs against each pool in {1, 2, 4, 8}. That is the curve.
+3. Place **3 to 5 bars** across the reachable band, snapped to readable values (0.8, 0.9, 0.95,
+   0.99, 0.995, 0.999, 0.9999) and spread so no two sit within a hair of each other. A small dataset
+   under a large index lands high, near 0.99 and 0.999, because everything reaches 0.9 there and a
+   0.9 row would separate nobody; a large dataset under a small index lands low, because nobody
+   reaches 0.99 and a 0.99 row would be empty for everyone.
+4. A band too narrow for three bars is reported as a speed comparison at saturation, labelled as
+   such rather than dressed up as a recall comparison.
 
-Roughly 20 recall probes per group, about six seconds.
+## Phase 2: per engine, find the knobs that land on each bar
 
-## Phase 2: choose the bars, once per (dataset, size)
+Still recall only, still free. For each participant and each bar, binary-search the beam by rung
+index (so each engine's own constraints hold -- Qdrant will not search a segment with a beam under
+what it asks of it, ours floors the beam at k) at each pool value, and keep the cheapest setting
+that lands **on** the bar.
 
-From the curves phase 1 produced, across all participants:
+"On the bar" is the goal, not near it. A point that sits exactly on a bar needs no interpolation and
+is the honest answer to "how fast is this engine at this recall". Where a rung ladder cannot hit a
+bar exactly -- and it often cannot, since recall moves in steps -- keep the two rungs that bracket
+it, the last below and the first above.
 
-- Take the recall interval every participant can reach: highest of their minimums to lowest of their
-  maximums.
-- Place **three bars** spread across it, snapped to readable values (0.9, 0.95, 0.99, 0.995, 0.999,
-  0.9999). A small dataset with a large index lands high, near 0.99 and 0.999; a large dataset with
-  a small index lands low.
-- An empty or single-point interval is reported as a speed comparison at saturation, labelled as
-  such rather than dressed up as a recall comparison.
+That is the cost rule: **at most two timed points per engine per bar**, and one wherever the ladder
+hits the bar squarely. Not the twenty to fifty-one this sweeps today, and not one per candidate
+setting either -- the search for the right setting is done in recall probes, which are free.
 
-## Phase 3: measure, every run
+## Phase 3: time the chosen points
 
-For each bar, several (beam, pool) pairs reach it and we want the fastest. Timing is not equally
-expensive in the two views, so:
-
-- **Time every candidate in the throughput view.** At 32 clients a point costs under a second.
-- **Time only the winner in the single-client view.** That view is the whole expense of a run.
-
-Per group: about 12 cheap points and 3 expensive ones, against 20 to 51 expensive ones in each of
-two views today.
+Both views, the same one or two points per bar. Nothing is timed that was not chosen.
 
 | | now | proposed |
 |---|---|---|
-| recall probes | free, but only at timed points | ~20, full concurrency, ~0.3 s |
-| throughput points | 20 to 51 | ~12, under a second each |
-| single-client points | 20 to 51 | 3 |
-| single-client seconds | 60 to 250 | 9 to 15 |
+| recall probes | free, but only at timed points | ~20 per participant, full concurrency, ~0.3 s |
+| timed points per group per view | 20 to 51 | 3 to 10 (1-2 per bar, 3-5 bars) |
+| single-client seconds per group | 60 to 250 | 9 to 30 |
 
 ## Phase 4: re-runs are cheap
 
@@ -112,8 +113,10 @@ That leaves SereneDB HNSW, SereneDB IVF, Qdrant and Elasticsearch.
    user gets. I would calibrate and publish auto only, and keep the forced modes as a labelled
    diagnostic run, rather than letting us pick the best mode per bar when the competitors' equivalent
    is chosen for them internally.
-2. **Which pool values.** 1, 2, 4, 8 covers what Qdrant and Elasticsearch default to. Adding "whole
-   beam" as a fifth is what we did before today and is worth keeping as a reference point.
+2. **Which pool values.** 1, 2, 4, 8 covers what Qdrant and Elasticsearch default to (Elasticsearch
+   defaults to 3). 0 -- answer from the codes, no rescore -- is Qdrant's scalar default and is worth
+   probing as a fifth, because it is the fastest point any engine has and on some shapes it clears a
+   low bar on its own.
 3. **Quantizer range.** Both competitors clip the quantization range by a quantile; we use global
    min and max. That is a build-time difference at the same bit width and it is not currently
    matched. Fixing it is an engine change, not a benchmark one.
