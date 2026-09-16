@@ -297,3 +297,36 @@ family definitions, so the page never reads a family yml itself:
 Sections on the page: a query with `filter == "none"` belongs to NO FILTER, every other query to
 FILTERED. The row for query `q` reads the participant's group `"<filter>/<k>"` (or `"exact/<filter>/<k>"`
 when `recall == "exact"`) for the selected view.
+
+## 13. Recall targets per dataset size
+
+A row's `recall` is the bar its cell is read at, never what is measured, so it can be chosen after
+the run. What is right at one size is wrong at another: a 1% filter over 1M rows leaves ~10K
+matches, where every engine answers k=10 exactly and any bar below 1.0 compares speed only, while
+the same row at 10M separates them. A family file may therefore carry per-size overrides:
+
+```yaml
+recall_by_size:
+  10m:
+    V03: 0.98
+    V11: 0.97
+```
+
+Keys are sizes declared in `sizes`; values are row ids with a recall in (0, 1) or `exact`.
+`Family.queries_for(size)` applies them, and the dataset manifest records the resolved rows.
+
+`vectorbench targets --dataset <id>` proposes the block from the measured frontiers of every
+participant that ran the dataset. Per (group, view) it reads each candidate bar through the
+crossing rule of section 9 and classifies the row:
+
+| verdict | meaning |
+|---|---|
+| `ok` | the declared bar is already the most informative candidate |
+| `replace` | another bar is read by more participants, or crossed rather than merely cleared |
+| `saturated` | every participant's cheapest declared point already clears the bar: a speed-only row |
+| `degenerate` | every participant declines the group at this size, because the median match set is smaller than k |
+| `no_target` | no candidate is readable: a ladder problem, not a target problem |
+
+Rows on the same group are assigned together, so a group sampled by three rows keeps three distinct
+bars instead of collapsing onto one. A `no_target` or `bracket_too_wide` verdict is a coverage
+failure and counts against the participant exactly like a slow cell.

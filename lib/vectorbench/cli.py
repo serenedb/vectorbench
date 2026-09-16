@@ -130,6 +130,14 @@ def cmd_check(args: argparse.Namespace) -> int:
     return run_check(_participant(args), fam, size, _data_dir(args), queries=args.queries, cpuset=args.cpuset or None, memory=args.memory or None)
 
 
+def cmd_targets(args: argparse.Namespace) -> int:
+    from .targets import run as run_targets
+
+    for dataset in args.dataset.split(","):
+        print(run_targets(dataset.strip(), view=args.view, metric=args.metric), end="")
+    return 0
+
+
 def cmd_assemble(args: argparse.Namespace) -> int:
     from .assemble import assemble
 
@@ -184,6 +192,12 @@ def build_parser() -> argparse.ArgumentParser:
     common(s)
     s.add_argument("--queries", type=int, default=200)
     s.set_defaults(fn=cmd_check)
+
+    s = sub.add_parser("targets", help="propose a recall target per row from the measured frontiers")
+    s.add_argument("--dataset", required=True, help="dataset id, or several separated by commas")
+    s.add_argument("--view", default="throughput", choices=["throughput", "latency"])
+    s.add_argument("--metric", default="qps", help="qps, p50, p90, p95 or p99")
+    s.set_defaults(fn=cmd_targets)
 
     s = sub.add_parser("assemble", help="build frontend/results.json from every result file")
     s.add_argument("--out")

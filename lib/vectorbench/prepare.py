@@ -413,7 +413,8 @@ class Preparer:
             "attributes": BASE_COLUMNS[2:],
             "filter_cases": self.family.filter_cases,
             "groundtruth": gt_summary,
-            "queries": [{"id": q.id, "filter": q.filter, "k": q.k, "recall": q.recall} for q in self.family.queries],
+            "queries": [{"id": q.id, "filter": q.filter, "k": q.k, "recall": q.recall}
+                        for q in self.family.queries_for(self.size)],
             "created": dt.datetime.now(dt.UTC).isoformat(timespec="seconds"),
             "tool_version": __version__,
         }

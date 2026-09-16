@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import re
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 from pathlib import Path
 from typing import Any
 
@@ -63,6 +63,8 @@ class Family:
     cluster_train_rows: int
     filter_cases: dict[str, dict[str, Any]]
     queries: list[QueryRow]
+    # size -> query id -> recall, overriding the row's own target for that dataset size.
+    recall_by_size: dict[str, dict[str, float | str]] = field(default_factory=dict)
     path: Path | None = None
     extra: dict[str, Any] = field(default_factory=dict)
 
@@ -73,6 +75,18 @@ class Family:
 
     def rows(self, size: str) -> int:
         return self.sizes[size]
+
+    def queries_for(self, size: str) -> list[QueryRow]:
+        """Rows with this size's recall targets applied.
+
+        A target that is trivially met by the cheapest ladder point, or that no participant can
+        reach, measures nothing; `recall_by_size` lets a family carry a different target per
+        dataset size without duplicating the row list. See `vectorbench targets`.
+        """
+        over = self.recall_by_size.get(size) or {}
+        if not over:
+            return list(self.queries)
+        return [replace(q, recall=over[q.id]) if q.id in over else q for q in self.queries]
 
     def groups(self) -> list[Group]:
         """Distinct groups in query-list order."""
@@ -102,6 +116,7 @@ class Family:
             "queries": [
                 {"id": q.id, "filter": q.filter, "k": q.k, "recall": q.recall} for q in self.queries
             ],
+            "recall_by_size": {s: dict(o) for s, o in self.recall_by_size.items()},
         }
 
 
@@ -130,9 +145,22 @@ def load_family_file(path: Path) -> Family:
         if filt not in raw["filter_cases"]:
             raise ValueError(f"{path}: query {qid} uses unknown filter case {filt!r}")
         queries.append(QueryRow(qid, filt, int(q["k"]), _parse_recall(q["recall"], qid)))
+    by_size: dict[str, dict[str, float | str]] = {}
+    for size, over in (raw.get("recall_by_size") or {}).items():
+        size = str(size)
+        if size not in raw["sizes"]:
+            raise ValueError(f"{path}: recall_by_size names unknown size {size!r}")
+        out: dict[str, float | str] = {}
+        for qid, value in (over or {}).items():
+            qid = str(qid)
+            if qid not in ids:
+                raise ValueError(f"{path}: recall_by_size[{size}] names unknown query {qid!r}")
+            out[qid] = _parse_recall(value, qid)
+        by_size[size] = out
     known = {
         "family", "title", "description", "dims", "metric", "source", "sizes", "queries_count",
         "gt_depth", "shard_rows", "cluster_k", "cluster_train_rows", "filter_cases", "queries",
+        "recall_by_size",
     }
     fam = Family(
         name=str(raw["family"]),
@@ -149,6 +177,7 @@ def load_family_file(path: Path) -> Family:
         cluster_train_rows=int(raw.get("cluster_train_rows", 1000000)),
         filter_cases={str(k): dict(v or {}) for k, v in raw["filter_cases"].items()},
         queries=queries,
+        recall_by_size=by_size,
         path=path,
         extra={k: v for k, v in raw.items() if k not in known},
     )
