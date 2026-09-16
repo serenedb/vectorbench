@@ -45,6 +45,7 @@ class Client:
         self.host = str(cfg.get("host", "127.0.0.1"))
         self.port = int(cfg.get("port", 9200))
         self.timeout = int(cfg.get("timeout", 600))
+        self.metric = str(cfg.get("metric", "ip")).lower()
         self.conn: http.client.HTTPConnection | None = None
 
     def connect(self) -> None:
@@ -73,7 +74,7 @@ class Client:
                 "size": k, "_source": False, "track_total_hits": False,
                 "query": {"script_score": {
                     "query": inner,
-                    "script": {"source": self.cfg["exact_script"], "params": {"q": query}},
+                    "script": {"source": self._exact_script(), "params": {"q": query}},
                 }},
             }
         knn: dict[str, Any] = {"field": "emb", "query_vector": query, "k": k}
@@ -84,6 +85,18 @@ class Client:
         if flt is not None:
             knn["filter"] = flt
         return {"size": k, "_source": False, "track_total_hits": False, "knn": knn}
+
+    def _exact_script(self) -> str:
+        """Painless for a brute-force score, per metric.
+
+        script_score wants higher to be better, so the l2 form inverts the distance. Getting this
+        wrong does not fail: it silently ranks by the other metric and the exact rows come back
+        with the wrong neighbours, which is why it follows the dataset rather than a settings key.
+        """
+        if self.metric == "l2":
+            return "1 / (1 + l2norm(params.q, 'emb'))"
+        # max_inner_product can be negative, and a script_score may not return a negative score.
+        return "double v = dotProduct(params.q, 'emb'); return v < 0 ? 1 / (1 - v) : v + 1;"
 
     def _post(self, path: str, body: dict[str, Any]) -> dict[str, Any]:
         assert self.conn is not None, "connect() first"

@@ -45,7 +45,9 @@ class Client:
         self.host = str(cfg.get("host", "127.0.0.1"))
         self.port = int(cfg.get("port", 9200))
         self.timeout = int(cfg.get("timeout", 600))
-        self.space = str(cfg.get("exact_space", "l2"))
+        # The plugin scores knn_score in the space the field was built with; taking it from the
+        # dataset rather than from a settings key keeps the exact rows honest on both families.
+        self.space = "l2" if str(cfg.get("metric", "ip")).lower() == "l2" else "innerproduct"
         self.conn: http.client.HTTPConnection | None = None
 
     def connect(self) -> None:

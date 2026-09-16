@@ -17,8 +17,6 @@ connection:
   port: 9200
   index_name: items
   timeout: 600
-  # Exact kNN is the plugin's knn_score script over the same filter; space_type is filled by load.
-  exact_space: l2
 
 # The k-NN plugin names its own query in the profile output. A filtered query that silently fell
 # back to a full scan, or an exact row that quietly used the graph, would not carry the same name.

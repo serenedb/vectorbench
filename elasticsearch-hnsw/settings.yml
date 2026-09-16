@@ -17,8 +17,6 @@ connection:
   port: 9200
   index_name: items
   timeout: 600
-  # Exact kNN is a script_score over the same filter; the script is per metric, filled by load.
-  exact_script: "double v = dotProduct(params.q, 'emb'); return v < 0 ? 1 / (1 - v) : v + 1;"
 
 # The query the driver checks once per group. Lucene names its kNN query in the profile output;
 # a filtered query that silently fell back to a full scan would not carry it.
