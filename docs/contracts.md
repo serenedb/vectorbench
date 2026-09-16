@@ -411,3 +411,17 @@ a hundred queries per client does not get it there: Elasticsearch's first points
 back between 2700 and 13600 queries per second at neighbouring ladder values, with p99 swinging
 from 5 to 70 milliseconds. The settle applies to every participant, because the protocol has to be
 the same for all of them, and it costs about three seconds per group.
+
+`--startup-samples <n>` bounds how many group-views begin with that restart. Sampling startup once
+per group is both more than a distribution needs and a third of the run: measured on Elasticsearch
+at a million rows, 44 restarts cost 28 seconds each against 1258 seconds of actual measurement, and
+for a JVM it also meant every group was timed from cold. After the sample is taken the engine stays
+up. The per-point warmup shrinks to a tenth after the first point of a group for the same reason:
+the engine does not change between points, only the search parameters do, and a full warmup of a
+hundred queries per client is ten seconds on a group running at three hundred queries per second.
+
+Two consequences worth stating. Groups after the sample are measured warm, which is closer to a
+deployment than a cold start is, but it does mean group order matters slightly; it is identical for
+every participant. And `memory_peak` becomes the peak since the engine came up rather than the peak
+for that group, which makes it a better number for comparing engines and a worse one for
+attributing memory to a shape.

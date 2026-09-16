@@ -1,0 +1,51 @@
+{
+ "dataset": "sift-128-1m",
+ "participant": "opensearch-hnsw",
+ "load_time": 468.83753166600945,
+ "load_phases": {
+  "ingest": 442.672,
+  "index": 25.982
+ },
+ "disk_bytes": 1369658407,
+ "disk_info": {
+  "segments": 3,
+  "index_bytes": 1157045222,
+  "index": {
+   "engine": "lucene",
+   "m": 16,
+   "ef_construction": 128,
+   "shards": 1,
+   "compression_level": "4x"
+  },
+  "mapping_variant": "lucene-4x",
+  "field": {
+   "type": "knn_vector",
+   "dimension": 128,
+   "method": {
+    "engine": "lucene",
+    "space_type": "l2",
+    "name": "hnsw",
+    "parameters": {
+     "ef_construction": 128,
+     "m": 16
+    }
+   },
+   "compression_level": "4x",
+   "space_type": "l2"
+  }
+ },
+ "memory_peak_load": 38566449152,
+ "version": "3.8.0",
+ "date": "2026-09-16",
+ "index": {
+  "params": {
+   "engine": "lucene",
+   "m": 16,
+   "ef_construction": 128,
+   "shards": 1,
+   "compression_level": "4x",
+   "dims": 128,
+   "metric": "l2"
+  }
+ }
+}

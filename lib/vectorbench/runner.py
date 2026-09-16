@@ -63,6 +63,12 @@ class RunOptions:
     # would be measured partly on interpreted code. Applied to every participant, because the
     # protocol has to be the same for all of them.
     settle_s: float = 3.0
+    # How many group-views begin with a stop and a start. The restart exists to sample startup, and
+    # sampling it once per group is both far more than a distribution needs and a third of the run:
+    # measured on Elasticsearch at a million rows, 44 restarts cost 28 seconds each against 1258
+    # seconds of actual measurement. After the sample is taken the engine stays up, which also means
+    # every group after the first is measured warm rather than paying a cold start no deployment has.
+    startup_samples: int = 5
     dry_run: bool = False
 
 
@@ -280,11 +286,12 @@ class Runner:
         if missing:
             rf.upsert_group({**base, "status": "error", "reason": f"block uses knobs {sorted(missing)} that the ladder does not define"})
             return
-        # restart: startup sample
-        log.info("[%s %s] restart", view, g.key)
-        self.p.stop(self.env)
-        startup = self.p.start(self.env)
-        startups.append(startup)
+        # A stop and a start, while the startup sample is still being collected.
+        if len(startups) < self.opts.startup_samples:
+            log.info("[%s %s] restart", view, g.key)
+            self.p.stop(self.env)
+            startups.append(self.p.start(self.env))
+        startup = startups[-1] if startups else 0.0
         gt = self.gt.case(g.filter)
         args = self.gt.per_query_args(g.filter, self.nq)
         pool = WorkerPool(clients, self.p.dir / "client.py", self.p.connection(self.family, self.dataset, self.index_settings), self.dsdir / "queries.parquet", self.family.dims, self.client_cpus, nq_limit=self.nq)
@@ -307,7 +314,11 @@ class Runner:
                     pool.run_pass(PassSpec(deadline_s=self.opts.settle_s,
                                            min_queries=min(SETTLE_MIN_QUERIES, self.nq),
                                            collect_ids=False, k=g.k))
-                pool.warmup(self.opts.warmup, g.k)
+                # The engine is warm after the first point of a group; what changes between points
+                # is the search parameters, not the engine, and a full warmup at every point is the
+                # single largest fixed cost on a slow group: a hundred queries per client is 3200
+                # queries, which at 300 queries per second is ten seconds before anything is timed.
+                pool.warmup(self.opts.warmup if li == 0 else max(1, self.opts.warmup // 10), g.k)
                 passes: list[dict[str, Any]] = []
                 first_ids: dict[int, list[int]] | None = None
                 t_budget = time.perf_counter()
