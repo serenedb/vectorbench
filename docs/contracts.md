@@ -338,6 +338,16 @@ Unfinished runs are excluded: choosing a bar is a publishing decision, so only p
 count, unlike `compare`, which reads partials so a run can be watched. A `no_target` or `bracket_too_wide` verdict is a coverage
 failure and counts against the participant exactly like a slow cell.
 
+A bar can land in a gap between two different plans rather than between two rungs of one ladder.
+A participant that offers several ways to answer a filtered query contributes points from all of
+them, and the frontier is over all of them, so between the best point of a cheap-and-approximate
+plan and the cheapest point of an exact one there can be no point at all. On sift at a million rows
+the default bar of 0.95 falls in exactly such a gap for three filtered groups, and all three read
+cleanly at 0.999, where both participants interpolate. That is not a ladder to densify; adding
+points to either plan does not put one in the gap. It is a bar in the wrong place, and it is the
+plainest argument for choosing bars per (dataset, size) rather than declaring three round numbers
+once.
+
 ## 14. Reading a head-to-head
 
 `vectorbench compare --dataset <id> --us <participant> --them <participant>` reads every row of the
