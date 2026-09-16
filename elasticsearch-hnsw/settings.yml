@@ -29,16 +29,16 @@ plan_rules:
 defaults:
   # Matched to the other HNSW participants: m 16, ef_construction 128, scalar 8-bit with reranking.
   # type: hnsw | int8_hnsw | int4_hnsw | bbq_hnsw (Lucene's quantized graph formats).
-  index: {type: int8_hnsw, m: 16, ef_construction: 128, shards: 1, oversample: 3.0}
+  index: {type: int8_hnsw, m: 16, ef_construction: 128, shards: 1}
   # num_candidates is Lucene's beam; it is floored at k, so the k=100 and k=1000 groups need their own.
-  ladder: {num_candidates: [16, 18, 20, 22, 24, 28, 32, 40, 48, 56, 64, 80, 96, 128, 192, 256, 384]}
+  ladder: {num_candidates: [16, 18, 20, 22, 24, 28, 32, 40, 48, 56, 64, 80, 96, 128, 192, 256, 384], oversample: [1.0, 4.0]}
 
 datasets:
   sift-128:
     100k: &small
       groups:
-        "*/100":  &k100  {ladder: {num_candidates: [100, 128, 160, 200, 256, 320, 360, 400, 512, 768]}}
-        "*/1000": &k1000 {ladder: {num_candidates: [1000, 1200, 1500, 2000, 2500, 3000, 4000]}}
+        "*/100":  &k100  {ladder: {num_candidates: [100, 128, 160, 200, 256, 320, 360, 400, 512, 768], oversample: [1.0, 4.0]}}
+        "*/1000": &k1000 {ladder: {num_candidates: [1000, 1200, 1500, 2000, 2500, 3000, 4000], oversample: [1.0, 4.0]}}
     1m:
       groups: {"*/100": *k100, "*/1000": *k1000}
     10m:

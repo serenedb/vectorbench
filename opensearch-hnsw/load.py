@@ -2,7 +2,7 @@
 
 Reads the shards of $VECTORBENCH_DATASET_DIR/base, bulk-indexes them, then refreshes and waits for
 merges to stop moving. Index parameters come from VB_INDEX_<KEY> (settings.yml section 6): engine,
-m, ef_construction, shards, mode, compression_level.
+engine, m, ef_construction, shards, compression_level.
 
 The k-NN plugin has changed how quantization is declared more than once, so the mapping is tried in
 descending order of expressiveness and the first one the server accepts is used. Whatever it built
@@ -53,17 +53,15 @@ class IndexConfig:
     m: int
     ef_construction: int
     shards: int
-    mode: str
     compression_level: str
 
     @staticmethod
     def from_env() -> "IndexConfig":
         return IndexConfig(
-            engine=env_str("VB_INDEX_ENGINE", "faiss").lower(),
+            engine=env_str("VB_INDEX_ENGINE", "lucene").lower(),
             m=env_int("VB_INDEX_M", 16),
             ef_construction=env_int("VB_INDEX_EF_CONSTRUCTION", 128),
             shards=env_int("VB_INDEX_SHARDS", 1),
-            mode=env_str("VB_INDEX_MODE", "in_memory").lower(),
             compression_level=env_str("VB_INDEX_COMPRESSION_LEVEL", "4x").lower(),
         )
 
@@ -106,28 +104,32 @@ def _method(cfg: IndexConfig) -> dict[str, Any]:
 
 
 def mapping_variants(cfg: IndexConfig) -> list[tuple[str, dict[str, Any]]]:
-    """Field mappings to try, most expressive first.
+    """Field mappings to try, the asked-for build first.
 
-    1. mode + compression_level + method: the current way to ask for byte codes and still pin the
-       graph parameters (2.17 and later). This is the one that matches the other participants.
-    2. method with faiss's fp16 encoder: the older syntax, and only 2x compression, so a run that
-       lands here is NOT a matched build. It is offered so a version without (1) still produces a
-       number, and `mapping_variant` in the result file says which one ran.
-    3. method alone: full precision, a different build again, reported the same way.
+    Not every engine takes every compression level in 3.8, and the pairs are not symmetric:
+
+    | compression | bits per dimension | faiss | lucene |
+    |---|---|---|---|
+    | 1x  | 32 (float)  | yes | yes |
+    | 2x  | 16 (fp16)   | yes | no  |
+    | 4x  | 8 (byte)    | no  | yes |
+    | 8x  | 4           | yes | no  |
+    | 16x | 2           | yes | no  |
+    | 32x | 1 (binary)  | yes | yes |
+
+    So eight-bit codes, which is what the other participants build, are reachable only through
+    Lucene here; faiss jumps from sixteen bits to four. The fallback drops the compression rather
+    than the engine, and says so, because a run that silently became full precision is not a
+    matched build and must be visible as such in the result file.
     """
     base = {"type": "knn_vector", "dimension": DIMS, "space_type": space_type()}
-    # compression_level names bits per dimension relative to float32: 4x is one byte.
-    sq_bits = {"4x": 8, "8x": 4, "16x": 2, "32x": 1}.get(cfg.compression_level)
-    out: list[tuple[str, dict[str, Any]]] = [
-        ("mode+compression", base | {"mode": cfg.mode,
-                                     "compression_level": cfg.compression_level,
-                                     "method": _method(cfg)}),
-    ]
-    if sq_bits == 8:
-        m = _method(cfg)
-        m["parameters"] = dict(m["parameters"]) | {"encoder": {"name": "sq", "parameters": {"type": "fp16"}}}
-        out.append(("sq-encoder", base | {"method": m}))
-    out.append(("method-only", base | {"method": _method(cfg)}))
+    method = {"name": "hnsw", "engine": cfg.engine,
+              "parameters": {"m": cfg.m, "ef_construction": cfg.ef_construction}}
+    out: list[tuple[str, dict[str, Any]]] = []
+    if cfg.compression_level and cfg.compression_level != "1x":
+        out.append((f"{cfg.engine}-{cfg.compression_level}",
+                    base | {"compression_level": cfg.compression_level, "method": method}))
+    out.append((f"{cfg.engine}-uncompressed", base | {"method": method}))
     return out
 
 
@@ -153,6 +155,9 @@ def create_index(es: Os, cfg: IndexConfig) -> str:
             errors.append(f"{name}: {out['__error__'][:200]}")
             es.json("DELETE", f"/{INDEX}", allow_fail=True)
             continue
+        if name != mapping_variants(cfg)[0][0]:
+            log(f"WARNING: {mapping_variants(cfg)[0][0]} was refused, falling back to {name}; "
+                f"this is NOT the build that was asked for")
         log(f"index {INDEX}: mapping variant {name!r}, space_type {space_type()}, {cfg.shards} shard(s)")
         return name
     raise SystemExit("no knn_vector mapping was accepted:\n  " + "\n  ".join(errors))

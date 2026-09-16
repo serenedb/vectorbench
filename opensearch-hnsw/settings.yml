@@ -1,9 +1,9 @@
-# OpenSearch participant: faiss HNSW through the k-NN plugin's knn_vector field.
+# OpenSearch participant: HNSW through the k-NN plugin's knn_vector field.
 participant:
   name: OpenSearch HNSW
   system: OpenSearch
   family: hnsw
-  tags: [Java, faiss, OpenSearch]
+  tags: [Java, Lucene, OpenSearch]
 
 env:
   port: 9200
@@ -22,25 +22,28 @@ connection:
 
 # The k-NN plugin names its own query in the profile output. A filtered query that silently fell
 # back to a full scan, or an exact row that quietly used the graph, would not carry the same name.
+# Measured against 3.8: the graph search profiles as LuceneEngineKnnVectorQuery plus
+# OSKnnFloatVectorQuery on the Lucene engine and NativeEngineKnnVectorQuery on faiss, while the
+# exact rows profile as ScriptScoreQuery alone.
 plan_rules:
-  approximate: [[KNNQuery, NativeEngineKnnVectorQuery, KnnFloatVectorQuery]]
-  exact_not: [KNNQuery, NativeEngineKnnVectorQuery, KnnFloatVectorQuery]
+  approximate: [[KnnVectorQuery, KnnFloatVectorQuery, KNNQuery]]
+  exact_not: [KnnVectorQuery, KnnFloatVectorQuery, KNNQuery]
 
 defaults:
-  # Matched to the other HNSW participants: m 16, ef_construction 128, 8-bit codes.
-  # compression_level 4x is the plugin's byte quantization; 8x/16x/32x are 4-, 2- and 1-bit.
-  index: {engine: faiss, m: 16, ef_construction: 128, shards: 1,
-          mode: in_memory, compression_level: 4x}
+  # Matched to the other HNSW participants: m 16, ef_construction 128, 8-bit codes. Eight bits is
+  # `compression_level: 4x`, which in 3.8 only Lucene accepts; faiss goes 16-bit then 4-bit, with no
+  # byte step. The faiss build is run separately, see README.
+  index: {engine: lucene, m: 16, ef_construction: 128, shards: 1, compression_level: 4x}
   # ef_search is faiss's beam. The plugin floors it at k, so the k=100 and k=1000 groups need
   # their own ladders.
-  ladder: {ef_search: [16, 18, 20, 22, 24, 28, 32, 40, 48, 56, 64, 80, 96, 128, 192, 256, 384]}
+  ladder: {ef_search: [16, 18, 20, 22, 24, 28, 32, 40, 48, 56, 64, 80, 96, 128, 192, 256, 384], oversample: [1.0, 4.0]}
 
 datasets:
   sift-128:
     100k: &small
       groups:
-        "*/100":  &k100  {ladder: {ef_search: [100, 128, 160, 200, 256, 320, 360, 400, 512, 768]}}
-        "*/1000": &k1000 {ladder: {ef_search: [1000, 1200, 1500, 2000, 2500, 3000, 4000]}}
+        "*/100":  &k100  {ladder: {ef_search: [100, 128, 160, 200, 256, 320, 360, 400, 512, 768], oversample: [1.0, 4.0]}}
+        "*/1000": &k1000 {ladder: {ef_search: [1000, 1200, 1500, 2000, 2500, 3000, 4000], oversample: [1.0, 4.0]}}
     1m:
       groups: {"*/100": *k100, "*/1000": *k1000}
     10m:

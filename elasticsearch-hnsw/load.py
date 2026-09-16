@@ -2,7 +2,7 @@
 
 Reads the shards of $VECTORBENCH_DATASET_DIR/base, bulk-indexes them, then refreshes and waits for
 merges to stop moving. Index parameters come from VB_INDEX_<KEY> (settings.yml section 6): type, m,
-ef_construction, shards, oversample.
+ef_construction, shards.
 
 Prints the two load tags of docs/contracts.md section 4 on stdout."""
 
@@ -48,7 +48,6 @@ class IndexConfig:
     m: int
     ef_construction: int
     shards: int
-    oversample: float
 
     @staticmethod
     def from_env() -> "IndexConfig":
@@ -57,7 +56,6 @@ class IndexConfig:
             m=env_int("VB_INDEX_M", 16),
             ef_construction=env_int("VB_INDEX_EF_CONSTRUCTION", 128),
             shards=env_int("VB_INDEX_SHARDS", 1),
-            oversample=float(env_str("VB_INDEX_OVERSAMPLE", "3.0")),
         )
 
 

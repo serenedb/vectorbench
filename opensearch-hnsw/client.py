@@ -22,6 +22,7 @@ import numpy as np
 class Handle:
     filter: dict[str, Any] | None  # OpenSearch query object, placeholders left in
     ef_search: int | None
+    oversample: float | None
     exact: bool
 
 
@@ -54,9 +55,11 @@ class Client:
     def prepare_group(self, block: str) -> Handle:
         b = json.loads(block)
         ef = b.get("ef_search")
+        ov = b.get("oversample")
         return Handle(
             filter=b.get("filter"),
             ef_search=int(ef) if ef is not None else None,
+            oversample=float(ov) if ov is not None else None,
             exact=str(b.get("exact", False)).lower() == "true",
         )
 
@@ -77,6 +80,10 @@ class Client:
                 }},
             }
         knn: dict[str, Any] = {"vector": query, "k": k}
+        if handle.oversample is not None:
+            # Without this the search answers from the 8-bit codes alone and recall stops well
+            # short of one however wide the beam is: measured 0.81 against 0.999 with it on.
+            knn["rescore"] = {"oversample_factor": handle.oversample}
         if handle.ef_search is not None:
             # Per-query beam: the plugin floors it at k, and setting it here keeps the index
             # setting out of the measured path.
