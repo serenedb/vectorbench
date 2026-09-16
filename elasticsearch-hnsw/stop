@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+# Graceful stop; returns when the container is gone.
+set -euo pipefail
+: "${VB_CONTAINER:=vectorbench-elasticsearch-hnsw}"
+docker stop --timeout 120 "$VB_CONTAINER" >/dev/null 2>&1 || true

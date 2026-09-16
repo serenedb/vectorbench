@@ -1,0 +1,15 @@
+{
+  "none/*": {"filter": null, "num_candidates": "{num_candidates}"},
+  "eq-10/*": {"filter": {"term": {"cat10": "$v"}}, "num_candidates": "{num_candidates}"},
+  "eq-1/*": {"filter": {"term": {"cat100": "$v"}}, "num_candidates": "{num_candidates}"},
+  "eq-0.1/*": {"filter": {"term": {"cat1000": "$v"}}, "num_candidates": "{num_candidates}"},
+  "range-10/*": {"filter": {"range": {"num": {"gte": "$lo", "lte": "$hi"}}}, "num_candidates": "{num_candidates}"},
+  "range-1/*": {"filter": {"range": {"num": {"gte": "$lo", "lte": "$hi"}}}, "num_candidates": "{num_candidates}"},
+  "and-1/*": {"filter": {"bool": {"filter": [{"term": {"cat10": "$v"}}, {"range": {"num": {"gte": "$lo", "lte": "$hi"}}}]}}, "num_candidates": "{num_candidates}"},
+  "corr/*": {"filter": {"term": {"cluster": "$v"}}, "num_candidates": "{num_candidates}"},
+  "xcorr/*": {"filter": {"term": {"cluster": "$v"}}, "num_candidates": "{num_candidates}"},
+  "lang/*": {"filter": {"term": {"lang": "$s"}}, "num_candidates": "{num_candidates}"},
+  "xlang/*": {"filter": {"term": {"lang": "$s"}}, "num_candidates": "{num_candidates}"},
+  "exact/none/*": {"filter": null, "exact": true},
+  "exact/eq-1/*": {"filter": {"term": {"cat100": "$v"}}, "exact": true}
+}

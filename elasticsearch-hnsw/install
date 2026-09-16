@@ -1,0 +1,45 @@
+#!/usr/bin/env bash
+# One-time setup: have the image present (pull only if the tag is not local), remove any container of
+# this name and wipe the engine directory, so ./load builds from an empty engine (a leftover index
+# would give a bogus instant load time).
+set -euo pipefail
+cd "$(dirname "$0")"
+
+: "${VB_IMAGE:=docker.elastic.co/elasticsearch/elasticsearch:9.5.4}"
+: "${VB_CONTAINER:=vectorbench-elasticsearch-hnsw}"
+: "${VECTORBENCH_ENGINE_DIR:?VECTORBENCH_ENGINE_DIR must be set (the engine storage directory)}"
+
+command -v docker >/dev/null || { echo "docker not on PATH" >&2; exit 1; }
+docker info >/dev/null 2>&1  || { echo "docker daemon not reachable" >&2; exit 1; }
+
+# ./load and client.py run on the host: the same interpreter ./load will use must have the drivers.
+python=${VECTORBENCH_PYTHON:-}
+if [[ -z "$python" ]]; then
+    if [[ -x ../.venv/bin/python ]]; then python=../.venv/bin/python; else python=python3; fi
+fi
+"$python" -c 'import numpy, pyarrow' 2>/dev/null \
+    || { echo "$python lacks numpy or pyarrow (needed by ./load and client.py)" >&2; exit 1; }
+
+echo "Elasticsearch image: $VB_IMAGE"
+if docker image inspect "$VB_IMAGE" >/dev/null 2>&1; then
+    echo "  using local image (not pulling)"
+else
+    docker pull --quiet "$VB_IMAGE" >/dev/null
+fi
+
+docker rm -f "$VB_CONTAINER" >/dev/null 2>&1 || true
+
+# Elasticsearch runs as uid 1000 inside the container and will have written files the host user
+# cannot remove; finish from a throwaway root container of the same image when a plain rm cannot.
+if [[ -e "$VECTORBENCH_ENGINE_DIR" ]]; then
+    rm -rf "$VECTORBENCH_ENGINE_DIR" 2>/dev/null || true
+    if [[ -e "$VECTORBENCH_ENGINE_DIR" ]]; then
+        parent=$(cd "$(dirname "$VECTORBENCH_ENGINE_DIR")" && pwd)
+        docker run --rm --user 0:0 --entrypoint rm -v "${parent}:/w" "$VB_IMAGE" \
+            -rf "/w/$(basename "$VECTORBENCH_ENGINE_DIR")"
+    fi
+fi
+mkdir -p "$VECTORBENCH_ENGINE_DIR"
+# The image's user owns the data directory; give it away rather than running the server as root.
+docker run --rm --user 0:0 --entrypoint chown -v "${VECTORBENCH_ENGINE_DIR}:/usr/share/elasticsearch/data" \
+    "$VB_IMAGE" -R 1000:0 /usr/share/elasticsearch/data

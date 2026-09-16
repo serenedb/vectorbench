@@ -1,0 +1,51 @@
+# Elasticsearch participant: Lucene's HNSW through the dense_vector field.
+participant:
+  name: Elasticsearch HNSW
+  system: Elasticsearch
+  family: hnsw
+  tags: [Java, Lucene, Elasticsearch]
+
+env:
+  port: 9200
+  container: vectorbench-elasticsearch-hnsw
+  image: docker.elastic.co/elasticsearch/elasticsearch:9.5.4
+  heap: 32g            # ES_JAVA_OPTS -Xms/-Xmx; the rest of RAM is Lucene's page cache
+  index_name: items
+
+connection:
+  host: 127.0.0.1
+  port: 9200
+  index_name: items
+  timeout: 600
+  # Exact kNN is a script_score over the same filter; the script is per metric, filled by load.
+  exact_script: "double v = dotProduct(params.q, 'emb'); return v < 0 ? 1 / (1 - v) : v + 1;"
+
+# The query the driver checks once per group. Lucene names its kNN query in the profile output;
+# a filtered query that silently fell back to a full scan would not carry it.
+plan_rules:
+  approximate: [Knn]
+  exact_not: [Knn]
+
+defaults:
+  # Matched to the other HNSW participants: m 16, ef_construction 128, scalar 8-bit with reranking.
+  # type: hnsw | int8_hnsw | int4_hnsw | bbq_hnsw (Lucene's quantized graph formats).
+  index: {type: int8_hnsw, m: 16, ef_construction: 128, shards: 1, oversample: 3.0}
+  # num_candidates is Lucene's beam; it is floored at k, so the k=100 and k=1000 groups need their own.
+  ladder: {num_candidates: [16, 18, 20, 22, 24, 28, 32, 40, 48, 56, 64, 80, 96, 128, 192, 256, 384]}
+
+datasets:
+  sift-128:
+    100k: &small
+      groups:
+        "*/100":  &k100  {ladder: {num_candidates: [100, 128, 160, 200, 256, 320, 360, 400, 512, 768]}}
+        "*/1000": &k1000 {ladder: {num_candidates: [1000, 1200, 1500, 2000, 2500, 3000, 4000]}}
+    1m:
+      groups: {"*/100": *k100, "*/1000": *k1000}
+    10m:
+      groups: {"*/100": *k100, "*/1000": *k1000}
+  wiki-v3-1024:
+    100k: *small
+    1m:
+      groups: {"*/100": *k100, "*/1000": *k1000}
+    10m:
+      groups: {"*/100": *k100, "*/1000": *k1000}

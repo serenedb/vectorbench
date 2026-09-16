@@ -1,0 +1,39 @@
+#!/usr/bin/env bash
+# Start the Elasticsearch container detached and return at once. Readiness is ./check's business: the
+# driver times startup from this call to the first successful ./check, so nothing here may wait.
+set -euo pipefail
+
+: "${VB_PORT:=9200}"
+: "${VB_CONTAINER:=vectorbench-elasticsearch-hnsw}"
+: "${VB_IMAGE:=docker.elastic.co/elasticsearch/elasticsearch:9.5.4}"
+: "${VB_HEAP:=32g}"
+: "${VECTORBENCH_ENGINE_DIR:?VECTORBENCH_ENGINE_DIR must be set (the engine storage directory)}"
+: "${VECTORBENCH_CPUSET:=}"
+: "${VECTORBENCH_MEMORY:=}"
+
+state=$(docker inspect -f '{{.State.Status}}' "$VB_CONTAINER" 2>/dev/null || true)
+case "$state" in
+    running) exit 0 ;;
+    "")      ;;
+    *)       docker start "$VB_CONTAINER" >/dev/null; exit 0 ;;
+esac
+
+limits=()
+[[ -n "$VECTORBENCH_CPUSET" ]] && limits+=(--cpuset-cpus "$VECTORBENCH_CPUSET")
+[[ -n "$VECTORBENCH_MEMORY" ]] && limits+=(--memory "$VECTORBENCH_MEMORY" --memory-swap "$VECTORBENCH_MEMORY")
+
+mkdir -p "$VECTORBENCH_ENGINE_DIR"
+# Host networking like every other participant (no userland proxy on the query path). Security off:
+# this is a loopback benchmark, and TLS plus auth would only add per-query cost.
+docker run -d --name "$VB_CONTAINER" \
+    "${limits[@]}" \
+    --network host \
+    --ulimit memlock=-1:-1 --ulimit nofile=65536:65536 \
+    -v "${VECTORBENCH_ENGINE_DIR}:/usr/share/elasticsearch/data" \
+    -e discovery.type=single-node \
+    -e xpack.security.enabled=false \
+    -e xpack.ml.enabled=false \
+    -e bootstrap.memory_lock=true \
+    -e "http.port=${VB_PORT}" \
+    -e "ES_JAVA_OPTS=-Xms${VB_HEAP} -Xmx${VB_HEAP}" \
+    "$VB_IMAGE" >/dev/null
