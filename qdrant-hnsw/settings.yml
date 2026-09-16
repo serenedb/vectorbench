@@ -20,7 +20,7 @@ defaults:
   # Optional keys: max_segment_size_kb (cap on a segment, README), async_scorer (io_uring rescorer, on_disk only).
   index: {m: 16, ef_construct: 128, quant: sq8, on_disk_vectors: false, on_disk_hnsw: false, segments: 8,
           full_scan_threshold_kb: 10}
-  ladder: {hnsw_ef: [8, 12, 16, 20, 24, 28, 32, 40, 48, 64, 96, 128, 192, 256, 384, 512]}
+  ladder: {hnsw_ef: [8, 12, 16, 20, 24, 28, 32, 40, 48, 64, 96, 128, 192, 256, 384, 512], oversample: [1.0, 4.0]}
 
 # Per size: the default ladder serves k=10; k=100 and k=1000 groups get wider beams because Qdrant never
 # searches a segment with a beam narrower than what it asks that segment for (README, "hnsw_ef and limit").
@@ -29,8 +29,8 @@ datasets:
   wiki-v3-1024:
     100k:
       groups:
-        "none/100":      &w100k_k100  {ladder: {hnsw_ef: [32, 48, 64, 100, 128, 192, 256, 384]}}
-        "none/1000":     &w100k_k1000 {ladder: {hnsw_ef: [128, 256, 512, 1000, 1500, 2000, 3000]}}
+        "none/100":      &w100k_k100  {ladder: {hnsw_ef: [32, 48, 64, 100, 128, 192, 256, 384], oversample: [1.0, 4.0]}}
+        "none/1000":     &w100k_k1000 {ladder: {hnsw_ef: [128, 256, 512, 1000, 1500, 2000, 3000], oversample: [1.0, 4.0]}}
         "eq-10/100": *w100k_k100
         "eq-1/100": *w100k_k100
         "eq-0.1/100": *w100k_k100
@@ -48,10 +48,10 @@ datasets:
         "corr/1000": *w100k_k1000
         "xcorr/1000": *w100k_k1000
     1m:
-      ladder: {hnsw_ef: [12, 16, 20, 24, 28, 32, 40, 48, 64, 96, 128, 192, 256, 384]}
+      ladder: {hnsw_ef: [12, 16, 20, 24, 28, 32, 40, 48, 64, 96, 128, 192, 256, 384], oversample: [1.0, 4.0]}
       groups:
-        "none/100":      &w1m_k100  {ladder: {hnsw_ef: [48, 64, 100, 128, 192, 256, 384, 512]}}
-        "none/1000":     &w1m_k1000 {ladder: {hnsw_ef: [256, 512, 1000, 1500, 2000, 3000, 4000]}}
+        "none/100":      &w1m_k100  {ladder: {hnsw_ef: [48, 64, 100, 128, 192, 256, 384, 512], oversample: [1.0, 4.0]}}
+        "none/1000":     &w1m_k1000 {ladder: {hnsw_ef: [256, 512, 1000, 1500, 2000, 3000, 4000], oversample: [1.0, 4.0]}}
         "eq-10/100": *w1m_k100
         "eq-1/100": *w1m_k100
         "eq-0.1/100": *w1m_k100
@@ -70,10 +70,10 @@ datasets:
         "xcorr/1000": *w1m_k1000
   sift-128:
     100k:
-      ladder: {hnsw_ef: [8, 12, 16, 24, 32, 48, 64, 96, 128]}
+      ladder: {hnsw_ef: [8, 12, 16, 24, 32, 48, 64, 96, 128], oversample: [1.0, 4.0]}
       groups:
-        "none/100":      &s100k_k100  {ladder: {hnsw_ef: [32, 48, 64, 100, 128, 192, 256]}}
-        "none/1000":     &s100k_k1000 {ladder: {hnsw_ef: [128, 256, 512, 1000, 1500, 2000, 3000]}}
+        "none/100":      &s100k_k100  {ladder: {hnsw_ef: [32, 48, 64, 100, 128, 192, 256], oversample: [1.0, 4.0]}}
+        "none/1000":     &s100k_k1000 {ladder: {hnsw_ef: [128, 256, 512, 1000, 1500, 2000, 3000], oversample: [1.0, 4.0]}}
         "eq-10/100": *s100k_k100
         "eq-1/100": *s100k_k100
         "eq-0.1/100": *s100k_k100
@@ -91,10 +91,10 @@ datasets:
         "corr/1000": *s100k_k1000
         "xcorr/1000": *s100k_k1000
     1m:
-      ladder: {hnsw_ef: [12, 16, 24, 32, 48, 64, 96, 128, 192]}
+      ladder: {hnsw_ef: [12, 16, 24, 32, 48, 64, 96, 128, 192], oversample: [1.0, 4.0]}
       groups:
-        "none/100":      &s1m_k100  {ladder: {hnsw_ef: [32, 48, 64, 100, 128, 192, 256, 384]}}
-        "none/1000":     &s1m_k1000 {ladder: {hnsw_ef: [256, 512, 1000, 1500, 2000, 3000, 4000]}}
+        "none/100":      &s1m_k100  {ladder: {hnsw_ef: [32, 48, 64, 100, 128, 192, 256, 384], oversample: [1.0, 4.0]}}
+        "none/1000":     &s1m_k1000 {ladder: {hnsw_ef: [256, 512, 1000, 1500, 2000, 3000, 4000], oversample: [1.0, 4.0]}}
         "eq-10/100": *s1m_k100
         "eq-1/100": *s1m_k100
         "eq-0.1/100": *s1m_k100

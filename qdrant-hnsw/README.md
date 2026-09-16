@@ -101,6 +101,20 @@ One configuration per dataset size (`settings.yml`), the search knob is `hnsw_ef
 | `max_segment_size_kb` | unset | cap on a segment (Qdrant's automatic value depends on the CPU count) |
 | `async_scorer` | false | Qdrant's io_uring rescorer, relevant with `on_disk_vectors` |
 
+## Rescoring the quantized candidates
+
+With `quant: sq8` the graph is searched on 8-bit codes, so the candidate order is the quantized one
+and the answer is capped by how well those codes rank. On sift at a million rows the cap showed
+itself plainly: recall stopped climbing at 0.97 for k=10 and 0.985 for k=1000, and a wider beam made
+it no better, so the 0.99 rows could not be read at all.
+
+Every approximate block therefore asks for `rescore: true` and carries `oversampling` as a second
+ladder knob. Qdrant then takes `limit * oversampling` candidates by quantized score and reorders
+them with the full-precision vectors. The knob is swept like `hnsw_ef`, so the frontier picks
+whichever pool a recall bar wants, rather than the participant guessing one. This matches what the
+other participants do: Elasticsearch declares `rescore_vector.oversample`, and SereneDB reranks its
+beam from the stored vectors.
+
 Ladders: the size's default ladder serves k=10; the k=100 and k=1000 groups have their own, wider
 ladders (YAML anchors, one per size), because Qdrant never searches a segment with a beam narrower than
 the number of results it asks that segment for. wiki-v3-1024 starts at 16 (100k) / 24 (1m), sift-128 at
