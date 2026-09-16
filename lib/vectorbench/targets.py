@@ -130,7 +130,7 @@ def propose(
     family: Family, size: str, root: Path = REPO_ROOT, metric: str = "qps", view: str = "throughput"
 ) -> dict[str, Any]:
     dataset = family.dataset_id(size)
-    docs = load_dataset_results(dataset, root)
+    docs = load_dataset_results(dataset, root, include_partial=False)
     rows = family.queries_for(size)
     out: dict[str, Any] = {
         "dataset": dataset, "participants": sorted(docs), "rows": [], "changed": {}, "skip": [],
@@ -157,11 +157,11 @@ def propose(
 
     for key, qs in by_group.items():
         qs = sorted(qs, key=lambda q: float(q.recall))
-        ranked = sorted(
-            (reading(key, t) for t in CANDIDATES), key=_score, reverse=True
-        )
+        readings = [reading(key, t) for t in CANDIDATES]
+        ranked = sorted(readings, key=_score, reverse=True)
         best = ranked[0]
-        chosen = sorted(r.target for r in ranked[: len(qs)])
+        chosen = _spread(readings, best, len(qs))
+        seen_targets: set[float] = set()
         for q, target in zip(qs, chosen):
             now = reading(key, float(q.recall))
             picked = reading(key, target)
@@ -174,6 +174,9 @@ def propose(
             elif picked.crossed == 0 and verdict == "ok":
                 # Everyone is above: the row still compares speed, at a bar all of them clear.
                 verdict = "saturated"
+            if target in seen_targets:
+                verdict = "redundant"
+            seen_targets.add(target)
             out["rows"].append({
                 "id": q.id,
                 "group": key,
@@ -189,6 +192,32 @@ def propose(
             elif verdict == "degenerate":
                 out["skip"].append(q.id)
     out["rows"].sort(key=lambda r: r["id"])
+    return out
+
+
+def _spread(readings: list[GroupReading], best: GroupReading, n: int) -> list[float]:
+    """`n` bars spread across the window every participant can answer in.
+
+    Rows on one group exist to sample its frontier at an easy, a middling and a hard bar. Taking
+    the `n` highest-scoring candidates would bunch them at the hard end, where a thousandth of
+    recall decides the reading; spreading them over the answerable window keeps the easy bar easy
+    and still puts the hard one where the engines separate.
+    """
+    window = [r.target for r in readings if _score(r)[:2] >= _score(best)[:2]]
+    if not window:
+        window = [best.target]
+    window.sort()
+    if n <= 1:
+        return [window[-1]]
+    if n >= len(window):
+        # Fewer answerable bars than rows: the extra rows repeat the hardest one and are reported
+        # as redundant, because a group that cannot be sampled at n distinct bars at this size is
+        # declaring more rows than the data supports.
+        return window + [window[-1]] * (n - len(window))
+    step = (len(window) - 1) / (n - 1)
+    out = sorted({window[round(i * step)] for i in range(n)})
+    while len(out) < n:
+        out.append(out[-1])
     return out
 
 

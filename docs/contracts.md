@@ -326,9 +326,16 @@ crossing rule of section 9 and classifies the row:
 | `saturated` | every participant's cheapest declared point already clears the bar: a speed-only row |
 | `degenerate` | every participant declines the group at this size, because the median match set is smaller than k |
 | `no_target` | no candidate is readable: a ladder problem, not a target problem |
+| `redundant` | the group's answerable window holds fewer distinct bars than it has rows, so this row repeats another |
 
-Rows on the same group are assigned together, so a group sampled by three rows keeps three distinct
-bars instead of collapsing onto one. A `no_target` or `bracket_too_wide` verdict is a coverage
+Rows on the same group are assigned together and spread across the window every participant can
+answer in, so a group sampled by three rows keeps an easy, a middling and a hard bar rather than
+bunching at the hard end where a thousandth of recall decides the reading. A window narrower than
+the row count produces a `redundant` verdict: at a million rows the unfiltered k=1000 group supports
+only two distinct bars, because the beam cannot go below k and recall already starts at 0.98 there.
+
+Unfinished runs are excluded: choosing a bar is a publishing decision, so only promoted result files
+count, unlike `compare`, which reads partials so a run can be watched. A `no_target` or `bracket_too_wide` verdict is a coverage
 failure and counts against the participant exactly like a slow cell.
 
 ## 14. Reading a head-to-head
