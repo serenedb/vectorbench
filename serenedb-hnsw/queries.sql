@@ -1,9 +1,15 @@
 -- SereneDB HNSW: one block per group (docs/contracts.md section 5). All statements but the last are
--- setup, run once per point on every connection; the last is the query. {ef} comes from the
--- ladder; $q $k $v $lo $hi $s are bound per query by client.py.
+-- setup, run once per point on every connection; the last is the query. {ef} and {rerank} come from
+-- the ladder; $q $k $v $lo $hi $s are bound per query by client.py.
+--
+-- {rerank} is the rescore pool as a multiple of k, and is Qdrant's quantization.oversampling: the
+-- beam is walked on quantized codes and ceil(rerank * k) of its hits are read back at full
+-- precision, with the beam widened to hold the pool when the pool is the wider of the two. Both
+-- participants sweep the same two values for it. docs/hnsw-parity.md has the mapping.
 
 -- group: none/*
 SET sdb_hnsw_ef_search = {ef};
+SET sdb_hnsw_rerank_factor = {rerank};
 SELECT id FROM {index.relation} ORDER BY emb <#> $q LIMIT $k;
 
 -- group: exact/none/*
@@ -13,11 +19,13 @@ SELECT id FROM {index.relation} ORDER BY emb <#> $q LIMIT $k;
 
 -- group: eq-10/*
 SET sdb_hnsw_ef_search = {ef};
+SET sdb_hnsw_rerank_factor = {rerank};
 SET sdb_hnsw_filter_mode = '{mode}';
 SELECT id FROM {index.relation} WHERE cat10 = $v ORDER BY emb <#> $q LIMIT $k;
 
 -- group: eq-1/*
 SET sdb_hnsw_ef_search = {ef};
+SET sdb_hnsw_rerank_factor = {rerank};
 SET sdb_hnsw_filter_mode = '{mode}';
 SELECT id FROM {index.relation} WHERE cat100 = $v ORDER BY emb <#> $q LIMIT $k;
 
@@ -27,40 +35,48 @@ SELECT id FROM {index.relation} WHERE cat100 = $v ORDER BY emb <#> $q LIMIT $k;
 
 -- group: eq-0.1/*
 SET sdb_hnsw_ef_search = {ef};
+SET sdb_hnsw_rerank_factor = {rerank};
 SET sdb_hnsw_filter_mode = '{mode}';
 SELECT id FROM {index.relation} WHERE cat1000 = $v ORDER BY emb <#> $q LIMIT $k;
 
 -- group: range-10/*
 SET sdb_hnsw_ef_search = {ef};
+SET sdb_hnsw_rerank_factor = {rerank};
 SET sdb_hnsw_filter_mode = '{mode}';
 SELECT id FROM {index.relation} WHERE num BETWEEN $lo AND $hi ORDER BY emb <#> $q LIMIT $k;
 
 -- group: range-1/*
 SET sdb_hnsw_ef_search = {ef};
+SET sdb_hnsw_rerank_factor = {rerank};
 SET sdb_hnsw_filter_mode = '{mode}';
 SELECT id FROM {index.relation} WHERE num BETWEEN $lo AND $hi ORDER BY emb <#> $q LIMIT $k;
 
 -- group: and-1/*
 SET sdb_hnsw_ef_search = {ef};
+SET sdb_hnsw_rerank_factor = {rerank};
 SET sdb_hnsw_filter_mode = '{mode}';
 SELECT id FROM {index.relation} WHERE cat10 = $v AND num BETWEEN $lo AND $hi ORDER BY emb <#> $q LIMIT $k;
 
 -- group: corr/*
 SET sdb_hnsw_ef_search = {ef};
+SET sdb_hnsw_rerank_factor = {rerank};
 SET sdb_hnsw_filter_mode = '{mode}';
 SELECT id FROM {index.relation} WHERE cluster = $v ORDER BY emb <#> $q LIMIT $k;
 
 -- group: xcorr/*
 SET sdb_hnsw_ef_search = {ef};
+SET sdb_hnsw_rerank_factor = {rerank};
 SET sdb_hnsw_filter_mode = '{mode}';
 SELECT id FROM {index.relation} WHERE cluster = $v ORDER BY emb <#> $q LIMIT $k;
 
 -- group: lang/*
 SET sdb_hnsw_ef_search = {ef};
+SET sdb_hnsw_rerank_factor = {rerank};
 SET sdb_hnsw_filter_mode = '{mode}';
 SELECT id FROM {index.relation} WHERE lang = $s ORDER BY emb <#> $q LIMIT $k;
 
 -- group: xlang/*
 SET sdb_hnsw_ef_search = {ef};
+SET sdb_hnsw_rerank_factor = {rerank};
 SET sdb_hnsw_filter_mode = '{mode}';
 SELECT id FROM {index.relation} WHERE lang = $s ORDER BY emb <#> $q LIMIT $k;

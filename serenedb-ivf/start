@@ -7,11 +7,22 @@ source ./common.sh
 
 if [[ -n "$VB_BINARY" ]]; then
     if pid="$(native_pid)" && [[ -n "$pid" ]]; then exit 0; fi
+    refuse_foreign_port
     mkdir -p "$VECTORBENCH_ENGINE_DIR/data"
     cmd=("$VB_BINARY" "$VECTORBENCH_ENGINE_DIR/data" "--listen=postgres://127.0.0.1:${VB_PORT}" "--log_storage=stdout")
     [[ -n "$VECTORBENCH_CPUSET" ]] && cmd=(taskset -c "$VECTORBENCH_CPUSET" "${cmd[@]}")
     setsid nohup "${cmd[@]}" >>"$VECTORBENCH_ENGINE_DIR/serened.log" 2>&1 </dev/null &
-    echo $! > "$PIDFILE"
+    pid=$!
+    echo "$pid" > "$PIDFILE"
+    # A server that exits at once (a port it cannot bind, a directory it cannot read)
+    # would otherwise leave a pidfile behind and let ./check answer from elsewhere.
+    sleep 0.3
+    kill -0 "$pid" 2>/dev/null || {
+        echo "serened exited immediately; last lines of $VECTORBENCH_ENGINE_DIR/serened.log:" >&2
+        tail -5 "$VECTORBENCH_ENGINE_DIR/serened.log" >&2 || true
+        rm -f "$PIDFILE"
+        exit 1
+    }
     exit 0
 fi
 
@@ -22,6 +33,7 @@ if docker inspect "$VB_CONTAINER" >/dev/null 2>&1; then
     exit 0
 fi
 
+refuse_foreign_port
 mkdir -p "$VECTORBENCH_ENGINE_DIR"
 # The image's baked flagfile forces port 7890; ours wins because it is mounted over it.
 printf -- '--server_directory=/var/lib/serenedb\n--listen=postgres://0.0.0.0:%s\n--log_storage=stdout\n' \

@@ -28,36 +28,45 @@ defaults:
   # Graph parameters match the Qdrant participant's (m 16, ef_construction 128) so the comparison is
   # of the engines, not of two different graphs; quantisation matches too (scalar 8-bit, reranked).
   index: {storage: search, relation: items, quant: sq8, m: 16, ef_construction: 128, compression: false}
-  # ef is the search beam and also the result ceiling (floored at k by SereneDB). `mode` is how a WHERE is
-  # honoured (sdb_hnsw_filter_mode): auto scans a selective predicate's rows or walks the graph scoring
-  # every neighbour; bridge crosses rejected rows for one hop only, cheaper at moderate selectivity and
-  # weaker at high recall; walk forces the graph walk where auto would scan (a correlated predicate's
-  # rows sit where the walk goes). Every mode is offered at every k. At k=10 on a selective predicate
-  # auto answers exactly and its recall is 1.0 at the cheapest beam, so the ladder has nothing left to
-  # trade: bridge is the only point that buys speed with recall the way a competitor's filtered walk
-  # does. The frontier picks per row. Only the filtered blocks name {mode}, so unfiltered groups
-  # measure ef alone.
-  ladder: {ef: [16, 24, 32, 48, 64, 96, 128, 192, 256, 384, 512], mode: [auto, bridge, walk]}
+  # ef is the search beam and also the result ceiling (floored at k by SereneDB).
+  #
+  # rerank sizes the pool re-scored at full precision, as a multiple of k, and is the same knob as the
+  # Qdrant participant's `oversample`: the graph is walked on quantized codes and ceil(rerank * k) of
+  # the beam's hits are read back exactly, with the beam widened to hold the pool when the pool is the
+  # wider of the two. Both participants sweep 1 and 4, so neither engine reaches a recall by a route
+  # the other was not offered -- which was the whole complaint about sweeping our beam against their
+  # oversample. SereneDB can also re-score the whole beam (rerank 0), which Qdrant can only spell as
+  # oversampling = ef/k; it is left out because Qdrant's ladder does not sweep its equivalent.
+  #
+  # mode is how a WHERE is honoured (sdb_hnsw_filter_mode): auto scans a selective predicate's rows or
+  # walks the graph scoring every neighbour; bridge crosses rejected rows for one hop only, cheaper at
+  # moderate selectivity and weaker at high recall; walk forces the graph walk where auto would scan
+  # (a correlated predicate's rows sit where the walk goes). Every mode is offered at every k. At k=10
+  # on a selective predicate auto answers exactly and its recall is 1.0 at the cheapest beam, so the
+  # ladder has nothing left to trade: bridge is the only point that buys speed with recall the way a
+  # competitor's filtered walk does. The frontier picks per row. Only the filtered blocks name {mode},
+  # so unfiltered groups measure ef and rerank alone.
+  ladder: {ef: [16, 24, 32, 48, 64, 96, 128, 192, 256, 384, 512], rerank: [1.0, 4.0], mode: [auto, bridge, walk]}
 
 # ef is floored at k, so the k=100 and k=1000 groups need their own ladders; the anchors share them.
 datasets:
   sift-128:
     100k: &sift_100k
-      ladder: {ef: [16, 18, 20, 22, 24, 28, 32, 40, 48, 56, 64, 80, 96, 128, 192, 256], mode: [auto, bridge, walk]}
+      ladder: {ef: [16, 18, 20, 22, 24, 28, 32, 40, 48, 56, 64, 80, 96, 128, 192, 256], rerank: [1.0, 4.0], mode: [auto, bridge, walk]}
       groups:
-        "*/100":  &k100  {ladder: {ef: [100, 128, 160, 200, 256, 320, 360, 400, 512, 768], mode: [auto, bridge, walk]}}
-        "*/1000": &k1000 {ladder: {ef: [1000, 1200, 1500, 2000, 2500, 3000, 4000], mode: [auto, bridge, walk]}}
+        "*/100":  &k100  {ladder: {ef: [100, 128, 160, 200, 256, 320, 360, 400, 512, 768], rerank: [1.0, 4.0], mode: [auto, bridge, walk]}}
+        "*/1000": &k1000 {ladder: {ef: [1000, 1200, 1500, 2000, 2500, 3000, 4000], rerank: [1.0, 4.0], mode: [auto, bridge, walk]}}
     1m:
-      ladder: {ef: [16, 18, 20, 22, 24, 28, 32, 40, 48, 56, 64, 80, 96, 128, 192, 256, 384], mode: [auto, bridge, walk]}
+      ladder: {ef: [16, 18, 20, 22, 24, 28, 32, 40, 48, 56, 64, 80, 96, 128, 192, 256, 384], rerank: [1.0, 4.0], mode: [auto, bridge, walk]}
       groups: {"*/100": *k100, "*/1000": *k1000}
     10m:
-      ladder: {ef: [16, 18, 20, 22, 24, 28, 32, 40, 48, 56, 64, 80, 96, 128, 192, 256, 384, 512], mode: [auto, bridge, walk]}
+      ladder: {ef: [16, 18, 20, 22, 24, 28, 32, 40, 48, 56, 64, 80, 96, 128, 192, 256, 384, 512], rerank: [1.0, 4.0], mode: [auto, bridge, walk]}
       groups: {"*/100": *k100, "*/1000": *k1000}
   wiki-v3-1024:
     100k: *sift_100k
     1m:
-      ladder: {ef: [16, 18, 20, 22, 24, 28, 32, 40, 48, 56, 64, 80, 96, 128, 192, 256, 384], mode: [auto, bridge, walk]}
+      ladder: {ef: [16, 18, 20, 22, 24, 28, 32, 40, 48, 56, 64, 80, 96, 128, 192, 256, 384], rerank: [1.0, 4.0], mode: [auto, bridge, walk]}
       groups: {"*/100": *k100, "*/1000": *k1000}
     10m:
-      ladder: {ef: [16, 18, 20, 22, 24, 28, 32, 40, 48, 56, 64, 80, 96, 128, 192, 256, 384, 512], mode: [auto, bridge, walk]}
+      ladder: {ef: [16, 18, 20, 22, 24, 28, 32, 40, 48, 56, 64, 80, 96, 128, 192, 256, 384, 512], rerank: [1.0, 4.0], mode: [auto, bridge, walk]}
       groups: {"*/100": *k100, "*/1000": *k1000}

@@ -17,6 +17,26 @@ PY="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)/.venv/bin/python"
 
 PIDFILE="$VECTORBENCH_ENGINE_DIR/serened.pid"
 
+port_taken() {  # exit 0 iff something is already listening on VB_PORT
+    "$PY" - "$VB_PORT" <<'EOF'
+import socket, sys
+s = socket.socket()
+s.settimeout(1)
+sys.exit(0 if s.connect_ex(("127.0.0.1", int(sys.argv[1]))) == 0 else 1)
+EOF
+}
+
+# A port held by an engine this script did not start is the worst kind of success:
+# ./start returns 0, ./check answers, ./load drops and recreates `items` in whatever
+# database is actually there, and every number after that describes the wrong index.
+# Refuse instead.
+refuse_foreign_port() {
+    port_taken || return 0
+    echo "port $VB_PORT is already in use by a process this script did not start;" >&2
+    echo "  stop it (or set VB_PORT) before starting $VB_CONTAINER" >&2
+    exit 1
+}
+
 native_pid() {  # prints the pid of a live native server, or nothing
     [[ -f "$PIDFILE" ]] || return 0
     local pid; pid="$(cat "$PIDFILE" 2>/dev/null || true)"
