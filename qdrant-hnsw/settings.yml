@@ -18,7 +18,7 @@ defaults:
   # m / ef_construct: HNSW graph; quant: none | sq8 | binary (README); on_disk_*: mmap instead of RAM;
   # segments: pinned default_segment_number; full_scan_threshold_kb: Qdrant's planner threshold (README).
   # Optional keys: max_segment_size_kb (cap on a segment, README), async_scorer (io_uring rescorer, on_disk only).
-  index: {m: 16, ef_construct: 128, quant: none, on_disk_vectors: false, on_disk_hnsw: false, segments: 8,
+  index: {m: 16, ef_construct: 128, quant: sq8, on_disk_vectors: false, on_disk_hnsw: false, segments: 8,
           full_scan_threshold_kb: 10}
   ladder: {hnsw_ef: [8, 12, 16, 20, 24, 28, 32, 40, 48, 64, 96, 128, 192, 256, 384, 512]}
 

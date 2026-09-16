@@ -25,7 +25,9 @@ plan_rules:
   exact: ["Exact:"]            # exact rows use the engine's brute force (sdb_ann_exact), never the ANN graph or clusters
 
 defaults:
-  index: {storage: search, relation: items, quant: sq8, m: 32, ef_construction: 200, compression: false}
+  # Graph parameters match the Qdrant participant's (m 16, ef_construction 128) so the comparison is
+  # of the engines, not of two different graphs; quantisation matches too (scalar 8-bit, reranked).
+  index: {storage: search, relation: items, quant: sq8, m: 16, ef_construction: 128, compression: false}
   # ef is the search beam and also the result ceiling (floored at k by SereneDB). `mode` is how a WHERE is
   # honoured (sdb_hnsw_filter_mode): auto scans a selective predicate's rows or walks the graph scoring
   # every neighbour; bridge crosses rejected rows for one hop only, cheaper at moderate selectivity and
