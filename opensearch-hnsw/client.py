@@ -1,11 +1,11 @@
-"""VectorBench client for the Elasticsearch HNSW participant (docs/contracts.md section 7).
+"""VectorBench client for the OpenSearch HNSW participant (docs/contracts.md section 7).
 
 A block is one value of queries.json with the ladder knobs already substituted:
-{"filter": <ES query object with "$v" "$lo" "$hi" "$s" placeholders> | null,
- "num_candidates": <int>, "rescore_oversample": <float, optional>, "exact": <bool, optional>}.
+{"filter": <OpenSearch query object with "$v" "$lo" "$hi" "$s" placeholders> | null,
+ "ef_search": <int>, "exact": <bool, optional>}.
 
-Requests go over a kept-alive http.client connection rather than the elasticsearch python client: the
-hot path is one search per query and the official client costs more per call than the search does at
+Requests go over a kept-alive http.client connection rather than the opensearch-py client: the hot
+path is one search per query and the official client costs more per call than the search does at
 k=10. `_source` is off and the dataset id is the document `_id`, so a hit is two small strings."""
 
 from __future__ import annotations
@@ -20,9 +20,8 @@ import numpy as np
 
 @dataclass(frozen=True)
 class Handle:
-    filter: dict[str, Any] | None  # ES query object, placeholders left in
-    num_candidates: int | None
-    oversample: float | None
+    filter: dict[str, Any] | None  # OpenSearch query object, placeholders left in
+    ef_search: int | None
     exact: bool
 
 
@@ -45,6 +44,7 @@ class Client:
         self.host = str(cfg.get("host", "127.0.0.1"))
         self.port = int(cfg.get("port", 9200))
         self.timeout = int(cfg.get("timeout", 600))
+        self.space = str(cfg.get("exact_space", "l2"))
         self.conn: http.client.HTTPConnection | None = None
 
     def connect(self) -> None:
@@ -53,12 +53,10 @@ class Client:
 
     def prepare_group(self, block: str) -> Handle:
         b = json.loads(block)
-        nc = b.get("num_candidates")
-        ov = b.get("rescore_oversample")
+        ef = b.get("ef_search")
         return Handle(
             filter=b.get("filter"),
-            num_candidates=int(nc) if nc is not None else None,
-            oversample=float(ov) if ov is not None else None,
+            ef_search=int(ef) if ef is not None else None,
             exact=str(b.get("exact", False)).lower() == "true",
         )
 
@@ -66,24 +64,27 @@ class Client:
         query = vec.tolist()
         flt = _arg(handle.filter, args) if handle.filter is not None else None
         if handle.exact:
-            # Brute force over every vector the filter admits: a script_score over the same filter,
-            # which is what Elasticsearch documents as exact kNN.
+            # Brute force over every vector the filter admits: the plugin's knn_score script, which
+            # is what OpenSearch documents as exact k-NN.
             inner: dict[str, Any] = flt if flt is not None else {"match_all": {}}
             return {
                 "size": k, "_source": False, "track_total_hits": False,
                 "query": {"script_score": {
                     "query": inner,
-                    "script": {"source": self.cfg["exact_script"], "params": {"q": query}},
+                    "script": {"source": "knn_score", "lang": "knn",
+                               "params": {"field": "emb", "query_value": query,
+                                          "space_type": self.space}},
                 }},
             }
-        knn: dict[str, Any] = {"field": "emb", "query_vector": query, "k": k}
-        if handle.num_candidates is not None:
-            knn["num_candidates"] = max(handle.num_candidates, k)
-        if handle.oversample is not None:
-            knn["rescore_vector"] = {"oversample": handle.oversample}
+        knn: dict[str, Any] = {"vector": query, "k": k}
+        if handle.ef_search is not None:
+            # Per-query beam: the plugin floors it at k, and setting it here keeps the index
+            # setting out of the measured path.
+            knn["method_parameters"] = {"ef_search": max(handle.ef_search, k)}
         if flt is not None:
             knn["filter"] = flt
-        return {"size": k, "_source": False, "track_total_hits": False, "knn": knn}
+        return {"size": k, "_source": False, "track_total_hits": False,
+                "query": {"knn": {"emb": knn}}}
 
     def _post(self, path: str, body: dict[str, Any]) -> dict[str, Any]:
         assert self.conn is not None, "connect() first"
@@ -100,7 +101,7 @@ class Client:
             resp = self.conn.getresponse()
             data = resp.read()
         if resp.status != 200:
-            raise RuntimeError(f"elasticsearch {resp.status}: {data[:400].decode(errors='replace')}")
+            raise RuntimeError(f"opensearch {resp.status}: {data[:400].decode(errors='replace')}")
         return json.loads(data)
 
     def search(self, handle: Handle, vec: np.ndarray, k: int, args: dict[str, Any]) -> list[int]:
@@ -113,8 +114,6 @@ class Client:
         kinds: list[str] = []
 
         def collect(nodes: Any) -> None:
-            # A knn clause is rewritten into a nested query tree, so the name to check for is not
-            # always at the top level.
             if isinstance(nodes, list):
                 for n in nodes:
                     collect(n)

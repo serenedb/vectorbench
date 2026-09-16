@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+# Bytes on disk: the whole engine directory, data and index together.
+set -euo pipefail
+: "${VECTORBENCH_ENGINE_DIR:?VECTORBENCH_ENGINE_DIR must be set}"
+du -sb "$VECTORBENCH_ENGINE_DIR" 2>/dev/null | cut -f1

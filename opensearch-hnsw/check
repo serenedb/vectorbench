@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+# Exit 0 only when OpenSearch answers a real request. Used at 100 ms for startup timing, so it must
+# be cheap and must not wait.
+set -euo pipefail
+: "${VB_PORT:=9200}"
+: "${VB_HOST:=127.0.0.1}"
+out=$(curl -sf --max-time 5 "http://${VB_HOST}:${VB_PORT}/_cluster/health?wait_for_status=yellow&timeout=1s" 2>/dev/null) || exit 1
+case "$out" in *'"status":"red"'*) exit 1 ;; esac
+exit 0
