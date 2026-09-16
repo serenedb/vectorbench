@@ -49,6 +49,25 @@ def json_value(v: Any) -> Any:
     return v.item() if hasattr(v, "item") else v
 
 
+# Bulk bodies are mostly vectors, and at 1024 dimensions the standard library spends longer turning
+# a document into text than Elasticsearch spends indexing it: sift's 128 dimensions took 274 seconds
+# for a million rows, and the payload per document is eight times larger on wiki. orjson serialises a
+# numpy array without converting it to a Python list first. It is optional, so the participant still
+# runs without it.
+try:
+    import orjson
+
+    _NUMPY = orjson.OPT_SERIALIZE_NUMPY
+
+    def dumps(obj: Any) -> bytes:
+        return orjson.dumps(obj, option=_NUMPY)
+except ImportError:  # pragma: no cover - exercised only where orjson is absent
+    def dumps(obj: Any) -> bytes:
+        # The vector arrives as a numpy array either way, so the fallback has to widen it too.
+        return json.dumps(obj, separators=(",", ":"),
+                          default=lambda o: o.tolist()).encode()
+
+
 def log(msg: str) -> None:
     print(msg, flush=True)
 
@@ -198,13 +217,13 @@ def ingest(es: Os, _cfg: IndexConfig) -> int:
         rows = len(emb)
         for start in range(0, rows, BULK_DOCS):
             stop = min(start + BULK_DOCS, rows)
-            lines: list[str] = []
+            lines: list[bytes] = []
             for i in range(start, stop):
                 doc = {name: json_value(v[i]) for name, v in cols.items() if name != "id"}
-                doc["emb"] = emb[i].tolist()
-                lines.append(json.dumps({"index": {"_id": str(int(cols["id"][i]))}}))
-                lines.append(json.dumps(doc, separators=(",", ":")))
-            payload = ("\n".join(lines) + "\n").encode()
+                doc["emb"] = emb[i]
+                lines.append(dumps({"index": {"_id": str(int(cols["id"][i]))}}))
+                lines.append(dumps(doc))
+            payload = b"\n".join(lines) + b"\n"
             out = es.request("POST", f"/{INDEX}/_bulk", payload, "application/x-ndjson")
             if out.get("errors"):
                 first = next(item for item in out["items"] if "error" in item.get("index", {}))
