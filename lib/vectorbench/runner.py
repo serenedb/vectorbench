@@ -32,12 +32,12 @@ TOTAL_BUDGET_S = 60.0
 DEGENERATE_FACTOR = 10
 
 
-@dataclass
 # A time-bounded settle gives a slow group too few queries to compile anything, so it also has a
 # floor: at three hundred queries per second the floor is what decides, at ten thousand the clock is.
 SETTLE_MIN_QUERIES = 2000
 
 
+@dataclass
 class RunOptions:
     data_dir: Path
     views: list[str] = field(default_factory=lambda: ["throughput", "latency"])
