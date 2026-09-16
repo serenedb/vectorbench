@@ -330,3 +330,23 @@ crossing rule of section 9 and classifies the row:
 Rows on the same group are assigned together, so a group sampled by three rows keeps three distinct
 bars instead of collapsing onto one. A `no_target` or `bracket_too_wide` verdict is a coverage
 failure and counts against the participant exactly like a slow cell.
+
+## 14. Reading a head-to-head
+
+`vectorbench compare --dataset <id> --us <participant> --them <participant>` reads every row of the
+dataset at the bar that dataset declares, on both views, and reports the ratio with the winner's
+direction already applied, so above one always means `--us` is ahead. `--section unfiltered` or
+`--section filtered` narrows it; `--verbose` lists every row rather than only losses and
+unreadable cells.
+
+A row falls into one of five buckets:
+
+| bucket | meaning |
+|---|---|
+| win, tie, loss | both sides answered; the tie band is two percent, below the noise of a short pass |
+| `unreadable` | one side could not answer at that bar, so there is no comparison; this is a coverage failure and counts against whichever side could not answer |
+| `n/a` | both sides declined the group because the shape is out of scope at this size (section 13) |
+
+`unreadable` is reported separately from `loss` on purpose. A participant whose ladder stops short
+of the bar has not lost a race, it has failed to enter one, and the fix is its ladder or its build
+rather than its speed.

@@ -130,6 +130,15 @@ def cmd_check(args: argparse.Namespace) -> int:
     return run_check(_participant(args), fam, size, _data_dir(args), queries=args.queries, cpuset=args.cpuset or None, memory=args.memory or None)
 
 
+def cmd_compare(args: argparse.Namespace) -> int:
+    from .compare import run as run_compare
+
+    for dataset in args.dataset.split(","):
+        print(run_compare(dataset.strip(), args.us, args.them,
+                          section=args.section, verbose=args.verbose), end="")
+    return 0
+
+
 def cmd_targets(args: argparse.Namespace) -> int:
     from .targets import run as run_targets
 
@@ -192,6 +201,14 @@ def build_parser() -> argparse.ArgumentParser:
     common(s)
     s.add_argument("--queries", type=int, default=200)
     s.set_defaults(fn=cmd_check)
+
+    s = sub.add_parser("compare", help="head-to-head between two participants, row by row")
+    s.add_argument("--dataset", required=True, help="dataset id, or several separated by commas")
+    s.add_argument("--us", default="serenedb-hnsw")
+    s.add_argument("--them", default="qdrant-hnsw")
+    s.add_argument("--section", choices=["unfiltered", "filtered"], help="restrict to one section")
+    s.add_argument("--verbose", action="store_true", help="list every row, not only the bad ones")
+    s.set_defaults(fn=cmd_compare)
 
     s = sub.add_parser("targets", help="propose a recall target per row from the measured frontiers")
     s.add_argument("--dataset", required=True, help="dataset id, or several separated by commas")
