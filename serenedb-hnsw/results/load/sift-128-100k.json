@@ -1,31 +1,41 @@
 {
  "dataset": "sift-128-100k",
  "participant": "serenedb-hnsw",
- "load_time": 31.62891411899909,
+ "load_time": 14.192093935998855,
  "load_phases": {
   "ddl": 0.029,
-  "ingest": 1.243,
-  "compaction": 30.194
+  "ingest": 0.931,
+  "compaction": 13.086
  },
- "disk_bytes": 70429334,
+ "disk_bytes": 95251025,
  "disk_info": {
   "rows": 100000,
   "storage": "search",
   "segments": 1,
   "files": 5,
-  "index_bytes": 58399928,
-  "ddl": "CREATE INDEX items_vec ON items USING inverted(id, cat10, cat100, cat1000, num, cluster, lang, emb hnsw (metric = 'l2', quant = 'sq8', m = 32, ef_construction = 200))"
+  "index_bytes": 83221612,
+  "ddl": "CREATE INDEX items_vec ON items USING inverted(id, cat10, cat100, cat1000, num, cluster, lang, emb hnsw (metric = 'l2', quant = 'sq8', compression = false, m = 16, ef_construction = 128))",
+  "index": {
+   "kind": "hnsw",
+   "metric": "l2",
+   "quant": "sq8",
+   "m": 16,
+   "ef_construction": 128,
+   "compression": false,
+   "storage": "search"
+  }
  },
- "memory_peak_load": 496197632,
+ "memory_peak_load": 578191360,
  "version": "26.09.0",
- "date": "2026-09-15",
+ "date": "2026-09-16",
  "index": {
   "params": {
    "storage": "search",
    "relation": "items",
    "quant": "sq8",
-   "m": 32,
-   "ef_construction": 200,
+   "m": 16,
+   "ef_construction": 128,
+   "compression": false,
    "dims": 128,
    "metric": "l2"
   }
