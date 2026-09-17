@@ -36,6 +36,7 @@ SAMPLE = os.environ.get("VB_INDEX_SAMPLE_FACTOR")
 M = os.environ.get("VB_INDEX_M")
 EFC = os.environ.get("VB_INDEX_EF_CONSTRUCTION")
 STORAGE = os.environ.get("VB_INDEX_STORAGE", "search")
+SEGMENTS = os.environ.get("VB_INDEX_SEGMENTS")
 # compression=false stores the index's raw vectors uncompressed: rerank and exact reads skip the codec
 # at the price of disk (index option of both opclasses).
 COMPRESSION = os.environ.get("VB_INDEX_COMPRESSION")
@@ -93,6 +94,12 @@ def refresh(cur: psycopg.Cursor) -> None:
 
 
 def compact(cur: psycopg.Cursor) -> None:
+    # Pin the segment count. Every engine searches every segment with the full
+    # beam and unions the results, so a one-segment index and an eight-segment
+    # one are different amounts of work at the same nominal ef -- the count has
+    # to be matched across participants or the comparison is not one.
+    if SEGMENTS:
+        cur.execute(f"SET sdb_compact_target_segments = {int(SEGMENTS)}")
     if STORAGE == "view":
         cur.execute("VACUUM (COMPACT_INDEX) items_vec")
     else:
