@@ -10,7 +10,7 @@
 
 -- group: none/*
 SET sdb_hnsw_ef_search = {ef};
-SET sdb_hnsw_oversample = {oversample};
+SET sdb_ann_oversample = {oversample};
 SELECT id FROM {index.relation} ORDER BY emb <#> $q LIMIT $k;
 
 -- group: exact/none/*
@@ -20,13 +20,13 @@ SELECT id FROM {index.relation} ORDER BY emb <#> $q LIMIT $k;
 
 -- group: eq-10/*
 SET sdb_hnsw_ef_search = {ef};
-SET sdb_hnsw_oversample = {oversample};
+SET sdb_ann_oversample = {oversample};
 SET sdb_hnsw_filter_mode = '{mode}';
 SELECT id FROM {index.relation} WHERE cat10 = $v ORDER BY emb <#> $q LIMIT $k;
 
 -- group: eq-1/*
 SET sdb_hnsw_ef_search = {ef};
-SET sdb_hnsw_oversample = {oversample};
+SET sdb_ann_oversample = {oversample};
 SET sdb_hnsw_filter_mode = '{mode}';
 SELECT id FROM {index.relation} WHERE cat100 = $v ORDER BY emb <#> $q LIMIT $k;
 
@@ -36,48 +36,48 @@ SELECT id FROM {index.relation} WHERE cat100 = $v ORDER BY emb <#> $q LIMIT $k;
 
 -- group: eq-0.1/*
 SET sdb_hnsw_ef_search = {ef};
-SET sdb_hnsw_oversample = {oversample};
+SET sdb_ann_oversample = {oversample};
 SET sdb_hnsw_filter_mode = '{mode}';
 SELECT id FROM {index.relation} WHERE cat1000 = $v ORDER BY emb <#> $q LIMIT $k;
 
 -- group: range-10/*
 SET sdb_hnsw_ef_search = {ef};
-SET sdb_hnsw_oversample = {oversample};
+SET sdb_ann_oversample = {oversample};
 SET sdb_hnsw_filter_mode = '{mode}';
 SELECT id FROM {index.relation} WHERE num BETWEEN $lo AND $hi ORDER BY emb <#> $q LIMIT $k;
 
 -- group: range-1/*
 SET sdb_hnsw_ef_search = {ef};
-SET sdb_hnsw_oversample = {oversample};
+SET sdb_ann_oversample = {oversample};
 SET sdb_hnsw_filter_mode = '{mode}';
 SELECT id FROM {index.relation} WHERE num BETWEEN $lo AND $hi ORDER BY emb <#> $q LIMIT $k;
 
 -- group: and-1/*
 SET sdb_hnsw_ef_search = {ef};
-SET sdb_hnsw_oversample = {oversample};
+SET sdb_ann_oversample = {oversample};
 SET sdb_hnsw_filter_mode = '{mode}';
 SELECT id FROM {index.relation} WHERE cat10 = $v AND num BETWEEN $lo AND $hi ORDER BY emb <#> $q LIMIT $k;
 
 -- group: corr/*
 SET sdb_hnsw_ef_search = {ef};
-SET sdb_hnsw_oversample = {oversample};
+SET sdb_ann_oversample = {oversample};
 SET sdb_hnsw_filter_mode = '{mode}';
 SELECT id FROM {index.relation} WHERE cluster = $v ORDER BY emb <#> $q LIMIT $k;
 
 -- group: xcorr/*
 SET sdb_hnsw_ef_search = {ef};
-SET sdb_hnsw_oversample = {oversample};
+SET sdb_ann_oversample = {oversample};
 SET sdb_hnsw_filter_mode = '{mode}';
 SELECT id FROM {index.relation} WHERE cluster = $v ORDER BY emb <#> $q LIMIT $k;
 
 -- group: lang/*
 SET sdb_hnsw_ef_search = {ef};
-SET sdb_hnsw_oversample = {oversample};
+SET sdb_ann_oversample = {oversample};
 SET sdb_hnsw_filter_mode = '{mode}';
 SELECT id FROM {index.relation} WHERE lang = $s ORDER BY emb <#> $q LIMIT $k;
 
 -- group: xlang/*
 SET sdb_hnsw_ef_search = {ef};
-SET sdb_hnsw_oversample = {oversample};
+SET sdb_ann_oversample = {oversample};
 SET sdb_hnsw_filter_mode = '{mode}';
 SELECT id FROM {index.relation} WHERE lang = $s ORDER BY emb <#> $q LIMIT $k;
