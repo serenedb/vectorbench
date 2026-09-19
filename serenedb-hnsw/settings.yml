@@ -31,7 +31,12 @@ defaults:
   # engine searches every segment with the full beam and unions the results, so
   # an index of one segment and an index of eight are different amounts of work
   # at the same nominal ef. Pinned on both sides or the row is not a comparison.
-  index: {storage: search, relation: items, quant: sq8, m: 16, ef_construction: 128,
+  # quant is usq8, not sq8: uniform 8-bit scalar quantization is what Qdrant's
+  # ScalarQuantizationConfig does (one quantile for the whole vector), and the
+  # rule is that both participants use the same quantization where both support
+  # it. Per-dimension sq8 is more accurate but Qdrant has no equivalent, and
+  # uniform is also what lets the score run in integers.
+  index: {storage: search, relation: items, quant: usq8, m: 16, ef_construction: 128,
           compression: false, segments: 8}
   # ef is the search beam and also the result ceiling (floored at k by SereneDB).
   #
