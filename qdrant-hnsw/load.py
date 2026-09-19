@@ -93,11 +93,13 @@ class IndexConfig:
     segments: int
     full_scan_threshold_kb: int
     max_segment_size_kb: int | None
+    payload_m: int | None = None
 
     @classmethod
     def from_env(cls) -> IndexConfig:
         return cls(
             m=env_int("VB_INDEX_M", 16), ef_construct=env_int("VB_INDEX_EF_CONSTRUCT", 128),
+            payload_m=(int(os.environ["VB_INDEX_PAYLOAD_M"]) if os.environ.get("VB_INDEX_PAYLOAD_M") else None),
             quant=env_str("VB_INDEX_QUANT", "none").lower(),
             on_disk_vectors=env_bool("VB_INDEX_ON_DISK_VECTORS"), on_disk_hnsw=env_bool("VB_INDEX_ON_DISK_HNSW"),
             segments=env_int("VB_INDEX_SEGMENTS", 8), full_scan_threshold_kb=env_int("VB_INDEX_FULL_SCAN_THRESHOLD_KB", 10),
@@ -137,7 +139,7 @@ def create_collection(client: QdrantClient, target: Target, dims: int, metric: s
     client.create_collection(
         collection_name=target.collection,
         vectors_config=models.VectorParams(size=dims, distance=DISTANCE[metric], on_disk=cfg.on_disk_vectors),
-        hnsw_config=models.HnswConfigDiff(m=cfg.m, ef_construct=cfg.ef_construct, full_scan_threshold=cfg.full_scan_threshold_kb, on_disk=cfg.on_disk_hnsw),
+        hnsw_config=models.HnswConfigDiff(m=cfg.m, ef_construct=cfg.ef_construct, full_scan_threshold=cfg.full_scan_threshold_kb, on_disk=cfg.on_disk_hnsw, payload_m=cfg.payload_m),
         optimizers_config=models.OptimizersConfigDiff(indexing_threshold=0, default_segment_number=cfg.segments, max_segment_size=cfg.max_segment_size_kb),
         quantization_config=cfg.quantization(metric),
     )

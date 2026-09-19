@@ -19,7 +19,7 @@ defaults:
   # segments: pinned default_segment_number; full_scan_threshold_kb: Qdrant's planner threshold (README).
   # Optional keys: max_segment_size_kb (cap on a segment, README), async_scorer (io_uring rescorer, on_disk only).
   index: {m: 16, ef_construct: 128, quant: sq8, on_disk_vectors: false, on_disk_hnsw: false, segments: 8,
-          full_scan_threshold_kb: 10}
+          full_scan_threshold_kb: 10, payload_m: 0}
   ladder: {hnsw_ef: [8, 12, 16, 20, 24, 28, 32, 40, 48, 64, 96, 128, 192, 256, 384, 512], oversample: [1.0, 4.0]}
 
 # Per size: the default ladder serves k=10; k=100 and k=1000 groups get wider beams because Qdrant never

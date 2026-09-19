@@ -64,6 +64,13 @@ class Client:
         params = q.SearchParams()
         if p.get("hnsw_ef") is not None:
             params.hnsw_ef = int(p["hnsw_ef"])
+        if p.get("acorn"):
+            # ACORN is Qdrant's filtered walk type: it expands a rejected node's
+            # neighbours in its place instead of discarding it. Off by default and
+            # per-search, so it is a knob in the query text like hnsw_ef. Its own
+            # max_selectivity (default 0.4) decides when it applies, which is
+            # Qdrant choosing the walk, the way our `auto` chooses ours.
+            params.acorn.CopyFrom(q.AcornSearchParams(enable=True))
         if str(p.get("exact", False)).lower() == "true":
             params.exact = True
         if p.get("quantization"):
