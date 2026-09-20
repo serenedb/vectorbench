@@ -7,12 +7,42 @@ from __future__ import annotations
 
 import os
 import re
+import struct
 from typing import Any
 
 import numpy as np
 import psycopg
 from psycopg.types.array import ListBinaryDumper
 from psycopg.types.numeric import Float4BinaryDumper
+from psycopg.adapt import Dumper
+from psycopg.pq import Format as PqFormat
+
+
+class NdarrayFloat4BinaryDumper(Dumper):
+    """A numpy vector as a FLOAT4[] in Postgres binary form.
+
+    psycopg's generic list dumper boxes every element -- 134us for a 1024-float
+    vector against 0.6us here -- and `tolist()` yields Python floats, so it
+    sends float8: twelve bytes a dimension on the wire plus a cast the server
+    then has to undo. The driver times the client call, so that lands in every
+    latency and every qps this participant reports, against a competitor whose
+    client serialises in C. Encoding the array with numpy measures the engine
+    instead of psycopg.
+    """
+
+    format = PqFormat.BINARY
+    oid = 1021  # float4[]
+    _HEADER = struct.Struct("!iiiii")  # ndim, hasnull, elem oid, dim, lower bound
+
+    def dump(self, obj: "np.ndarray") -> bytes:
+        a = np.ascontiguousarray(obj, dtype=">f4")
+        n = a.shape[0]
+        # Postgres writes a 4-byte length before every element; build both
+        # columns at once so the whole payload is one vectorised store.
+        out = np.empty((n, 2), dtype=">u4")
+        out[:, 0] = 4
+        out[:, 1] = a.view(">u4")
+        return self._HEADER.pack(1, 0, 700, n, 1) + out.tobytes()
 
 OPERATORS = {"ip": "<#>", "l2": "<->", "cosine": "<=>"}
 PARAM_RE = re.compile(r"\$(qd|q|k|v|lo|hi|v2|s)\b")
@@ -38,6 +68,7 @@ class Client:
         # dims floats instead of parsing dims decimal strings (about 0.1 ms per query at 128 dims).
         self.conn.adapters.register_dumper(float, Float4BinaryDumper)
         self.conn.adapters.register_dumper(list, ListBinaryDumper)
+        self.conn.adapters.register_dumper(np.ndarray, NdarrayFloat4BinaryDumper)
 
     def prepare_group(self, block: str) -> Any:
         assert self.conn is not None
@@ -66,7 +97,9 @@ class Client:
         assert self.conn is not None
         vals: list[Any] = []
         for name in handle["order"]:
-            if name in ("q", "qd"):
+            if name == "q":
+                vals.append(vec)
+            elif name == "qd":
                 vals.append(vec.tolist())
             elif name == "k":
                 vals.append(int(k))
@@ -80,7 +113,7 @@ class Client:
         assert self.conn is not None
         vals: list[Any] = []
         for name in handle["order"]:
-            vals.append(vec.tolist() if name in ("q", "qd") else int(k) if name == "k" else args[name])
+            vals.append(vec if name == "q" else vec.tolist() if name == "qd" else int(k) if name == "k" else args[name])
         cur = self.conn.execute("EXPLAIN " + handle["sql"], vals, binary=True)
         return "\n".join(str(r[-1]) for r in cur.fetchall())
 
