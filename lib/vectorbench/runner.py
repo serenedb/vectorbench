@@ -184,7 +184,7 @@ class Runner:
 
     # ----------------------------------------------------------------- plan
     def selected_groups(self) -> list[Group]:
-        groups = self.family.groups()
+        groups = self.family.groups(self.size)
         if not self.opts.groups:
             return groups
         sel = []

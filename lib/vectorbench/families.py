@@ -98,10 +98,15 @@ class Family:
             return rows
         return [replace(q, recall=over[q.id]) if q.id in over else q for q in rows]
 
-    def groups(self) -> list[Group]:
-        """Distinct groups in query-list order."""
+    def groups(self, size: str | None = None) -> list[Group]:
+        """Distinct groups in query-list order.
+
+        With a size, the rows `skip_by_size` calls meaningless there are left out: a row whose k is
+        the whole match set has no nearest-neighbour problem left to measure, and running it scores
+        a hole every engine declines.
+        """
         seen: dict[str, Group] = {}
-        for q in self.queries:
+        for q in (self.queries_for(size) if size is not None else self.queries):
             seen.setdefault(q.group_key, Group(q.group_key, q.filter, q.k, q.exact))
         return list(seen.values())
 

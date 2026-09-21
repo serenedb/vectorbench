@@ -58,7 +58,7 @@ def run_check(p: Participant, family: Family, size: str, data_dir: Path, queries
     log.info("engine ready in %.2fs", startup)
     pool = WorkerPool(1, p.dir / "client.py", p.connection(family, family.dataset_id(size), resolve_settings(p.settings, family, size)["index"]), dsdir / "queries.parquet", family.dims, qsel=qsel)
     try:
-        for g in family.groups():
+        for g in family.groups(size):
             block = resolve_block(blocks, g)
             if block is None:
                 log.info("%-22s unsupported (no block)", g.key)

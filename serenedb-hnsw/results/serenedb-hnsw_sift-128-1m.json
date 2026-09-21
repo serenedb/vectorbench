@@ -47133,102 +47133,1146 @@
    "exact": false,
    "view": "throughput",
    "clients": 32,
-   "status": "error",
-   "reason": "worker 9 failed:\nTraceback (most recent call last):\n  File \"/home/mironov/work/projects/serenedb/vectorbench/lib/vectorbench/workers.py\", line 87, in _worker_main\n    handle = client.prepare_group(payload)\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/mironov/work/projects/serenedb/vectorbench/serenedb-hnsw/client.py\", line 49, in prepare_group\n    self.conn.execute(s)\n  File \"/home/mironov/work/projects/serenedb/vectorbench/.venv/lib/python3.12/site-packages/psycopg/connection.py\", line 300, in execute\n    raise ex.with_traceback(None)\npsycopg.errors.UndefinedObject: unrecognized configuration parameter \"sdb_hnsw_rerank_factor\"\n\nDid you mean: \"sdb_rerank_factor\"\n",
-   "points": [],
-   "plan": null
-  },
-  {
-   "key": "exact/none/10",
-   "filter": "none",
-   "k": 10,
-   "exact": true,
-   "view": "throughput",
-   "clients": 32,
    "status": "ok",
-   "block": "SET sdb_ann_exact = on;\nSELECT id FROM items ORDER BY emb <#> $q LIMIT $k;",
-   "startup": 0.45341089699650183,
+   "block": "SET sdb_hnsw_ef_search = {ef};\nSET sdb_ann_oversample = {oversample};\nSELECT id FROM items ORDER BY emb <#> $q LIMIT $k;",
+   "startup": 0.4530686959915329,
    "points": [
     {
      "ladder_index": 0,
-     "knobs": {},
-     "recall": 1.0,
-     "recall_strict": 0.9999320805976909,
-     "tail": 0.0,
-     "short_results": 0,
-     "qps": 531.6437165624046,
-     "latency_ms": {
-      "n": 4417,
-      "min": 7.457495,
-      "avg": 58.223404626896084,
-      "p50": 51.741515,
-      "p95": 105.9667146,
-      "p99": 214.29324208000006,
-      "max": 617.983364
+     "knobs": {
+      "ef": 16,
+      "oversample": 1.0
      },
-     "queries": 4417,
-     "duration": 8.308195624995278,
+     "recall": 0.9462400000000002,
+     "recall_strict": 0.94619,
+     "tail": 0.0009,
+     "short_results": 0,
+     "qps": 28024.699041433912,
+     "latency_ms": {
+      "n": 10000,
+      "min": 0.44808,
+      "avg": 1.0106145156000002,
+      "p50": 0.9469265,
+      "p95": 1.4982221499999995,
+      "p99": 2.33017304,
+      "max": 5.046554
+     },
+     "queries": 10000,
+     "duration": 0.35682809600257315,
      "passes": [
       {
-       "qps": 531.6437165624046,
-       "avg": 58.223404626896084,
-       "p50": 51.741515,
-       "p99": 214.29324208000006,
-       "queries": 4417,
-       "duration": 8.308195624995278
+       "qps": 28024.699041433912,
+       "avg": 1.0106145156000002,
+       "p50": 0.9469265,
+       "p99": 2.33017304,
+       "queries": 10000,
+       "duration": 0.35682809600257315
+      }
+     ]
+    },
+    {
+     "ladder_index": 1,
+     "knobs": {
+      "ef": 16,
+      "oversample": 4.0
+     },
+     "recall": 0.9902400000000001,
+     "recall_strict": 0.99019,
+     "tail": 0.0,
+     "short_results": 0,
+     "qps": 26821.27342827718,
+     "latency_ms": {
+      "n": 10000,
+      "min": 0.544352,
+      "avg": 1.0623359854999999,
+      "p50": 0.9947695,
+      "p95": 1.5632511499999997,
+      "p99": 2.3070203600000005,
+      "max": 3.97471
+     },
+     "queries": 10000,
+     "duration": 0.372838374983985,
+     "passes": [
+      {
+       "qps": 26821.27342827718,
+       "avg": 1.0623359854999999,
+       "p50": 0.9947695,
+       "p99": 2.3070203600000005,
+       "queries": 10000,
+       "duration": 0.372838374983985
+      }
+     ]
+    },
+    {
+     "ladder_index": 2,
+     "knobs": {
+      "ef": 18,
+      "oversample": 1.0
+     },
+     "recall": 0.9555100000000001,
+     "recall_strict": 0.9554600000000001,
+     "tail": 0.0004,
+     "short_results": 0,
+     "qps": 28053.525935447233,
+     "latency_ms": {
+      "n": 10000,
+      "min": 0.501278,
+      "avg": 1.0168066342,
+      "p50": 0.949253,
+      "p95": 1.522603799999999,
+      "p99": 2.2634101400000004,
+      "max": 6.651763
+     },
+     "queries": 10000,
+     "duration": 0.3564614310162142,
+     "passes": [
+      {
+       "qps": 28053.525935447233,
+       "avg": 1.0168066342,
+       "p50": 0.949253,
+       "p99": 2.2634101400000004,
+       "queries": 10000,
+       "duration": 0.3564614310162142
+      }
+     ]
+    },
+    {
+     "ladder_index": 3,
+     "knobs": {
+      "ef": 18,
+      "oversample": 4.0
+     },
+     "recall": 0.9902400000000001,
+     "recall_strict": 0.99016,
+     "tail": 0.0,
+     "short_results": 0,
+     "qps": 27703.033149254486,
+     "latency_ms": {
+      "n": 10000,
+      "min": 0.572232,
+      "avg": 1.0649412696,
+      "p50": 0.9911095,
+      "p95": 1.58744965,
+      "p99": 2.346751530000002,
+      "max": 4.823117
+     },
+     "queries": 10000,
+     "duration": 0.3609713039768394,
+     "passes": [
+      {
+       "qps": 27703.033149254486,
+       "avg": 1.0649412696,
+       "p50": 0.9911095,
+       "p99": 2.346751530000002,
+       "queries": 10000,
+       "duration": 0.3609713039768394
+      }
+     ]
+    },
+    {
+     "ladder_index": 4,
+     "knobs": {
+      "ef": 20,
+      "oversample": 1.0
+     },
+     "recall": 0.9628200000000001,
+     "recall_strict": 0.96278,
+     "tail": 0.0001,
+     "short_results": 0,
+     "qps": 27469.875195609417,
+     "latency_ms": {
+      "n": 10000,
+      "min": 0.520633,
+      "avg": 1.029372513,
+      "p50": 0.9559845,
+      "p95": 1.570127599999999,
+      "p99": 2.402223540000002,
+      "max": 5.656304
+     },
+     "queries": 10000,
+     "duration": 0.3640351450012531,
+     "passes": [
+      {
+       "qps": 27469.875195609417,
+       "avg": 1.029372513,
+       "p50": 0.9559845,
+       "p99": 2.402223540000002,
+       "queries": 10000,
+       "duration": 0.3640351450012531
+      }
+     ]
+    },
+    {
+     "ladder_index": 5,
+     "knobs": {
+      "ef": 20,
+      "oversample": 4.0
+     },
+     "recall": 0.9902400000000001,
+     "recall_strict": 0.99018,
+     "tail": 0.0,
+     "short_results": 0,
+     "qps": 27002.393472424956,
+     "latency_ms": {
+      "n": 10000,
+      "min": 0.56385,
+      "avg": 1.0626442787,
+      "p50": 0.9950125,
+      "p95": 1.5806544,
+      "p99": 2.1791732300000017,
+      "max": 3.692072
+     },
+     "queries": 10000,
+     "duration": 0.37033754101139493,
+     "passes": [
+      {
+       "qps": 27002.393472424956,
+       "avg": 1.0626442787,
+       "p50": 0.9950125,
+       "p99": 2.1791732300000017,
+       "queries": 10000,
+       "duration": 0.37033754101139493
+      }
+     ]
+    },
+    {
+     "ladder_index": 6,
+     "knobs": {
+      "ef": 22,
+      "oversample": 1.0
+     },
+     "recall": 0.96846,
+     "recall_strict": 0.9684200000000001,
+     "tail": 0.0001,
+     "short_results": 0,
+     "qps": 27446.573948142304,
+     "latency_ms": {
+      "n": 10000,
+      "min": 0.458102,
+      "avg": 1.0397705422999999,
+      "p50": 0.9545520000000001,
+      "p95": 1.5637254999999994,
+      "p99": 2.6570291700000026,
+      "max": 9.032518
+     },
+     "queries": 10000,
+     "duration": 0.3643441989843268,
+     "passes": [
+      {
+       "qps": 27446.573948142304,
+       "avg": 1.0397705422999999,
+       "p50": 0.9545520000000001,
+       "p99": 2.6570291700000026,
+       "queries": 10000,
+       "duration": 0.3643441989843268
+      }
+     ]
+    },
+    {
+     "ladder_index": 7,
+     "knobs": {
+      "ef": 22,
+      "oversample": 4.0
+     },
+     "recall": 0.9902400000000001,
+     "recall_strict": 0.99018,
+     "tail": 0.0,
+     "short_results": 0,
+     "qps": 27175.15187476994,
+     "latency_ms": {
+      "n": 10000,
+      "min": 0.586879,
+      "avg": 1.0635586651,
+      "p50": 0.995413,
+      "p95": 1.5724778499999994,
+      "p99": 2.2275206700000005,
+      "max": 4.780539
+     },
+     "queries": 10000,
+     "duration": 0.36798322401591577,
+     "passes": [
+      {
+       "qps": 27175.15187476994,
+       "avg": 1.0635586651,
+       "p50": 0.995413,
+       "p99": 2.2275206700000005,
+       "queries": 10000,
+       "duration": 0.36798322401591577
+      }
+     ]
+    },
+    {
+     "ladder_index": 8,
+     "knobs": {
+      "ef": 24,
+      "oversample": 1.0
+     },
+     "recall": 0.9728900000000001,
+     "recall_strict": 0.9728400000000001,
+     "tail": 0.0001,
+     "short_results": 0,
+     "qps": 28718.215163224795,
+     "latency_ms": {
+      "n": 10000,
+      "min": 0.512599,
+      "avg": 1.0266977463,
+      "p50": 0.9607559999999999,
+      "p95": 1.5254120499999997,
+      "p99": 2.305440460000003,
+      "max": 8.491195
+     },
+     "queries": 10000,
+     "duration": 0.34821105501032434,
+     "passes": [
+      {
+       "qps": 28718.215163224795,
+       "avg": 1.0266977463,
+       "p50": 0.9607559999999999,
+       "p99": 2.305440460000003,
+       "queries": 10000,
+       "duration": 0.34821105501032434
+      }
+     ]
+    },
+    {
+     "ladder_index": 9,
+     "knobs": {
+      "ef": 24,
+      "oversample": 4.0
+     },
+     "recall": 0.9902400000000001,
+     "recall_strict": 0.9901900000000001,
+     "tail": 0.0,
+     "short_results": 0,
+     "qps": 27522.80134687949,
+     "latency_ms": {
+      "n": 10000,
+      "min": 0.589877,
+      "avg": 1.0626230327,
+      "p50": 0.9932685,
+      "p95": 1.5772147499999996,
+      "p99": 2.1739493500000013,
+      "max": 4.926244
+     },
+     "queries": 10000,
+     "duration": 0.3633351080061402,
+     "passes": [
+      {
+       "qps": 27522.80134687949,
+       "avg": 1.0626230327,
+       "p50": 0.9932685,
+       "p99": 2.1739493500000013,
+       "queries": 10000,
+       "duration": 0.3633351080061402
+      }
+     ]
+    },
+    {
+     "ladder_index": 10,
+     "knobs": {
+      "ef": 28,
+      "oversample": 1.0
+     },
+     "recall": 0.97965,
+     "recall_strict": 0.9796000000000001,
+     "tail": 0.0,
+     "short_results": 0,
+     "qps": 27524.24863594569,
+     "latency_ms": {
+      "n": 10000,
+      "min": 0.467735,
+      "avg": 1.0445359796,
+      "p50": 0.9709935000000001,
+      "p95": 1.5418058999999993,
+      "p99": 2.458252910000001,
+      "max": 6.819656
+     },
+     "queries": 10000,
+     "duration": 0.3633160030003637,
+     "passes": [
+      {
+       "qps": 27524.24863594569,
+       "avg": 1.0445359796,
+       "p50": 0.9709935000000001,
+       "p99": 2.458252910000001,
+       "queries": 10000,
+       "duration": 0.3633160030003637
+      }
+     ]
+    },
+    {
+     "ladder_index": 11,
+     "knobs": {
+      "ef": 28,
+      "oversample": 4.0
+     },
+     "recall": 0.9902400000000001,
+     "recall_strict": 0.9901700000000001,
+     "tail": 0.0,
+     "short_results": 0,
+     "qps": 26985.25530986038,
+     "latency_ms": {
+      "n": 10000,
+      "min": 0.579265,
+      "avg": 1.0667935905,
+      "p50": 0.991359,
+      "p95": 1.5899793999999996,
+      "p99": 2.2492419100000007,
+      "max": 6.43957
+     },
+     "queries": 10000,
+     "duration": 0.37057274000835605,
+     "passes": [
+      {
+       "qps": 26985.25530986038,
+       "avg": 1.0667935905,
+       "p50": 0.991359,
+       "p99": 2.2492419100000007,
+       "queries": 10000,
+       "duration": 0.37057274000835605
+      }
+     ]
+    },
+    {
+     "ladder_index": 12,
+     "knobs": {
+      "ef": 32,
+      "oversample": 1.0
+     },
+     "recall": 0.9846099999999999,
+     "recall_strict": 0.98454,
+     "tail": 0.0,
+     "short_results": 0,
+     "qps": 27383.277696385332,
+     "latency_ms": {
+      "n": 10000,
+      "min": 0.519927,
+      "avg": 1.0618234997,
+      "p50": 0.9764854999999999,
+      "p95": 1.6340216999999995,
+      "p99": 2.5031577900000017,
+      "max": 10.449024
+     },
+     "queries": 10000,
+     "duration": 0.36518637801054865,
+     "passes": [
+      {
+       "qps": 27383.277696385332,
+       "avg": 1.0618234997,
+       "p50": 0.9764854999999999,
+       "p99": 2.5031577900000017,
+       "queries": 10000,
+       "duration": 0.36518637801054865
+      }
+     ]
+    },
+    {
+     "ladder_index": 13,
+     "knobs": {
+      "ef": 32,
+      "oversample": 4.0
+     },
+     "recall": 0.9902400000000001,
+     "recall_strict": 0.9901800000000001,
+     "tail": 0.0,
+     "short_results": 0,
+     "qps": 27930.898298774755,
+     "latency_ms": {
+      "n": 10000,
+      "min": 0.562533,
+      "avg": 1.0622879084,
+      "p50": 0.9856695,
+      "p95": 1.5616804499999997,
+      "p99": 2.5099758100000016,
+      "max": 7.733456
+     },
+     "queries": 10000,
+     "duration": 0.3580264369957149,
+     "passes": [
+      {
+       "qps": 27930.898298774755,
+       "avg": 1.0622879084,
+       "p50": 0.9856695,
+       "p99": 2.5099758100000016,
+       "queries": 10000,
+       "duration": 0.3580264369957149
+      }
+     ]
+    },
+    {
+     "ladder_index": 14,
+     "knobs": {
+      "ef": 40,
+      "oversample": 1.0
+     },
+     "recall": 0.99023,
+     "recall_strict": 0.9901600000000003,
+     "tail": 0.0,
+     "short_results": 0,
+     "qps": 27258.269536006108,
+     "latency_ms": {
+      "n": 10000,
+      "min": 0.578046,
+      "avg": 1.0571124051999998,
+      "p50": 0.9847485,
+      "p95": 1.5886815499999996,
+      "p99": 2.570192490000001,
+      "max": 5.04702
+     },
+     "queries": 10000,
+     "duration": 0.3668611460016109,
+     "passes": [
+      {
+       "qps": 27258.269536006108,
+       "avg": 1.0571124051999998,
+       "p50": 0.9847485,
+       "p99": 2.570192490000001,
+       "queries": 10000,
+       "duration": 0.3668611460016109
+      }
+     ]
+    },
+    {
+     "ladder_index": 15,
+     "knobs": {
+      "ef": 40,
+      "oversample": 4.0
+     },
+     "recall": 0.9902400000000001,
+     "recall_strict": 0.9901700000000001,
+     "tail": 0.0,
+     "short_results": 0,
+     "qps": 27130.729548303287,
+     "latency_ms": {
+      "n": 10000,
+      "min": 0.561831,
+      "avg": 1.0705684873,
+      "p50": 0.9841185,
+      "p95": 1.5962780499999996,
+      "p99": 2.5316540400000007,
+      "max": 8.593294
+     },
+     "queries": 10000,
+     "duration": 0.3685857389937155,
+     "passes": [
+      {
+       "qps": 27130.729548303287,
+       "avg": 1.0705684873,
+       "p50": 0.9841185,
+       "p99": 2.5316540400000007,
+       "queries": 10000,
+       "duration": 0.3685857389937155
+      }
+     ]
+    },
+    {
+     "ladder_index": 16,
+     "knobs": {
+      "ef": 48,
+      "oversample": 1.0
+     },
+     "recall": 0.9933799999999999,
+     "recall_strict": 0.9933299999999999,
+     "tail": 0.0,
+     "short_results": 0,
+     "qps": 26915.944488092347,
+     "latency_ms": {
+      "n": 10000,
+      "min": 0.581216,
+      "avg": 1.0763738845,
+      "p50": 0.9970195,
+      "p95": 1.58174705,
+      "p99": 2.546445670000001,
+      "max": 7.001342
+     },
+     "queries": 10000,
+     "duration": 0.3715269959939178,
+     "passes": [
+      {
+       "qps": 26915.944488092347,
+       "avg": 1.0763738845,
+       "p50": 0.9970195,
+       "p99": 2.546445670000001,
+       "queries": 10000,
+       "duration": 0.3715269959939178
+      }
+     ]
+    },
+    {
+     "ladder_index": 17,
+     "knobs": {
+      "ef": 48,
+      "oversample": 4.0
+     },
+     "recall": 0.9933900000000001,
+     "recall_strict": 0.99335,
+     "tail": 0.0,
+     "short_results": 0,
+     "qps": 26850.728192866438,
+     "latency_ms": {
+      "n": 10000,
+      "min": 0.544891,
+      "avg": 1.0911438959,
+      "p50": 0.998513,
+      "p95": 1.6327228999999999,
+      "p99": 2.5705043300000003,
+      "max": 8.57767
+     },
+     "queries": 10000,
+     "duration": 0.3724293780105654,
+     "passes": [
+      {
+       "qps": 26850.728192866438,
+       "avg": 1.0911438959,
+       "p50": 0.998513,
+       "p99": 2.5705043300000003,
+       "queries": 10000,
+       "duration": 0.3724293780105654
+      }
+     ]
+    },
+    {
+     "ladder_index": 18,
+     "knobs": {
+      "ef": 56,
+      "oversample": 1.0
+     },
+     "recall": 0.9953700000000001,
+     "recall_strict": 0.9953299999999999,
+     "tail": 0.0,
+     "short_results": 0,
+     "qps": 26518.47415102291,
+     "latency_ms": {
+      "n": 10000,
+      "min": 0.606198,
+      "avg": 1.0823342655000001,
+      "p50": 1.001593,
+      "p95": 1.6139366999999998,
+      "p99": 2.3803985900000013,
+      "max": 14.302215
+     },
+     "queries": 10000,
+     "duration": 0.3770956029766239,
+     "passes": [
+      {
+       "qps": 26518.47415102291,
+       "avg": 1.0823342655000001,
+       "p50": 1.001593,
+       "p99": 2.3803985900000013,
+       "queries": 10000,
+       "duration": 0.3770956029766239
+      }
+     ]
+    },
+    {
+     "ladder_index": 19,
+     "knobs": {
+      "ef": 56,
+      "oversample": 4.0
+     },
+     "recall": 0.9953799999999999,
+     "recall_strict": 0.99535,
+     "tail": 0.0,
+     "short_results": 0,
+     "qps": 27270.742111804644,
+     "latency_ms": {
+      "n": 10000,
+      "min": 0.59413,
+      "avg": 1.1044202942,
+      "p50": 1.0190275,
+      "p95": 1.6271849,
+      "p99": 2.3393117600000015,
+      "max": 9.664162
+     },
+     "queries": 10000,
+     "duration": 0.3666933579952456,
+     "passes": [
+      {
+       "qps": 27270.742111804644,
+       "avg": 1.1044202942,
+       "p50": 1.0190275,
+       "p99": 2.3393117600000015,
+       "queries": 10000,
+       "duration": 0.3666933579952456
+      }
+     ]
+    },
+    {
+     "ladder_index": 20,
+     "knobs": {
+      "ef": 64,
+      "oversample": 1.0
+     },
+     "recall": 0.99671,
+     "recall_strict": 0.9966700000000001,
+     "tail": 0.0,
+     "short_results": 0,
+     "qps": 26924.878622089287,
+     "latency_ms": {
+      "n": 10000,
+      "min": 0.551088,
+      "avg": 1.0954020431,
+      "p50": 1.0179369999999999,
+      "p95": 1.6228070499999991,
+      "p99": 2.2816762300000004,
+      "max": 4.121207
+     },
+     "queries": 10000,
+     "duration": 0.37140371699933894,
+     "passes": [
+      {
+       "qps": 26924.878622089287,
+       "avg": 1.0954020431,
+       "p50": 1.0179369999999999,
+       "p99": 2.2816762300000004,
+       "queries": 10000,
+       "duration": 0.37140371699933894
+      }
+     ]
+    },
+    {
+     "ladder_index": 21,
+     "knobs": {
+      "ef": 64,
+      "oversample": 4.0
+     },
+     "recall": 0.99672,
+     "recall_strict": 0.9966799999999999,
+     "tail": 0.0,
+     "short_results": 0,
+     "qps": 26891.887661091736,
+     "latency_ms": {
+      "n": 10000,
+      "min": 0.620044,
+      "avg": 1.1242703184,
+      "p50": 1.0331510000000002,
+      "p95": 1.6861427999999998,
+      "p99": 2.546269220000001,
+      "max": 5.443476
+     },
+     "queries": 10000,
+     "duration": 0.37185935498564504,
+     "passes": [
+      {
+       "qps": 26891.887661091736,
+       "avg": 1.1242703184,
+       "p50": 1.0331510000000002,
+       "p99": 2.546269220000001,
+       "queries": 10000,
+       "duration": 0.37185935498564504
+      }
+     ]
+    },
+    {
+     "ladder_index": 22,
+     "knobs": {
+      "ef": 80,
+      "oversample": 1.0
+     },
+     "recall": 0.99802,
+     "recall_strict": 0.9979599999999998,
+     "tail": 0.0,
+     "short_results": 0,
+     "qps": 26627.42444648346,
+     "latency_ms": {
+      "n": 10000,
+      "min": 0.652686,
+      "avg": 1.1440433238999999,
+      "p50": 1.0554665,
+      "p95": 1.7319800499999995,
+      "p99": 2.4835231900000005,
+      "max": 4.759365
+     },
+     "queries": 10000,
+     "duration": 0.3755526570021175,
+     "passes": [
+      {
+       "qps": 26627.42444648346,
+       "avg": 1.1440433238999999,
+       "p50": 1.0554665,
+       "p99": 2.4835231900000005,
+       "queries": 10000,
+       "duration": 0.3755526570021175
+      }
+     ]
+    },
+    {
+     "ladder_index": 23,
+     "knobs": {
+      "ef": 80,
+      "oversample": 4.0
+     },
+     "recall": 0.99803,
+     "recall_strict": 0.9979599999999998,
+     "tail": 0.0,
+     "short_results": 0,
+     "qps": 24394.309720164256,
+     "latency_ms": {
+      "n": 10000,
+      "min": 0.675337,
+      "avg": 1.2003226942,
+      "p50": 1.06098,
+      "p95": 1.7667081499999995,
+      "p99": 2.5095698300000002,
+      "max": 37.125951
+     },
+     "queries": 10000,
+     "duration": 0.40993166499538347,
+     "passes": [
+      {
+       "qps": 24394.309720164256,
+       "avg": 1.2003226942,
+       "p50": 1.06098,
+       "p99": 2.5095698300000002,
+       "queries": 10000,
+       "duration": 0.40993166499538347
+      }
+     ]
+    },
+    {
+     "ladder_index": 24,
+     "knobs": {
+      "ef": 96,
+      "oversample": 1.0
+     },
+     "recall": 0.9987400000000002,
+     "recall_strict": 0.9986799999999999,
+     "tail": 0.0,
+     "short_results": 0,
+     "qps": 25782.07301787479,
+     "latency_ms": {
+      "n": 10000,
+      "min": 0.595584,
+      "avg": 1.172786564,
+      "p50": 1.0926885,
+      "p95": 1.7196571999999994,
+      "p99": 2.20040036,
+      "max": 4.404737
+     },
+     "queries": 10000,
+     "duration": 0.3878664059739094,
+     "passes": [
+      {
+       "qps": 25782.07301787479,
+       "avg": 1.172786564,
+       "p50": 1.0926885,
+       "p99": 2.20040036,
+       "queries": 10000,
+       "duration": 0.3878664059739094
+      }
+     ]
+    },
+    {
+     "ladder_index": 25,
+     "knobs": {
+      "ef": 96,
+      "oversample": 4.0
+     },
+     "recall": 0.99875,
+     "recall_strict": 0.99872,
+     "tail": 0.0,
+     "short_results": 0,
+     "qps": 25486.03343858974,
+     "latency_ms": {
+      "n": 10000,
+      "min": 0.70679,
+      "avg": 1.2020548413,
+      "p50": 1.1127704999999999,
+      "p95": 1.8061239499999995,
+      "p99": 2.34131444,
+      "max": 4.061308
+     },
+     "queries": 10000,
+     "duration": 0.39237176801543683,
+     "passes": [
+      {
+       "qps": 25486.03343858974,
+       "avg": 1.2020548413,
+       "p50": 1.1127704999999999,
+       "p99": 2.34131444,
+       "queries": 10000,
+       "duration": 0.39237176801543683
+      }
+     ]
+    },
+    {
+     "ladder_index": 26,
+     "knobs": {
+      "ef": 128,
+      "oversample": 1.0
+     },
+     "recall": 0.9995099999999999,
+     "recall_strict": 0.99949,
+     "tail": 0.0,
+     "short_results": 0,
+     "qps": 23732.33236448632,
+     "latency_ms": {
+      "n": 10000,
+      "min": 0.750842,
+      "avg": 1.2754484629,
+      "p50": 1.1797304999999998,
+      "p95": 1.9072261,
+      "p99": 2.4404442700000004,
+      "max": 5.14902
+     },
+     "queries": 10000,
+     "duration": 0.4213660859968513,
+     "passes": [
+      {
+       "qps": 23732.33236448632,
+       "avg": 1.2754484629,
+       "p50": 1.1797304999999998,
+       "p99": 2.4404442700000004,
+       "queries": 10000,
+       "duration": 0.4213660859968513
+      }
+     ]
+    },
+    {
+     "ladder_index": 27,
+     "knobs": {
+      "ef": 128,
+      "oversample": 4.0
+     },
+     "recall": 0.9995200000000001,
+     "recall_strict": 0.99949,
+     "tail": 0.0,
+     "short_results": 0,
+     "qps": 23782.504053531826,
+     "latency_ms": {
+      "n": 10000,
+      "min": 0.80358,
+      "avg": 1.3000870271,
+      "p50": 1.204002,
+      "p95": 1.9372344499999998,
+      "p99": 2.451607820000001,
+      "max": 5.467112
+     },
+     "queries": 10000,
+     "duration": 0.4204771700024139,
+     "passes": [
+      {
+       "qps": 23782.504053531826,
+       "avg": 1.3000870271,
+       "p50": 1.204002,
+       "p99": 2.451607820000001,
+       "queries": 10000,
+       "duration": 0.4204771700024139
+      }
+     ]
+    },
+    {
+     "ladder_index": 28,
+     "knobs": {
+      "ef": 192,
+      "oversample": 1.0
+     },
+     "recall": 0.99985,
+     "recall_strict": 0.9998099999999999,
+     "tail": 0.0,
+     "short_results": 0,
+     "qps": 20633.685488610878,
+     "latency_ms": {
+      "n": 10000,
+      "min": 0.88274,
+      "avg": 1.4789252934000001,
+      "p50": 1.371989,
+      "p95": 2.2297612499999997,
+      "p99": 2.787596040000001,
+      "max": 5.450992
+     },
+     "queries": 10000,
+     "duration": 0.4846443940186873,
+     "passes": [
+      {
+       "qps": 20633.685488610878,
+       "avg": 1.4789252934000001,
+       "p50": 1.371989,
+       "p99": 2.787596040000001,
+       "queries": 10000,
+       "duration": 0.4846443940186873
+      }
+     ]
+    },
+    {
+     "ladder_index": 29,
+     "knobs": {
+      "ef": 192,
+      "oversample": 4.0
+     },
+     "recall": 0.9998600000000001,
+     "recall_strict": 0.9998099999999999,
+     "tail": 0.0,
+     "short_results": 0,
+     "qps": 20079.90178452069,
+     "latency_ms": {
+      "n": 10000,
+      "min": 0.883241,
+      "avg": 1.5190990969,
+      "p50": 1.4088755,
+      "p95": 2.31658125,
+      "p99": 2.9381412100000004,
+      "max": 5.710999
+     },
+     "queries": 10000,
+     "duration": 0.49801040400052443,
+     "passes": [
+      {
+       "qps": 20079.90178452069,
+       "avg": 1.5190990969,
+       "p50": 1.4088755,
+       "p99": 2.9381412100000004,
+       "queries": 10000,
+       "duration": 0.49801040400052443
+      }
+     ]
+    },
+    {
+     "ladder_index": 30,
+     "knobs": {
+      "ef": 256,
+      "oversample": 1.0
+     },
+     "recall": 0.9999299999999999,
+     "recall_strict": 0.9998799999999999,
+     "tail": 0.0,
+     "short_results": 0,
+     "qps": 17880.921641099227,
+     "latency_ms": {
+      "n": 10000,
+      "min": 0.942276,
+      "avg": 1.7124732906000002,
+      "p50": 1.604917,
+      "p95": 2.6193327499999994,
+      "p99": 3.3200297200000026,
+      "max": 5.984623
+     },
+     "queries": 10000,
+     "duration": 0.5592552890011575,
+     "passes": [
+      {
+       "qps": 17880.921641099227,
+       "avg": 1.7124732906000002,
+       "p50": 1.604917,
+       "p99": 3.3200297200000026,
+       "queries": 10000,
+       "duration": 0.5592552890011575
+      }
+     ]
+    },
+    {
+     "ladder_index": 31,
+     "knobs": {
+      "ef": 256,
+      "oversample": 4.0
+     },
+     "recall": 0.9999399999999999,
+     "recall_strict": 0.9999,
+     "tail": 0.0,
+     "short_results": 0,
+     "qps": 17545.868497364358,
+     "latency_ms": {
+      "n": 10000,
+      "min": 0.982797,
+      "avg": 1.7589548757,
+      "p50": 1.6431925,
+      "p95": 2.695714249999999,
+      "p99": 3.4123684900000013,
+      "max": 6.195786
+     },
+     "queries": 10000,
+     "duration": 0.5699347399931867,
+     "passes": [
+      {
+       "qps": 17545.868497364358,
+       "avg": 1.7589548757,
+       "p50": 1.6431925,
+       "p99": 3.4123684900000013,
+       "queries": 10000,
+       "duration": 0.5699347399931867
+      }
+     ]
+    },
+    {
+     "ladder_index": 32,
+     "knobs": {
+      "ef": 384,
+      "oversample": 1.0
+     },
+     "recall": 0.9999600000000001,
+     "recall_strict": 0.9999,
+     "tail": 0.0,
+     "short_results": 0,
+     "qps": 14315.33127441133,
+     "latency_ms": {
+      "n": 10000,
+      "min": 1.087503,
+      "avg": 2.1717702915999997,
+      "p50": 2.0271559999999997,
+      "p95": 3.3997239999999995,
+      "p99": 4.2381980100000005,
+      "max": 7.211748
+     },
+     "queries": 10000,
+     "duration": 0.6985517700086348,
+     "passes": [
+      {
+       "qps": 14315.33127441133,
+       "avg": 2.1717702915999997,
+       "p50": 2.0271559999999997,
+       "p99": 4.2381980100000005,
+       "queries": 10000,
+       "duration": 0.6985517700086348
+      }
+     ]
+    },
+    {
+     "ladder_index": 33,
+     "knobs": {
+      "ef": 384,
+      "oversample": 4.0
+     },
+     "recall": 0.99997,
+     "recall_strict": 0.99992,
+     "tail": 0.0,
+     "short_results": 0,
+     "qps": 13933.326388833806,
+     "latency_ms": {
+      "n": 10000,
+      "min": 1.148189,
+      "avg": 2.2226543411999997,
+      "p50": 2.0681405,
+      "p95": 3.445285999999999,
+      "p99": 4.38892656,
+      "max": 6.407946
+     },
+     "queries": 10000,
+     "duration": 0.7177037069923244,
+     "passes": [
+      {
+       "qps": 13933.326388833806,
+       "avg": 2.2226543411999997,
+       "p50": 2.0681405,
+       "p99": 4.38892656,
+       "queries": 10000,
+       "duration": 0.7177037069923244
       }
      ]
     }
    ],
-   "plan": "\u256d\u2500 STREAMING_LIMIT \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u256e\n\u2502 ~1,000,000 rows                        \u2502\n\u2570\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u252c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u256f\n\u256d\u2500 PROJECTION \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2534\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u256e\n\u2502 Projections: CAST(#0 AS BIGINT)        \u2502\n\u2502 ~1,000,000 rows                        \u2502\n\u2570\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u252c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u256f\n\u256d\u2500 ORDER_BY \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2534\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u256e\n\u2502 Order By: #1 ASC                       \u2502\n\u2502 ~1,000,000 rows                        \u2502\n\u2570\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u252c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u256f\n\u256d\u2500 PROJECTION \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2534\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u256e\n\u2502 Projections: CAST(#0 AS INTEGER), #1   \u2502\n\u2502 ~1,000,000 rows                        \u2502\n\u2570\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u252c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u256f\n\u256d\u2500 IRESEARCH_SCAN \u2500\u2500\u2500\u2534\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u256e\n\u2502 Index: items                           \u2502\n\u2502 Lookup: search                         \u2502\n\u2502 Score: l2_distance(emb, FLOAT[128])    \u2502\n\u2502 Exact:                                 \u2502\n\u2502 brute force over the stored vectors    \u2502\n\u2502 Top: CAST($2 AS BIGINT)                \u2502\n\u2502 Projections: id,                       \u2502\n\u2502              sdb_inverted_index_score  \u2502\n\u2502 ~1,000,000 rows                        \u2502\n\u2570\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u256f",
-   "memory_peak": 1211088896
-  },
-  {
-   "key": "none/100",
-   "filter": "none",
-   "k": 100,
-   "exact": false,
-   "view": "throughput",
-   "clients": 32,
-   "status": "error",
-   "reason": "worker 26 failed:\nTraceback (most recent call last):\n  File \"/home/mironov/work/projects/serenedb/vectorbench/lib/vectorbench/workers.py\", line 87, in _worker_main\n    handle = client.prepare_group(payload)\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/mironov/work/projects/serenedb/vectorbench/serenedb-hnsw/client.py\", line 49, in prepare_group\n    self.conn.execute(s)\n  File \"/home/mironov/work/projects/serenedb/vectorbench/.venv/lib/python3.12/site-packages/psycopg/connection.py\", line 300, in execute\n    raise ex.with_traceback(None)\npsycopg.errors.UndefinedObject: unrecognized configuration parameter \"sdb_hnsw_rerank_factor\"\n\nDid you mean: \"sdb_rerank_factor\"\n",
-   "points": [],
-   "plan": null
-  },
-  {
-   "key": "none/1000",
-   "filter": "none",
-   "k": 1000,
-   "exact": false,
-   "view": "throughput",
-   "clients": 32,
-   "status": "error",
-   "reason": "worker 30 failed:\nTraceback (most recent call last):\n  File \"/home/mironov/work/projects/serenedb/vectorbench/lib/vectorbench/workers.py\", line 87, in _worker_main\n    handle = client.prepare_group(payload)\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/mironov/work/projects/serenedb/vectorbench/serenedb-hnsw/client.py\", line 49, in prepare_group\n    self.conn.execute(s)\n  File \"/home/mironov/work/projects/serenedb/vectorbench/.venv/lib/python3.12/site-packages/psycopg/connection.py\", line 300, in execute\n    raise ex.with_traceback(None)\npsycopg.errors.UndefinedObject: unrecognized configuration parameter \"sdb_hnsw_rerank_factor\"\n\nDid you mean: \"sdb_rerank_factor\"\n",
-   "points": [],
-   "plan": null
-  },
-  {
-   "key": "none/10",
-   "filter": "none",
-   "k": 10,
-   "exact": false,
-   "view": "latency",
-   "clients": 1,
-   "status": "error",
-   "reason": "worker 0 failed:\nTraceback (most recent call last):\n  File \"/home/mironov/work/projects/serenedb/vectorbench/lib/vectorbench/workers.py\", line 87, in _worker_main\n    handle = client.prepare_group(payload)\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/mironov/work/projects/serenedb/vectorbench/serenedb-hnsw/client.py\", line 49, in prepare_group\n    self.conn.execute(s)\n  File \"/home/mironov/work/projects/serenedb/vectorbench/.venv/lib/python3.12/site-packages/psycopg/connection.py\", line 300, in execute\n    raise ex.with_traceback(None)\npsycopg.errors.UndefinedObject: unrecognized configuration parameter \"sdb_hnsw_rerank_factor\"\n\nDid you mean: \"sdb_rerank_factor\"\n",
-   "points": [],
-   "plan": null
+   "plan": "\u256d\u2500 STREAMING_LIMIT \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u256e\n\u2502 ~1,000,000 rows                        \u2502\n\u2570\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u252c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u256f\n\u256d\u2500 PROJECTION \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2534\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u256e\n\u2502 Projections: CAST(#0 AS BIGINT)        \u2502\n\u2502 ~1,000,000 rows                        \u2502\n\u2570\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u252c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u256f\n\u256d\u2500 ORDER_BY \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2534\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u256e\n\u2502 Order By: #1 ASC                       \u2502\n\u2502 ~1,000,000 rows                        \u2502\n\u2570\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u252c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u256f\n\u256d\u2500 PROJECTION \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2534\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u256e\n\u2502 Projections: CAST(#0 AS INTEGER), #1   \u2502\n\u2502 ~1,000,000 rows                        \u2502\n\u2570\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u252c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u256f\n\u256d\u2500 IRESEARCH_SCAN \u2500\u2500\u2500\u2534\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u256e\n\u2502 Index: items                           \u2502\n\u2502 Lookup: search                         \u2502\n\u2502 Score: l2_distance(emb, FLOAT[128])    \u2502\n\u2502 Top: CAST($2 AS BIGINT)                \u2502\n\u2502 Projections: id,                       \u2502\n\u2502              sdb_inverted_index_score  \u2502\n\u2502 ~1,000,000 rows                        \u2502\n\u2570\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u256f",
+   "memory_peak": 1416601600
   },
   {
    "key": "exact/none/10",
    "filter": "none",
    "k": 10,
    "exact": true,
-   "view": "latency",
-   "clients": 1,
+   "view": "throughput",
+   "clients": 32,
    "status": "ok",
    "block": "SET sdb_ann_exact = on;\nSELECT id FROM items ORDER BY emb <#> $q LIMIT $k;",
-   "startup": 0.45341089699650183,
+   "startup": 0.4530686959915329,
    "points": [
     {
      "ladder_index": 0,
@@ -47237,32 +48281,2366 @@
      "recall_strict": 1.0,
      "tail": 0.0,
      "short_results": 0,
-     "qps": 111.10109071861626,
+     "qps": 659.5814443612737,
      "latency_ms": {
-      "n": 2000,
-      "min": 7.121635,
-      "avg": 8.990201912,
-      "p50": 8.891395,
-      "p95": 10.3962801,
-      "p99": 11.363356229999999,
-      "max": 13.81415
+      "n": 5322,
+      "min": 9.694342,
+      "avg": 48.158038809658024,
+      "p50": 36.978049,
+      "p95": 100.0276865,
+      "p99": 153.00607096,
+      "max": 387.970524
      },
-     "queries": 2000,
-     "duration": 18.00162344999262,
+     "queries": 5322,
+     "duration": 8.068753366998862,
      "passes": [
       {
-       "qps": 111.10109071861626,
-       "avg": 8.990201912,
-       "p50": 8.891395,
-       "p99": 11.363356229999999,
-       "queries": 2000,
-       "duration": 18.00162344999262
+       "qps": 659.5814443612737,
+       "avg": 48.158038809658024,
+       "p50": 36.978049,
+       "p99": 153.00607096,
+       "queries": 5322,
+       "duration": 8.068753366998862
       }
      ]
     }
    ],
    "plan": "\u256d\u2500 STREAMING_LIMIT \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u256e\n\u2502 ~1,000,000 rows                        \u2502\n\u2570\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u252c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u256f\n\u256d\u2500 PROJECTION \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2534\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u256e\n\u2502 Projections: CAST(#0 AS BIGINT)        \u2502\n\u2502 ~1,000,000 rows                        \u2502\n\u2570\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u252c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u256f\n\u256d\u2500 ORDER_BY \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2534\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u256e\n\u2502 Order By: #1 ASC                       \u2502\n\u2502 ~1,000,000 rows                        \u2502\n\u2570\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u252c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u256f\n\u256d\u2500 PROJECTION \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2534\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u256e\n\u2502 Projections: CAST(#0 AS INTEGER), #1   \u2502\n\u2502 ~1,000,000 rows                        \u2502\n\u2570\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u252c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u256f\n\u256d\u2500 IRESEARCH_SCAN \u2500\u2500\u2500\u2534\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u256e\n\u2502 Index: items                           \u2502\n\u2502 Lookup: search                         \u2502\n\u2502 Score: l2_distance(emb, FLOAT[128])    \u2502\n\u2502 Exact:                                 \u2502\n\u2502 brute force over the stored vectors    \u2502\n\u2502 Top: CAST($2 AS BIGINT)                \u2502\n\u2502 Projections: id,                       \u2502\n\u2502              sdb_inverted_index_score  \u2502\n\u2502 ~1,000,000 rows                        \u2502\n\u2570\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u256f",
-   "memory_peak": 1197719552
+   "memory_peak": 1434566656
+  },
+  {
+   "key": "none/100",
+   "filter": "none",
+   "k": 100,
+   "exact": false,
+   "view": "throughput",
+   "clients": 32,
+   "status": "ok",
+   "block": "SET sdb_hnsw_ef_search = {ef};\nSET sdb_ann_oversample = {oversample};\nSELECT id FROM items ORDER BY emb <#> $q LIMIT $k;",
+   "startup": 0.4530686959915329,
+   "points": [
+    {
+     "ladder_index": 0,
+     "knobs": {
+      "ef": 100,
+      "oversample": 1.0
+     },
+     "recall": 0.9947790000000001,
+     "recall_strict": 0.994735,
+     "tail": 0.0,
+     "short_results": 0,
+     "qps": 22180.440679696672,
+     "latency_ms": {
+      "n": 10000,
+      "min": 0.864629,
+      "avg": 1.3698971656,
+      "p50": 1.2676319999999999,
+      "p95": 2.0465044,
+      "p99": 2.6383977000000005,
+      "max": 4.61585
+     },
+     "queries": 10000,
+     "duration": 0.450847669999348,
+     "passes": [
+      {
+       "qps": 22180.440679696672,
+       "avg": 1.3698971656,
+       "p50": 1.2676319999999999,
+       "p99": 2.6383977000000005,
+       "queries": 10000,
+       "duration": 0.450847669999348
+      }
+     ]
+    },
+    {
+     "ladder_index": 1,
+     "knobs": {
+      "ef": 100,
+      "oversample": 4.0
+     },
+     "recall": 0.9998900000000002,
+     "recall_strict": 0.9998560000000001,
+     "tail": 0.0,
+     "short_results": 0,
+     "qps": 10926.992298484482,
+     "latency_ms": {
+      "n": 10000,
+      "min": 1.398478,
+      "avg": 2.8241763478,
+      "p50": 2.6159735,
+      "p95": 4.472384699999998,
+      "p99": 5.59671596,
+      "max": 8.899179
+     },
+     "queries": 10000,
+     "duration": 0.9151649170089513,
+     "passes": [
+      {
+       "qps": 10926.992298484482,
+       "avg": 2.8241763478,
+       "p50": 2.6159735,
+       "p99": 5.59671596,
+       "queries": 10000,
+       "duration": 0.9151649170089513
+      }
+     ]
+    },
+    {
+     "ladder_index": 2,
+     "knobs": {
+      "ef": 128,
+      "oversample": 1.0
+     },
+     "recall": 0.9972789999999999,
+     "recall_strict": 0.9972380000000001,
+     "tail": 0.0,
+     "short_results": 0,
+     "qps": 20649.57107908133,
+     "latency_ms": {
+      "n": 10000,
+      "min": 0.912497,
+      "avg": 1.4760231304,
+      "p50": 1.3600340000000002,
+      "p95": 2.2307176499999994,
+      "p99": 2.94923596,
+      "max": 6.241087
+     },
+     "queries": 10000,
+     "duration": 0.48427156000980176,
+     "passes": [
+      {
+       "qps": 20649.57107908133,
+       "avg": 1.4760231304,
+       "p50": 1.3600340000000002,
+       "p99": 2.94923596,
+       "queries": 10000,
+       "duration": 0.48427156000980176
+      }
+     ]
+    },
+    {
+     "ladder_index": 3,
+     "knobs": {
+      "ef": 128,
+      "oversample": 4.0
+     },
+     "recall": 0.9998900000000002,
+     "recall_strict": 0.9998610000000001,
+     "tail": 0.0,
+     "short_results": 0,
+     "qps": 10641.633968123057,
+     "latency_ms": {
+      "n": 10000,
+      "min": 1.379249,
+      "avg": 2.8220771755,
+      "p50": 2.633642,
+      "p95": 4.441098949999999,
+      "p99": 5.61656369,
+      "max": 7.384272
+     },
+     "queries": 10000,
+     "duration": 0.9397053149878047,
+     "passes": [
+      {
+       "qps": 10641.633968123057,
+       "avg": 2.8220771755,
+       "p50": 2.633642,
+       "p99": 5.61656369,
+       "queries": 10000,
+       "duration": 0.9397053149878047
+      }
+     ]
+    },
+    {
+     "ladder_index": 4,
+     "knobs": {
+      "ef": 160,
+      "oversample": 1.0
+     },
+     "recall": 0.998509,
+     "recall_strict": 0.9984700000000001,
+     "tail": 0.0,
+     "short_results": 0,
+     "qps": 17703.884251599906,
+     "latency_ms": {
+      "n": 10000,
+      "min": 0.91865,
+      "avg": 1.6784385918,
+      "p50": 1.4465395,
+      "p95": 2.43079325,
+      "p99": 3.40385712,
+      "max": 42.714414
+     },
+     "queries": 10000,
+     "duration": 0.564847795991227,
+     "passes": [
+      {
+       "qps": 17703.884251599906,
+       "avg": 1.6784385918,
+       "p50": 1.4465395,
+       "p99": 3.40385712,
+       "queries": 10000,
+       "duration": 0.564847795991227
+      }
+     ]
+    },
+    {
+     "ladder_index": 5,
+     "knobs": {
+      "ef": 160,
+      "oversample": 4.0
+     },
+     "recall": 0.9998900000000002,
+     "recall_strict": 0.9998560000000001,
+     "tail": 0.0,
+     "short_results": 0,
+     "qps": 10772.587596948179,
+     "latency_ms": {
+      "n": 10000,
+      "min": 1.329343,
+      "avg": 2.8348240044999997,
+      "p50": 2.6284185,
+      "p95": 4.4300998,
+      "p99": 5.59835683,
+      "max": 7.804215
+     },
+     "queries": 10000,
+     "duration": 0.9282820780063048,
+     "passes": [
+      {
+       "qps": 10772.587596948179,
+       "avg": 2.8348240044999997,
+       "p50": 2.6284185,
+       "p99": 5.59835683,
+       "queries": 10000,
+       "duration": 0.9282820780063048
+      }
+     ]
+    },
+    {
+     "ladder_index": 6,
+     "knobs": {
+      "ef": 200,
+      "oversample": 1.0
+     },
+     "recall": 0.9991650000000002,
+     "recall_strict": 0.9991220000000001,
+     "tail": 0.0,
+     "short_results": 0,
+     "qps": 17117.62308649297,
+     "latency_ms": {
+      "n": 10000,
+      "min": 1.015787,
+      "avg": 1.7664773972999999,
+      "p50": 1.6290205,
+      "p95": 2.6883332,
+      "p99": 3.51352159,
+      "max": 22.063768
+     },
+     "queries": 10000,
+     "duration": 0.58419325799332,
+     "passes": [
+      {
+       "qps": 17117.62308649297,
+       "avg": 1.7664773972999999,
+       "p50": 1.6290205,
+       "p99": 3.51352159,
+       "queries": 10000,
+       "duration": 0.58419325799332
+      }
+     ]
+    },
+    {
+     "ladder_index": 7,
+     "knobs": {
+      "ef": 200,
+      "oversample": 4.0
+     },
+     "recall": 0.9998900000000002,
+     "recall_strict": 0.9998600000000001,
+     "tail": 0.0,
+     "short_results": 0,
+     "qps": 10743.416499599813,
+     "latency_ms": {
+      "n": 10000,
+      "min": 1.38845,
+      "avg": 2.8447908071000003,
+      "p50": 2.646255,
+      "p95": 4.47724755,
+      "p99": 5.624755600000001,
+      "max": 8.071152
+     },
+     "queries": 10000,
+     "duration": 0.9308025990030728,
+     "passes": [
+      {
+       "qps": 10743.416499599813,
+       "avg": 2.8447908071000003,
+       "p50": 2.646255,
+       "p99": 5.624755600000001,
+       "queries": 10000,
+       "duration": 0.9308025990030728
+      }
+     ]
+    },
+    {
+     "ladder_index": 8,
+     "knobs": {
+      "ef": 256,
+      "oversample": 1.0
+     },
+     "recall": 0.999568,
+     "recall_strict": 0.9995360000000001,
+     "tail": 0.0,
+     "short_results": 0,
+     "qps": 15552.99497966371,
+     "latency_ms": {
+      "n": 10000,
+      "min": 1.108519,
+      "avg": 1.9766967428,
+      "p50": 1.8421585,
+      "p95": 3.0772864999999996,
+      "p99": 3.833539450000001,
+      "max": 5.777933
+     },
+     "queries": 10000,
+     "duration": 0.6429629799968097,
+     "passes": [
+      {
+       "qps": 15552.99497966371,
+       "avg": 1.9766967428,
+       "p50": 1.8421585,
+       "p99": 3.833539450000001,
+       "queries": 10000,
+       "duration": 0.6429629799968097
+      }
+     ]
+    },
+    {
+     "ladder_index": 9,
+     "knobs": {
+      "ef": 256,
+      "oversample": 4.0
+     },
+     "recall": 0.9998900000000002,
+     "recall_strict": 0.999859,
+     "tail": 0.0,
+     "short_results": 0,
+     "qps": 10597.418881293925,
+     "latency_ms": {
+      "n": 10000,
+      "min": 1.31954,
+      "avg": 2.8377952367000003,
+      "p50": 2.633353,
+      "p95": 4.438723949999999,
+      "p99": 5.553331080000002,
+      "max": 9.553138
+     },
+     "queries": 10000,
+     "duration": 0.9436260010115802,
+     "passes": [
+      {
+       "qps": 10597.418881293925,
+       "avg": 2.8377952367000003,
+       "p50": 2.633353,
+       "p99": 5.553331080000002,
+       "queries": 10000,
+       "duration": 0.9436260010115802
+      }
+     ]
+    },
+    {
+     "ladder_index": 10,
+     "knobs": {
+      "ef": 320,
+      "oversample": 1.0
+     },
+     "recall": 0.999783,
+     "recall_strict": 0.99975,
+     "tail": 0.0,
+     "short_results": 0,
+     "qps": 13496.16778260501,
+     "latency_ms": {
+      "n": 10000,
+      "min": 1.184402,
+      "avg": 2.2253188516,
+      "p50": 2.0555770000000004,
+      "p95": 3.4800813499999985,
+      "p99": 4.57241301,
+      "max": 9.789303
+     },
+     "queries": 10000,
+     "duration": 0.7409510730067268,
+     "passes": [
+      {
+       "qps": 13496.16778260501,
+       "avg": 2.2253188516,
+       "p50": 2.0555770000000004,
+       "p99": 4.57241301,
+       "queries": 10000,
+       "duration": 0.7409510730067268
+      }
+     ]
+    },
+    {
+     "ladder_index": 11,
+     "knobs": {
+      "ef": 320,
+      "oversample": 4.0
+     },
+     "recall": 0.9998900000000002,
+     "recall_strict": 0.999859,
+     "tail": 0.0,
+     "short_results": 0,
+     "qps": 10722.554542411277,
+     "latency_ms": {
+      "n": 10000,
+      "min": 1.364141,
+      "avg": 2.8319891425000003,
+      "p50": 2.6252485,
+      "p95": 4.416643649999999,
+      "p99": 5.684523410000002,
+      "max": 9.318137
+     },
+     "queries": 10000,
+     "duration": 0.9326135820010677,
+     "passes": [
+      {
+       "qps": 10722.554542411277,
+       "avg": 2.8319891425000003,
+       "p50": 2.6252485,
+       "p99": 5.684523410000002,
+       "queries": 10000,
+       "duration": 0.9326135820010677
+      }
+     ]
+    },
+    {
+     "ladder_index": 12,
+     "knobs": {
+      "ef": 360,
+      "oversample": 1.0
+     },
+     "recall": 0.9998380000000001,
+     "recall_strict": 0.9998,
+     "tail": 0.0,
+     "short_results": 0,
+     "qps": 12845.296040668052,
+     "latency_ms": {
+      "n": 10000,
+      "min": 1.199035,
+      "avg": 2.3693094284,
+      "p50": 2.1987579999999998,
+      "p95": 3.7050639999999992,
+      "p99": 4.597145920000001,
+      "max": 9.675659
+     },
+     "queries": 10000,
+     "duration": 0.7784950979985297,
+     "passes": [
+      {
+       "qps": 12845.296040668052,
+       "avg": 2.3693094284,
+       "p50": 2.1987579999999998,
+       "p99": 4.597145920000001,
+       "queries": 10000,
+       "duration": 0.7784950979985297
+      }
+     ]
+    },
+    {
+     "ladder_index": 13,
+     "knobs": {
+      "ef": 360,
+      "oversample": 4.0
+     },
+     "recall": 0.9998900000000002,
+     "recall_strict": 0.9998610000000001,
+     "tail": 0.0,
+     "short_results": 0,
+     "qps": 10981.61610162622,
+     "latency_ms": {
+      "n": 10000,
+      "min": 1.379573,
+      "avg": 2.8321392383,
+      "p50": 2.6282225,
+      "p95": 4.46877345,
+      "p99": 5.637100130000001,
+      "max": 7.92117
+     },
+     "queries": 10000,
+     "duration": 0.9106127829873003,
+     "passes": [
+      {
+       "qps": 10981.61610162622,
+       "avg": 2.8321392383,
+       "p50": 2.6282225,
+       "p99": 5.637100130000001,
+       "queries": 10000,
+       "duration": 0.9106127829873003
+      }
+     ]
+    },
+    {
+     "ladder_index": 14,
+     "knobs": {
+      "ef": 400,
+      "oversample": 1.0
+     },
+     "recall": 0.9998900000000002,
+     "recall_strict": 0.9998550000000002,
+     "tail": 0.0,
+     "short_results": 0,
+     "qps": 11749.722318794265,
+     "latency_ms": {
+      "n": 10000,
+      "min": 1.209158,
+      "avg": 2.5162885638,
+      "p50": 2.333769,
+      "p95": 3.976144699999999,
+      "p99": 4.976141490000001,
+      "max": 7.957147
+     },
+     "queries": 10000,
+     "duration": 0.8510839429800399,
+     "passes": [
+      {
+       "qps": 11749.722318794265,
+       "avg": 2.5162885638,
+       "p50": 2.333769,
+       "p99": 4.976141490000001,
+       "queries": 10000,
+       "duration": 0.8510839429800399
+      }
+     ]
+    },
+    {
+     "ladder_index": 15,
+     "knobs": {
+      "ef": 400,
+      "oversample": 4.0
+     },
+     "recall": 0.9998900000000002,
+     "recall_strict": 0.9998610000000001,
+     "tail": 0.0,
+     "short_results": 0,
+     "qps": 10875.22173935312,
+     "latency_ms": {
+      "n": 10000,
+      "min": 1.429782,
+      "avg": 2.8313898010000003,
+      "p50": 2.638664,
+      "p95": 4.441098499999999,
+      "p99": 5.5263260700000005,
+      "max": 9.079068
+     },
+     "queries": 10000,
+     "duration": 0.9195214810024481,
+     "passes": [
+      {
+       "qps": 10875.22173935312,
+       "avg": 2.8313898010000003,
+       "p50": 2.638664,
+       "p99": 5.5263260700000005,
+       "queries": 10000,
+       "duration": 0.9195214810024481
+      }
+     ]
+    },
+    {
+     "ladder_index": 16,
+     "knobs": {
+      "ef": 512,
+      "oversample": 1.0
+     },
+     "recall": 0.9999460000000001,
+     "recall_strict": 0.999916,
+     "tail": 0.0,
+     "short_results": 0,
+     "qps": 10521.74465635528,
+     "latency_ms": {
+      "n": 10000,
+      "min": 1.445066,
+      "avg": 2.883049551,
+      "p50": 2.683265,
+      "p95": 4.508491549999998,
+      "p99": 5.60683284,
+      "max": 8.316225
+     },
+     "queries": 10000,
+     "duration": 0.9504127239924856,
+     "passes": [
+      {
+       "qps": 10521.74465635528,
+       "avg": 2.883049551,
+       "p50": 2.683265,
+       "p99": 5.60683284,
+       "queries": 10000,
+       "duration": 0.9504127239924856
+      }
+     ]
+    },
+    {
+     "ladder_index": 17,
+     "knobs": {
+      "ef": 512,
+      "oversample": 4.0
+     },
+     "recall": 0.9999460000000001,
+     "recall_strict": 0.999916,
+     "tail": 0.0,
+     "short_results": 0,
+     "qps": 9401.354755966178,
+     "latency_ms": {
+      "n": 10000,
+      "min": 1.560561,
+      "avg": 3.2456045062,
+      "p50": 3.0019015,
+      "p95": 5.0392996,
+      "p99": 6.19504101,
+      "max": 9.494528
+     },
+     "queries": 10000,
+     "duration": 1.0636764870141633,
+     "passes": [
+      {
+       "qps": 9401.354755966178,
+       "avg": 3.2456045062,
+       "p50": 3.0019015,
+       "p99": 6.19504101,
+       "queries": 10000,
+       "duration": 1.0636764870141633
+      }
+     ]
+    },
+    {
+     "ladder_index": 18,
+     "knobs": {
+      "ef": 768,
+      "oversample": 1.0
+     },
+     "recall": 0.9999890000000001,
+     "recall_strict": 0.999957,
+     "tail": 0.0,
+     "short_results": 0,
+     "qps": 8444.541513183898,
+     "latency_ms": {
+      "n": 10000,
+      "min": 1.575924,
+      "avg": 3.6761006476,
+      "p50": 3.4533695,
+      "p95": 5.72855035,
+      "p99": 6.911329910000002,
+      "max": 10.988205
+     },
+     "queries": 10000,
+     "duration": 1.184196913993219,
+     "passes": [
+      {
+       "qps": 8444.541513183898,
+       "avg": 3.6761006476,
+       "p50": 3.4533695,
+       "p99": 6.911329910000002,
+       "queries": 10000,
+       "duration": 1.184196913993219
+      }
+     ]
+    },
+    {
+     "ladder_index": 19,
+     "knobs": {
+      "ef": 768,
+      "oversample": 4.0
+     },
+     "recall": 0.9999890000000001,
+     "recall_strict": 0.999959,
+     "tail": 0.0,
+     "short_results": 0,
+     "qps": 7489.4960116647735,
+     "latency_ms": {
+      "n": 10000,
+      "min": 1.735398,
+      "avg": 4.0381287845,
+      "p50": 3.898669,
+      "p95": 6.107949649999997,
+      "p99": 7.411308870000002,
+      "max": 13.917251
+     },
+     "queries": 10000,
+     "duration": 1.3352033280243631,
+     "passes": [
+      {
+       "qps": 7489.4960116647735,
+       "avg": 4.0381287845,
+       "p50": 3.898669,
+       "p99": 7.411308870000002,
+       "queries": 10000,
+       "duration": 1.3352033280243631
+      }
+     ]
+    }
+   ],
+   "plan": "\u256d\u2500 STREAMING_LIMIT \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u256e\n\u2502 ~1,000,000 rows                        \u2502\n\u2570\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u252c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u256f\n\u256d\u2500 PROJECTION \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2534\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u256e\n\u2502 Projections: CAST(#0 AS BIGINT)        \u2502\n\u2502 ~1,000,000 rows                        \u2502\n\u2570\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u252c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u256f\n\u256d\u2500 ORDER_BY \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2534\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u256e\n\u2502 Order By: #1 ASC                       \u2502\n\u2502 ~1,000,000 rows                        \u2502\n\u2570\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u252c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u256f\n\u256d\u2500 PROJECTION \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2534\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u256e\n\u2502 Projections: CAST(#0 AS INTEGER), #1   \u2502\n\u2502 ~1,000,000 rows                        \u2502\n\u2570\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u252c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u256f\n\u256d\u2500 IRESEARCH_SCAN \u2500\u2500\u2500\u2534\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u256e\n\u2502 Index: items                           \u2502\n\u2502 Lookup: search                         \u2502\n\u2502 Score: l2_distance(emb, FLOAT[128])    \u2502\n\u2502 Top: CAST($2 AS BIGINT)                \u2502\n\u2502 Projections: id,                       \u2502\n\u2502              sdb_inverted_index_score  \u2502\n\u2502 ~1,000,000 rows                        \u2502\n\u2570\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u256f",
+   "memory_peak": 1438195712
+  },
+  {
+   "key": "none/1000",
+   "filter": "none",
+   "k": 1000,
+   "exact": false,
+   "view": "throughput",
+   "clients": 32,
+   "status": "ok",
+   "block": "SET sdb_hnsw_ef_search = {ef};\nSET sdb_ann_oversample = {oversample};\nSELECT id FROM items ORDER BY emb <#> $q LIMIT $k;",
+   "startup": 0.4530686959915329,
+   "points": [
+    {
+     "ladder_index": 0,
+     "knobs": {
+      "ef": 1000,
+      "oversample": 1.0
+     },
+     "recall": 0.999859,
+     "recall_strict": 0.999859,
+     "tail": 0.0,
+     "short_results": 0,
+     "qps": 4810.633929365415,
+     "latency_ms": {
+      "n": 10000,
+      "min": 2.942359,
+      "avg": 6.2778635677,
+      "p50": 6.0215765,
+      "p95": 8.947336199999999,
+      "p99": 10.80075489000001,
+      "max": 24.302446
+     },
+     "queries": 10000,
+     "duration": 2.0787281150114723,
+     "passes": [
+      {
+       "qps": 4810.633929365415,
+       "avg": 6.2778635677,
+       "p50": 6.0215765,
+       "p99": 10.80075489000001,
+       "queries": 10000,
+       "duration": 2.0787281150114723
+      }
+     ]
+    },
+    {
+     "ladder_index": 1,
+     "knobs": {
+      "ef": 1000,
+      "oversample": 4.0
+     },
+     "recall": 0.9999797,
+     "recall_strict": 0.9999797,
+     "tail": 0.0,
+     "short_results": 0,
+     "qps": 1516.2363061895744,
+     "latency_ms": {
+      "n": 10000,
+      "min": 5.233841,
+      "avg": 16.4119774501,
+      "p50": 13.607448999999999,
+      "p95": 30.943159449999996,
+      "p99": 72.89200861,
+      "max": 220.963478
+     },
+     "queries": 10000,
+     "duration": 6.595278030988993,
+     "passes": [
+      {
+       "qps": 1516.2363061895744,
+       "avg": 16.4119774501,
+       "p50": 13.607448999999999,
+       "p99": 72.89200861,
+       "queries": 10000,
+       "duration": 6.595278030988993
+      }
+     ]
+    },
+    {
+     "ladder_index": 2,
+     "knobs": {
+      "ef": 1200,
+      "oversample": 1.0
+     },
+     "recall": 0.9999145,
+     "recall_strict": 0.9999145,
+     "tail": 0.0,
+     "short_results": 0,
+     "qps": 4348.686692068677,
+     "latency_ms": {
+      "n": 10000,
+      "min": 3.151172,
+      "avg": 6.7150503757,
+      "p50": 6.639252,
+      "p95": 9.855960449999998,
+      "p99": 11.542849310000001,
+      "max": 22.821543
+     },
+     "queries": 10000,
+     "duration": 2.299544829991646,
+     "passes": [
+      {
+       "qps": 4348.686692068677,
+       "avg": 6.7150503757,
+       "p50": 6.639252,
+       "p99": 11.542849310000001,
+       "queries": 10000,
+       "duration": 2.299544829991646
+      }
+     ]
+    },
+    {
+     "ladder_index": 3,
+     "knobs": {
+      "ef": 1200,
+      "oversample": 4.0
+     },
+     "recall": 0.9999758999999998,
+     "recall_strict": 0.9999758999999998,
+     "tail": 0.0,
+     "short_results": 0,
+     "qps": 1513.5929771793662,
+     "latency_ms": {
+      "n": 10000,
+      "min": 5.106797,
+      "avg": 16.176458373299997,
+      "p50": 13.282588,
+      "p95": 30.917043699999997,
+      "p99": 63.91980911,
+      "max": 459.787481
+     },
+     "queries": 10000,
+     "duration": 6.606795981992036,
+     "passes": [
+      {
+       "qps": 1513.5929771793662,
+       "avg": 16.176458373299997,
+       "p50": 13.282588,
+       "p99": 63.91980911,
+       "queries": 10000,
+       "duration": 6.606795981992036
+      }
+     ]
+    },
+    {
+     "ladder_index": 4,
+     "knobs": {
+      "ef": 1500,
+      "oversample": 1.0
+     },
+     "recall": 0.9999471000000001,
+     "recall_strict": 0.9999471000000001,
+     "tail": 0.0,
+     "short_results": 0,
+     "qps": 3752.522637548561,
+     "latency_ms": {
+      "n": 10000,
+      "min": 3.164546,
+      "avg": 7.515616432300001,
+      "p50": 7.053565,
+      "p95": 10.96506955,
+      "p99": 13.86528094,
+      "max": 24.480459
+     },
+     "queries": 10000,
+     "duration": 2.6648739970114548,
+     "passes": [
+      {
+       "qps": 3752.522637548561,
+       "avg": 7.515616432300001,
+       "p50": 7.053565,
+       "p99": 13.86528094,
+       "queries": 10000,
+       "duration": 2.6648739970114548
+      }
+     ]
+    },
+    {
+     "ladder_index": 5,
+     "knobs": {
+      "ef": 1500,
+      "oversample": 4.0
+     },
+     "recall": 0.9999780999999999,
+     "recall_strict": 0.9999780999999999,
+     "tail": 0.0,
+     "short_results": 0,
+     "qps": 1529.36018330636,
+     "latency_ms": {
+      "n": 10000,
+      "min": 5.20356,
+      "avg": 16.3115773495,
+      "p50": 13.8876845,
+      "p95": 31.027180049999863,
+      "p99": 57.900261690000185,
+      "max": 276.021201
+     },
+     "queries": 10000,
+     "duration": 6.5386820640123915,
+     "passes": [
+      {
+       "qps": 1529.36018330636,
+       "avg": 16.3115773495,
+       "p50": 13.8876845,
+       "p99": 57.900261690000185,
+       "queries": 10000,
+       "duration": 6.5386820640123915
+      }
+     ]
+    },
+    {
+     "ladder_index": 6,
+     "knobs": {
+      "ef": 2000,
+      "oversample": 1.0
+     },
+     "recall": 0.9999680000000001,
+     "recall_strict": 0.9999680000000001,
+     "tail": 0.0,
+     "short_results": 0,
+     "qps": 3069.739275904293,
+     "latency_ms": {
+      "n": 10000,
+      "min": 3.489387,
+      "avg": 8.8072211934,
+      "p50": 8.1359085,
+      "p95": 13.90993675,
+      "p99": 18.726306150000028,
+      "max": 32.903463
+     },
+     "queries": 10000,
+     "duration": 3.2576056469988544,
+     "passes": [
+      {
+       "qps": 3069.739275904293,
+       "avg": 8.8072211934,
+       "p50": 8.1359085,
+       "p99": 18.726306150000028,
+       "queries": 10000,
+       "duration": 3.2576056469988544
+      }
+     ]
+    },
+    {
+     "ladder_index": 7,
+     "knobs": {
+      "ef": 2000,
+      "oversample": 4.0
+     },
+     "recall": 0.9999786,
+     "recall_strict": 0.9999786,
+     "tail": 0.0,
+     "short_results": 0,
+     "qps": 1523.3685733172324,
+     "latency_ms": {
+      "n": 10000,
+      "min": 5.396111,
+      "avg": 16.2219729943,
+      "p50": 13.821173,
+      "p95": 31.71394369999993,
+      "p99": 59.917570540000014,
+      "max": 337.987008
+     },
+     "queries": 10000,
+     "duration": 6.56439956498798,
+     "passes": [
+      {
+       "qps": 1523.3685733172324,
+       "avg": 16.2219729943,
+       "p50": 13.821173,
+       "p99": 59.917570540000014,
+       "queries": 10000,
+       "duration": 6.56439956498798
+      }
+     ]
+    },
+    {
+     "ladder_index": 8,
+     "knobs": {
+      "ef": 2500,
+      "oversample": 1.0
+     },
+     "recall": 0.999973,
+     "recall_strict": 0.999973,
+     "tail": 0.0,
+     "short_results": 0,
+     "qps": 2624.567567066636,
+     "latency_ms": {
+      "n": 10000,
+      "min": 3.73494,
+      "avg": 9.9658686846,
+      "p50": 8.942955000000001,
+      "p95": 16.911829299999997,
+      "p99": 23.96007106,
+      "max": 47.920062
+     },
+     "queries": 10000,
+     "duration": 3.8101514799927827,
+     "passes": [
+      {
+       "qps": 2624.567567066636,
+       "avg": 9.9658686846,
+       "p50": 8.942955000000001,
+       "p99": 23.96007106,
+       "queries": 10000,
+       "duration": 3.8101514799927827
+      }
+     ]
+    },
+    {
+     "ladder_index": 9,
+     "knobs": {
+      "ef": 2500,
+      "oversample": 4.0
+     },
+     "recall": 0.9999776999999999,
+     "recall_strict": 0.9999776999999999,
+     "tail": 0.0,
+     "short_results": 0,
+     "qps": 1526.2610830906344,
+     "latency_ms": {
+      "n": 10000,
+      "min": 4.979765,
+      "avg": 16.2805685193,
+      "p50": 13.861363,
+      "p95": 31.916211349999998,
+      "p99": 61.44652983000002,
+      "max": 188.859701
+     },
+     "queries": 10000,
+     "duration": 6.551958973985165,
+     "passes": [
+      {
+       "qps": 1526.2610830906344,
+       "avg": 16.2805685193,
+       "p50": 13.861363,
+       "p99": 61.44652983000002,
+       "queries": 10000,
+       "duration": 6.551958973985165
+      }
+     ]
+    },
+    {
+     "ladder_index": 10,
+     "knobs": {
+      "ef": 3000,
+      "oversample": 1.0
+     },
+     "recall": 0.9999740999999999,
+     "recall_strict": 0.9999740999999999,
+     "tail": 0.0,
+     "short_results": 0,
+     "qps": 2305.184945257069,
+     "latency_ms": {
+      "n": 10000,
+      "min": 4.048994,
+      "avg": 11.1273120935,
+      "p50": 9.904361000000002,
+      "p95": 19.8946471,
+      "p99": 29.01671418000003,
+      "max": 62.971272
+     },
+     "queries": 10000,
+     "duration": 4.338046724005835,
+     "passes": [
+      {
+       "qps": 2305.184945257069,
+       "avg": 11.1273120935,
+       "p50": 9.904361000000002,
+       "p99": 29.01671418000003,
+       "queries": 10000,
+       "duration": 4.338046724005835
+      }
+     ]
+    },
+    {
+     "ladder_index": 11,
+     "knobs": {
+      "ef": 3000,
+      "oversample": 4.0
+     },
+     "recall": 0.9999783,
+     "recall_strict": 0.9999783,
+     "tail": 0.0,
+     "short_results": 0,
+     "qps": 1518.9235821297293,
+     "latency_ms": {
+      "n": 10000,
+      "min": 4.669733,
+      "avg": 16.2291402928,
+      "p50": 13.727616999999999,
+      "p95": 31.925435699999994,
+      "p99": 58.899515250000015,
+      "max": 228.928588
+     },
+     "queries": 10000,
+     "duration": 6.583609680994414,
+     "passes": [
+      {
+       "qps": 1518.9235821297293,
+       "avg": 16.2291402928,
+       "p50": 13.727616999999999,
+       "p99": 58.899515250000015,
+       "queries": 10000,
+       "duration": 6.583609680994414
+      }
+     ]
+    },
+    {
+     "ladder_index": 12,
+     "knobs": {
+      "ef": 4000,
+      "oversample": 1.0
+     },
+     "recall": 0.9999762000000001,
+     "recall_strict": 0.9999762000000001,
+     "tail": 0.0,
+     "short_results": 0,
+     "qps": 1864.214901481127,
+     "latency_ms": {
+      "n": 10000,
+      "min": 4.661199,
+      "avg": 13.328267181600001,
+      "p50": 11.3518895,
+      "p95": 24.935411399999996,
+      "p99": 43.95021814000008,
+      "max": 144.891313
+     },
+     "queries": 10000,
+     "duration": 5.3641884270182345,
+     "passes": [
+      {
+       "qps": 1864.214901481127,
+       "avg": 13.328267181600001,
+       "p50": 11.3518895,
+       "p99": 43.95021814000008,
+       "queries": 10000,
+       "duration": 5.3641884270182345
+      }
+     ]
+    },
+    {
+     "ladder_index": 13,
+     "knobs": {
+      "ef": 4000,
+      "oversample": 4.0
+     },
+     "recall": 0.9999790000000001,
+     "recall_strict": 0.9999790000000001,
+     "tail": 0.0,
+     "short_results": 0,
+     "qps": 1520.4386800898615,
+     "latency_ms": {
+      "n": 10000,
+      "min": 5.37594,
+      "avg": 16.2767829162,
+      "p50": 13.8495385,
+      "p95": 31.89137625,
+      "p99": 61.86271372000001,
+      "max": 181.925111
+     },
+     "queries": 10000,
+     "duration": 6.577049197017914,
+     "passes": [
+      {
+       "qps": 1520.4386800898615,
+       "avg": 16.2767829162,
+       "p50": 13.8495385,
+       "p99": 61.86271372000001,
+       "queries": 10000,
+       "duration": 6.577049197017914
+      }
+     ]
+    }
+   ],
+   "plan": "\u256d\u2500 STREAMING_LIMIT \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u256e\n\u2502 ~1,000,000 rows                        \u2502\n\u2570\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u252c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u256f\n\u256d\u2500 PROJECTION \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2534\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u256e\n\u2502 Projections: CAST(#0 AS BIGINT)        \u2502\n\u2502 ~1,000,000 rows                        \u2502\n\u2570\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u252c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u256f\n\u256d\u2500 ORDER_BY \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2534\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u256e\n\u2502 Order By: #1 ASC                       \u2502\n\u2502 ~1,000,000 rows                        \u2502\n\u2570\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u252c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u256f\n\u256d\u2500 PROJECTION \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2534\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u256e\n\u2502 Projections: CAST(#0 AS INTEGER), #1   \u2502\n\u2502 ~1,000,000 rows                        \u2502\n\u2570\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u252c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u256f\n\u256d\u2500 IRESEARCH_SCAN \u2500\u2500\u2500\u2534\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u256e\n\u2502 Index: items                           \u2502\n\u2502 Lookup: search                         \u2502\n\u2502 Score: l2_distance(emb, FLOAT[128])    \u2502\n\u2502 Top: CAST($2 AS BIGINT)                \u2502\n\u2502 Projections: id,                       \u2502\n\u2502              sdb_inverted_index_score  \u2502\n\u2502 ~1,000,000 rows                        \u2502\n\u2570\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u256f",
+   "memory_peak": 1466093568
+  },
+  {
+   "key": "none/10",
+   "filter": "none",
+   "k": 10,
+   "exact": false,
+   "view": "latency",
+   "clients": 1,
+   "status": "ok",
+   "block": "SET sdb_hnsw_ef_search = {ef};\nSET sdb_ann_oversample = {oversample};\nSELECT id FROM items ORDER BY emb <#> $q LIMIT $k;",
+   "startup": 0.4530686959915329,
+   "points": [
+    {
+     "ladder_index": 0,
+     "knobs": {
+      "ef": 16,
+      "oversample": 1.0
+     },
+     "recall": 0.9465616045845274,
+     "recall_strict": 0.9465616045845274,
+     "tail": 0.001114294810569882,
+     "short_results": 0,
+     "qps": 785.1923855272769,
+     "latency_ms": {
+      "n": 6282,
+      "min": 0.674037,
+      "avg": 1.2682172137854186,
+      "p50": 1.2493235,
+      "p95": 1.4927492999999998,
+      "p99": 1.6406782499999992,
+      "max": 17.207258
+     },
+     "queries": 6282,
+     "duration": 8.000587009999435,
+     "passes": [
+      {
+       "qps": 785.1923855272769,
+       "avg": 1.2682172137854186,
+       "p50": 1.2493235,
+       "p99": 1.6406782499999992,
+       "queries": 6282,
+       "duration": 8.000587009999435
+      }
+     ]
+    },
+    {
+     "ladder_index": 1,
+     "knobs": {
+      "ef": 16,
+      "oversample": 4.0
+     },
+     "recall": 0.9903062087633228,
+     "recall_strict": 0.9902892911520894,
+     "tail": 0.0,
+     "short_results": 0,
+     "qps": 738.7949608015888,
+     "latency_ms": {
+      "n": 5911,
+      "min": 0.972946,
+      "avg": 1.3482454100828962,
+      "p50": 1.335119,
+      "p95": 1.5608845,
+      "p99": 1.6878447,
+      "max": 3.134954
+     },
+     "queries": 5911,
+     "duration": 8.000866699992912,
+     "passes": [
+      {
+       "qps": 738.7949608015888,
+       "avg": 1.3482454100828962,
+       "p50": 1.335119,
+       "p99": 1.6878447,
+       "queries": 5911,
+       "duration": 8.000866699992912
+      }
+     ]
+    },
+    {
+     "ladder_index": 2,
+     "knobs": {
+      "ef": 18,
+      "oversample": 1.0
+     },
+     "recall": 0.9557085668534827,
+     "recall_strict": 0.9556925540432346,
+     "tail": 0.0003202562049639712,
+     "short_results": 0,
+     "qps": 780.5719127176787,
+     "latency_ms": {
+      "n": 6245,
+      "min": 0.810124,
+      "avg": 1.2757376113690952,
+      "p50": 1.259833,
+      "p95": 1.4955093999999998,
+      "p99": 1.6401877999999999,
+      "max": 16.271774
+     },
+     "queries": 6245,
+     "duration": 8.00054408601136,
+     "passes": [
+      {
+       "qps": 780.5719127176787,
+       "avg": 1.2757376113690952,
+       "p50": 1.259833,
+       "p99": 1.6401877999999999,
+       "queries": 6245,
+       "duration": 8.00054408601136
+      }
+     ]
+    },
+    {
+     "ladder_index": 3,
+     "knobs": {
+      "ef": 18,
+      "oversample": 4.0
+     },
+     "recall": 0.9903409090909091,
+     "recall_strict": 0.9903409090909091,
+     "tail": 0.0,
+     "short_results": 0,
+     "qps": 747.9889194780393,
+     "latency_ms": {
+      "n": 5984,
+      "min": 0.77433,
+      "avg": 1.3314618524398396,
+      "p50": 1.3262749999999999,
+      "p95": 1.5484420499999998,
+      "p99": 1.6871749800000002,
+      "max": 16.855283
+     },
+     "queries": 5984,
+     "duration": 8.000118510011816,
+     "passes": [
+      {
+       "qps": 747.9889194780393,
+       "avg": 1.3314618524398396,
+       "p50": 1.3262749999999999,
+       "p99": 1.6871749800000002,
+       "queries": 5984,
+       "duration": 8.000118510011816
+      }
+     ]
+    },
+    {
+     "ladder_index": 4,
+     "knobs": {
+      "ef": 20,
+      "oversample": 1.0
+     },
+     "recall": 0.9631060116354234,
+     "recall_strict": 0.9630898513251454,
+     "tail": 0.0,
+     "short_results": 0,
+     "qps": 773.393872378582,
+     "latency_ms": {
+      "n": 6188,
+      "min": 0.734545,
+      "avg": 1.2876170444408532,
+      "p50": 1.27265,
+      "p95": 1.5044059499999993,
+      "p99": 1.6425054700000001,
+      "max": 17.036695
+     },
+     "queries": 6188,
+     "duration": 8.001097786007449,
+     "passes": [
+      {
+       "qps": 773.393872378582,
+       "avg": 1.2876170444408532,
+       "p50": 1.27265,
+       "p99": 1.6425054700000001,
+       "queries": 6188,
+       "duration": 8.001097786007449
+      }
+     ]
+    },
+    {
+     "ladder_index": 5,
+     "knobs": {
+      "ef": 20,
+      "oversample": 4.0
+     },
+     "recall": 0.990323123527432,
+     "recall_strict": 0.9902894648266577,
+     "tail": 0.0,
+     "short_results": 0,
+     "qps": 742.7382694718742,
+     "latency_ms": {
+      "n": 5942,
+      "min": 0.815813,
+      "avg": 1.3410429007068327,
+      "p50": 1.3274595,
+      "p95": 1.5626305,
+      "p99": 1.6914689100000002,
+      "max": 17.083412
+     },
+     "queries": 5942,
+     "duration": 8.00012634898303,
+     "passes": [
+      {
+       "qps": 742.7382694718742,
+       "avg": 1.3410429007068327,
+       "p50": 1.3274595,
+       "p99": 1.6914689100000002,
+       "queries": 5942,
+       "duration": 8.00012634898303
+      }
+     ]
+    },
+    {
+     "ladder_index": 6,
+     "knobs": {
+      "ef": 22,
+      "oversample": 1.0
+     },
+     "recall": 0.9689381676918097,
+     "recall_strict": 0.968921981223697,
+     "tail": 0.0,
+     "short_results": 0,
+     "qps": 772.1760887550208,
+     "latency_ms": {
+      "n": 6178,
+      "min": 0.792383,
+      "avg": 1.289774157979929,
+      "p50": 1.2747614999999999,
+      "p95": 1.5037904999999994,
+      "p99": 1.64199575,
+      "max": 3.557792
+     },
+     "queries": 6178,
+     "duration": 8.00076574497507,
+     "passes": [
+      {
+       "qps": 772.1760887550208,
+       "avg": 1.289774157979929,
+       "p50": 1.2747614999999999,
+       "p99": 1.64199575,
+       "queries": 6178,
+       "duration": 8.00076574497507
+      }
+     ]
+    },
+    {
+     "ladder_index": 7,
+     "knobs": {
+      "ef": 22,
+      "oversample": 4.0
+     },
+     "recall": 0.9902974983096687,
+     "recall_strict": 0.9902636916835699,
+     "tail": 0.0,
+     "short_results": 0,
+     "qps": 739.4191861049798,
+     "latency_ms": {
+      "n": 5916,
+      "min": 0.776152,
+      "avg": 1.3470922549019608,
+      "p50": 1.332098,
+      "p95": 1.55015375,
+      "p99": 1.7054536500000004,
+      "max": 15.561497
+     },
+     "queries": 5916,
+     "duration": 8.000874349992955,
+     "passes": [
+      {
+       "qps": 739.4191861049798,
+       "avg": 1.3470922549019608,
+       "p50": 1.332098,
+       "p99": 1.7054536500000004,
+       "queries": 5916,
+       "duration": 8.000874349992955
+      }
+     ]
+    },
+    {
+     "ladder_index": 8,
+     "knobs": {
+      "ef": 24,
+      "oversample": 1.0
+     },
+     "recall": 0.9732834363813863,
+     "recall_strict": 0.9732834363813863,
+     "tail": 0.0,
+     "short_results": 0,
+     "qps": 768.2372836560935,
+     "latency_ms": {
+      "n": 6146,
+      "min": 0.808357,
+      "avg": 1.2963149720143183,
+      "p50": 1.2810915,
+      "p95": 1.51248875,
+      "p99": 1.6568437,
+      "max": 15.711254
+     },
+     "queries": 6146,
+     "duration": 8.00013242100249,
+     "passes": [
+      {
+       "qps": 768.2372836560935,
+       "avg": 1.2963149720143183,
+       "p50": 1.2810915,
+       "p99": 1.6568437,
+       "queries": 6146,
+       "duration": 8.00013242100249
+      }
+     ]
+    },
+    {
+     "ladder_index": 9,
+     "knobs": {
+      "ef": 24,
+      "oversample": 4.0
+     },
+     "recall": 0.9903149339654589,
+     "recall_strict": 0.990298002031832,
+     "tail": 0.0,
+     "short_results": 0,
+     "qps": 738.1476030561229,
+     "latency_ms": {
+      "n": 5906,
+      "min": 0.905382,
+      "avg": 1.3494285093125635,
+      "p50": 1.335502,
+      "p95": 1.5563805,
+      "p99": 1.7074261999999996,
+      "max": 16.315745
+     },
+     "queries": 5906,
+     "duration": 8.001109772012569,
+     "passes": [
+      {
+       "qps": 738.1476030561229,
+       "avg": 1.3494285093125635,
+       "p50": 1.335502,
+       "p99": 1.7074261999999996,
+       "queries": 5906,
+       "duration": 8.001109772012569
+      }
+     ]
+    },
+    {
+     "ladder_index": 10,
+     "knobs": {
+      "ef": 28,
+      "oversample": 1.0
+     },
+     "recall": 0.9798439531859557,
+     "recall_strict": 0.9798276983094929,
+     "tail": 0.0,
+     "short_results": 0,
+     "qps": 768.8944138811219,
+     "latency_ms": {
+      "n": 6152,
+      "min": 0.669465,
+      "avg": 1.2952767719440832,
+      "p50": 1.2867730000000002,
+      "p95": 1.51253155,
+      "p99": 1.64451866,
+      "max": 16.462554
+     },
+     "queries": 6152,
+     "duration": 8.001098576001823,
+     "passes": [
+      {
+       "qps": 768.8944138811219,
+       "avg": 1.2952767719440832,
+       "p50": 1.2867730000000002,
+       "p99": 1.64451866,
+       "queries": 6152,
+       "duration": 8.001098576001823
+      }
+     ]
+    },
+    {
+     "ladder_index": 11,
+     "knobs": {
+      "ef": 28,
+      "oversample": 4.0
+     },
+     "recall": 0.9903149339654589,
+     "recall_strict": 0.990298002031832,
+     "tail": 0.0,
+     "short_results": 0,
+     "qps": 738.1754183534964,
+     "latency_ms": {
+      "n": 5906,
+      "min": 0.799735,
+      "avg": 1.3494259651202167,
+      "p50": 1.334763,
+      "p95": 1.5519797499999999,
+      "p99": 1.6975144999999998,
+      "max": 17.038965
+     },
+     "queries": 5906,
+     "duration": 8.000808281009085,
+     "passes": [
+      {
+       "qps": 738.1754183534964,
+       "avg": 1.3494259651202167,
+       "p50": 1.334763,
+       "p99": 1.6975144999999998,
+       "queries": 5906,
+       "duration": 8.000808281009085
+      }
+     ]
+    },
+    {
+     "ladder_index": 12,
+     "knobs": {
+      "ef": 32,
+      "oversample": 1.0
+     },
+     "recall": 0.9848042468480424,
+     "recall_strict": 0.9847876575978766,
+     "tail": 0.0,
+     "short_results": 0,
+     "qps": 753.4015605529788,
+     "latency_ms": {
+      "n": 6028,
+      "min": 0.7958,
+      "avg": 1.3220973430656935,
+      "p50": 1.30533,
+      "p95": 1.53263475,
+      "p99": 1.6875065699999996,
+      "max": 17.978209
+     },
+     "queries": 6028,
+     "duration": 8.001045279990649,
+     "passes": [
+      {
+       "qps": 753.4015605529788,
+       "avg": 1.3220973430656935,
+       "p50": 1.30533,
+       "p99": 1.6875065699999996,
+       "queries": 6028,
+       "duration": 8.001045279990649
+      }
+     ]
+    },
+    {
+     "ladder_index": 13,
+     "knobs": {
+      "ef": 32,
+      "oversample": 4.0
+     },
+     "recall": 0.99031007751938,
+     "recall_strict": 0.9902932254802832,
+     "tail": 0.0,
+     "short_results": 0,
+     "qps": 741.7199770309204,
+     "latency_ms": {
+      "n": 5934,
+      "min": 0.919248,
+      "avg": 1.3429442637344118,
+      "p50": 1.3315475,
+      "p95": 1.5579546499999999,
+      "p99": 1.68939517,
+      "max": 2.127438
+     },
+     "queries": 5934,
+     "duration": 8.000323819986079,
+     "passes": [
+      {
+       "qps": 741.7199770309204,
+       "avg": 1.3429442637344118,
+       "p50": 1.3315475,
+       "p99": 1.68939517,
+       "queries": 5934,
+       "duration": 8.000323819986079
+      }
+     ]
+    },
+    {
+     "ladder_index": 14,
+     "knobs": {
+      "ef": 40,
+      "oversample": 1.0
+     },
+     "recall": 0.9903080013391363,
+     "recall_strict": 0.9903080013391363,
+     "tail": 0.0,
+     "short_results": 0,
+     "qps": 746.6664629567462,
+     "latency_ms": {
+      "n": 5974,
+      "min": 0.654444,
+      "avg": 1.33398281218614,
+      "p50": 1.3180165,
+      "p95": 1.54885295,
+      "p99": 1.6751637499999992,
+      "max": 16.056048
+     },
+     "queries": 5974,
+     "duration": 8.000895039993338,
+     "passes": [
+      {
+       "qps": 746.6664629567462,
+       "avg": 1.33398281218614,
+       "p50": 1.3180165,
+       "p99": 1.6751637499999992,
+       "queries": 5974,
+       "duration": 8.000895039993338
+      }
+     ]
+    },
+    {
+     "ladder_index": 15,
+     "knobs": {
+      "ef": 40,
+      "oversample": 4.0
+     },
+     "recall": 0.9903149339654589,
+     "recall_strict": 0.9903149339654589,
+     "tail": 0.0,
+     "short_results": 0,
+     "qps": 738.2107837520543,
+     "latency_ms": {
+      "n": 5906,
+      "min": 0.712933,
+      "avg": 1.349284336437521,
+      "p50": 1.3344045,
+      "p95": 1.560753,
+      "p99": 1.70679765,
+      "max": 16.414615
+     },
+     "queries": 5906,
+     "duration": 8.000424986996222,
+     "passes": [
+      {
+       "qps": 738.2107837520543,
+       "avg": 1.349284336437521,
+       "p50": 1.3344045,
+       "p99": 1.70679765,
+       "queries": 5906,
+       "duration": 8.000424986996222
+      }
+     ]
+    },
+    {
+     "ladder_index": 16,
+     "knobs": {
+      "ef": 48,
+      "oversample": 1.0
+     },
+     "recall": 0.9933543778036219,
+     "recall_strict": 0.9933377637481309,
+     "tail": 0.0,
+     "short_results": 0,
+     "qps": 752.3324037852707,
+     "latency_ms": {
+      "n": 6019,
+      "min": 0.753122,
+      "avg": 1.323831686825054,
+      "p50": 1.321515,
+      "p95": 1.551337,
+      "p99": 1.6961745199999998,
+      "max": 17.385685
+     },
+     "queries": 6019,
+     "duration": 8.000452951004263,
+     "passes": [
+      {
+       "qps": 752.3324037852707,
+       "avg": 1.323831686825054,
+       "p50": 1.321515,
+       "p99": 1.6961745199999998,
+       "queries": 6019,
+       "duration": 8.000452951004263
+      }
+     ]
+    },
+    {
+     "ladder_index": 17,
+     "knobs": {
+      "ef": 48,
+      "oversample": 4.0
+     },
+     "recall": 0.9933971946630173,
+     "recall_strict": 0.993362983236401,
+     "tail": 0.0,
+     "short_results": 0,
+     "qps": 730.7081288692904,
+     "latency_ms": {
+      "n": 5846,
+      "min": 0.8777,
+      "avg": 1.3631937088607595,
+      "p50": 1.349731,
+      "p95": 1.5629737499999998,
+      "p99": 1.6985691000000003,
+      "max": 17.436259
+     },
+     "queries": 5846,
+     "duration": 8.000458417023765,
+     "passes": [
+      {
+       "qps": 730.7081288692904,
+       "avg": 1.3631937088607595,
+       "p50": 1.349731,
+       "p99": 1.6985691000000003,
+       "queries": 5846,
+       "duration": 8.000458417023765
+      }
+     ]
+    },
+    {
+     "ladder_index": 18,
+     "knobs": {
+      "ef": 56,
+      "oversample": 1.0
+     },
+     "recall": 0.9951659574468085,
+     "recall_strict": 0.995131914893617,
+     "tail": 0.0,
+     "short_results": 0,
+     "qps": 734.2952692102618,
+     "latency_ms": {
+      "n": 5875,
+      "min": 0.859653,
+      "avg": 1.356486018212766,
+      "p50": 1.34689,
+      "p95": 1.5666371000000001,
+      "p99": 1.7154149400000003,
+      "max": 3.163531
+     },
+     "queries": 5875,
+     "duration": 8.00086865099729,
+     "passes": [
+      {
+       "qps": 734.2952692102618,
+       "avg": 1.356486018212766,
+       "p50": 1.34689,
+       "p99": 1.7154149400000003,
+       "queries": 5875,
+       "duration": 8.00086865099729
+      }
+     ]
+    },
+    {
+     "ladder_index": 19,
+     "knobs": {
+      "ef": 56,
+      "oversample": 4.0
+     },
+     "recall": 0.9951582223759294,
+     "recall_strict": 0.9951582223759294,
+     "tail": 0.0,
+     "short_results": 0,
+     "qps": 722.8744587499392,
+     "latency_ms": {
+      "n": 5783,
+      "min": 0.922835,
+      "avg": 1.3780584532249698,
+      "p50": 1.365938,
+      "p95": 1.5825105,
+      "p99": 1.7147784200000002,
+      "max": 15.838127
+     },
+     "queries": 5783,
+     "duration": 8.000005989975762,
+     "passes": [
+      {
+       "qps": 722.8744587499392,
+       "avg": 1.3780584532249698,
+       "p50": 1.365938,
+       "p99": 1.7147784200000002,
+       "queries": 5783,
+       "duration": 8.000005989975762
+      }
+     ]
+    },
+    {
+     "ladder_index": 20,
+     "knobs": {
+      "ef": 64,
+      "oversample": 1.0
+     },
+     "recall": 0.9964316349288043,
+     "recall_strict": 0.9964144793275005,
+     "tail": 0.0,
+     "short_results": 0,
+     "qps": 728.6195365391407,
+     "latency_ms": {
+      "n": 5829,
+      "min": 0.919752,
+      "avg": 1.3671866229198832,
+      "p50": 1.356015,
+      "p95": 1.57159,
+      "p99": 1.6981961600000004,
+      "max": 16.3072
+     },
+     "queries": 5829,
+     "duration": 8.000059986981796,
+     "passes": [
+      {
+       "qps": 728.6195365391407,
+       "avg": 1.3671866229198832,
+       "p50": 1.356015,
+       "p99": 1.6981961600000004,
+       "queries": 5829,
+       "duration": 8.000059986981796
+      }
+     ]
+    },
+    {
+     "ladder_index": 21,
+     "knobs": {
+      "ef": 64,
+      "oversample": 4.0
+     },
+     "recall": 0.9964489866620475,
+     "recall_strict": 0.9964489866620475,
+     "tail": 0.0,
+     "short_results": 0,
+     "qps": 721.5984406672947,
+     "latency_ms": {
+      "n": 5773,
+      "min": 0.766903,
+      "avg": 1.38043125532652,
+      "p50": 1.371732,
+      "p95": 1.5916316,
+      "p99": 1.7483991199999984,
+      "max": 16.943701
+     },
+     "queries": 5773,
+     "duration": 8.000294450001093,
+     "passes": [
+      {
+       "qps": 721.5984406672947,
+       "avg": 1.38043125532652,
+       "p50": 1.371732,
+       "p99": 1.7483991199999984,
+       "queries": 5773,
+       "duration": 8.000294450001093
+      }
+     ]
+    },
+    {
+     "ladder_index": 22,
+     "knobs": {
+      "ef": 80,
+      "oversample": 1.0
+     },
+     "recall": 0.9977376359172221,
+     "recall_strict": 0.9977200982111539,
+     "tail": 0.0,
+     "short_results": 0,
+     "qps": 712.6751316965551,
+     "latency_ms": {
+      "n": 5702,
+      "min": 0.918394,
+      "avg": 1.3977899065240267,
+      "p50": 1.3852099999999998,
+      "p95": 1.6037233999999998,
+      "p99": 1.7472025,
+      "max": 17.892868
+     },
+     "queries": 5702,
+     "duration": 8.000840419990709,
+     "passes": [
+      {
+       "qps": 712.6751316965551,
+       "avg": 1.3977899065240267,
+       "p50": 1.3852099999999998,
+       "p99": 1.7472025,
+       "queries": 5702,
+       "duration": 8.000840419990709
+      }
+     ]
+    },
+    {
+     "ladder_index": 23,
+     "knobs": {
+      "ef": 80,
+      "oversample": 4.0
+     },
+     "recall": 0.9977762089657606,
+     "recall_strict": 0.9977585598305684,
+     "tail": 0.0,
+     "short_results": 0,
+     "qps": 708.1992852280533,
+     "latency_ms": {
+      "n": 5666,
+      "min": 0.989329,
+      "avg": 1.406722142957995,
+      "p50": 1.3988475,
+      "p95": 1.6116605000000002,
+      "p99": 1.7430910000000006,
+      "max": 2.385365
+     },
+     "queries": 5666,
+     "duration": 8.00057288701646,
+     "passes": [
+      {
+       "qps": 708.1992852280533,
+       "avg": 1.406722142957995,
+       "p50": 1.3988475,
+       "p99": 1.7430910000000006,
+       "queries": 5666,
+       "duration": 8.00057288701646
+      }
+     ]
+    },
+    {
+     "ladder_index": 24,
+     "knobs": {
+      "ef": 96,
+      "oversample": 1.0
+     },
+     "recall": 0.9984953089042309,
+     "recall_strict": 0.9984953089042309,
+     "tail": 0.0,
+     "short_results": 0,
+     "qps": 706.0290729785384,
+     "latency_ms": {
+      "n": 5649,
+      "min": 0.946173,
+      "avg": 1.411106591432112,
+      "p50": 1.39915,
+      "p95": 1.6210314,
+      "p99": 1.7473616799999994,
+      "max": 16.215224
+     },
+     "queries": 5649,
+     "duration": 8.001086946984287,
+     "passes": [
+      {
+       "qps": 706.0290729785384,
+       "avg": 1.411106591432112,
+       "p50": 1.39915,
+       "p99": 1.7473616799999994,
+       "queries": 5649,
+       "duration": 8.001086946984287
+      }
+     ]
+    },
+    {
+     "ladder_index": 25,
+     "knobs": {
+      "ef": 96,
+      "oversample": 4.0
+     },
+     "recall": 0.9985130777499104,
+     "recall_strict": 0.9984951630240058,
+     "tail": 0.0,
+     "short_results": 0,
+     "qps": 697.7017680511685,
+     "latency_ms": {
+      "n": 5582,
+      "min": 0.99417,
+      "avg": 1.4280962210677177,
+      "p50": 1.4175675,
+      "p95": 1.63194485,
+      "p99": 1.7579030799999995,
+      "max": 16.452021
+     },
+     "queries": 5582,
+     "duration": 8.000553038000362,
+     "passes": [
+      {
+       "qps": 697.7017680511685,
+       "avg": 1.4280962210677177,
+       "p50": 1.4175675,
+       "p99": 1.7579030799999995,
+       "queries": 5582,
+       "duration": 8.000553038000362
+      }
+     ]
+    },
+    {
+     "ladder_index": 26,
+     "knobs": {
+      "ef": 128,
+      "oversample": 1.0
+     },
+     "recall": 0.9993581514762516,
+     "recall_strict": 0.9993581514762516,
+     "tail": 0.0,
+     "short_results": 0,
+     "qps": 681.517269073741,
+     "latency_ms": {
+      "n": 5453,
+      "min": 0.99062,
+      "avg": 1.4619571048963873,
+      "p50": 1.450212,
+      "p95": 1.6616507999999999,
+      "p99": 1.7985647599999999,
+      "max": 17.825386
+     },
+     "queries": 5453,
+     "duration": 8.00126460098545,
+     "passes": [
+      {
+       "qps": 681.517269073741,
+       "avg": 1.4619571048963873,
+       "p50": 1.450212,
+       "p99": 1.7985647599999999,
+       "queries": 5453,
+       "duration": 8.00126460098545
+      }
+     ]
+    },
+    {
+     "ladder_index": 27,
+     "knobs": {
+      "ef": 128,
+      "oversample": 4.0
+     },
+     "recall": 0.9993741947358734,
+     "recall_strict": 0.9993557886986931,
+     "tail": 0.0,
+     "short_results": 0,
+     "qps": 679.0756728773534,
+     "latency_ms": {
+      "n": 5433,
+      "min": 0.965138,
+      "avg": 1.467087111908706,
+      "p50": 1.459673,
+      "p95": 1.6749428,
+      "p99": 1.8177208000000005,
+      "max": 2.355552
+     },
+     "queries": 5433,
+     "duration": 8.000581108994083,
+     "passes": [
+      {
+       "qps": 679.0756728773534,
+       "avg": 1.467087111908706,
+       "p50": 1.459673,
+       "p99": 1.8177208000000005,
+       "queries": 5433,
+       "duration": 8.000581108994083
+      }
+     ]
+    },
+    {
+     "ladder_index": 28,
+     "knobs": {
+      "ef": 192,
+      "oversample": 1.0
+     },
+     "recall": 0.9997698504027617,
+     "recall_strict": 0.9997506712696586,
+     "tail": 0.0,
+     "short_results": 0,
+     "qps": 651.6844102456236,
+     "latency_ms": {
+      "n": 5214,
+      "min": 1.066588,
+      "avg": 1.5292542466436516,
+      "p50": 1.519388,
+      "p95": 1.7435049999999996,
+      "p99": 1.8818646799999998,
+      "max": 16.059594
+     },
+     "queries": 5214,
+     "duration": 8.000805171992397,
+     "passes": [
+      {
+       "qps": 651.6844102456236,
+       "avg": 1.5292542466436516,
+       "p50": 1.519388,
+       "p99": 1.8818646799999998,
+       "queries": 5214,
+       "duration": 8.000805171992397
+      }
+     ]
+    },
+    {
+     "ladder_index": 29,
+     "knobs": {
+      "ef": 192,
+      "oversample": 4.0
+     },
+     "recall": 0.9997907153729071,
+     "recall_strict": 0.9997526636225265,
+     "tail": 0.0,
+     "short_results": 0,
+     "qps": 656.9546161789119,
+     "latency_ms": {
+      "n": 5256,
+      "min": 0.963225,
+      "avg": 1.5170397519025876,
+      "p50": 1.518548,
+      "p95": 1.7438425,
+      "p99": 1.8900620999999995,
+      "max": 16.463083
+     },
+     "queries": 5256,
+     "duration": 8.000552657002117,
+     "passes": [
+      {
+       "qps": 656.9546161789119,
+       "avg": 1.5170397519025876,
+       "p50": 1.518548,
+       "p99": 1.8900620999999995,
+       "queries": 5256,
+       "duration": 8.000552657002117
+      }
+     ]
+    },
+    {
+     "ladder_index": 30,
+     "knobs": {
+      "ef": 256,
+      "oversample": 1.0
+     },
+     "recall": 0.9998794696665326,
+     "recall_strict": 0.9998593812776214,
+     "tail": 0.0,
+     "short_results": 0,
+     "qps": 622.1741007480152,
+     "latency_ms": {
+      "n": 4978,
+      "min": 1.123148,
+      "avg": 1.601963300723182,
+      "p50": 1.589625,
+      "p95": 1.8375894999999998,
+      "p99": 1.99088153,
+      "max": 18.140036
+     },
+     "queries": 4978,
+     "duration": 8.000975923001533,
+     "passes": [
+      {
+       "qps": 622.1741007480152,
+       "avg": 1.601963300723182,
+       "p50": 1.589625,
+       "p99": 1.99088153,
+       "queries": 4978,
+       "duration": 8.000975923001533
+      }
+     ]
+    },
+    {
+     "ladder_index": 31,
+     "knobs": {
+      "ef": 256,
+      "oversample": 4.0
+     },
+     "recall": 0.9998986212489862,
+     "recall_strict": 0.9998783454987834,
+     "tail": 0.0,
+     "short_results": 0,
+     "qps": 616.4438918938795,
+     "latency_ms": {
+      "n": 4932,
+      "min": 1.095181,
+      "avg": 1.6169518203568531,
+      "p50": 1.604743,
+      "p95": 1.8516473,
+      "p99": 2.0143403099999992,
+      "max": 3.661156
+     },
+     "queries": 4932,
+     "duration": 8.000728151993826,
+     "passes": [
+      {
+       "qps": 616.4438918938795,
+       "avg": 1.6169518203568531,
+       "p50": 1.604743,
+       "p99": 2.0143403099999992,
+       "queries": 4932,
+       "duration": 8.000728151993826
+      }
+     ]
+    },
+    {
+     "ladder_index": 32,
+     "knobs": {
+      "ef": 384,
+      "oversample": 1.0
+     },
+     "recall": 0.999912568306011,
+     "recall_strict": 0.999912568306011,
+     "tail": 0.0,
+     "short_results": 0,
+     "qps": 571.8005624305742,
+     "latency_ms": {
+      "n": 4575,
+      "min": 1.205396,
+      "avg": 1.7436013790163933,
+      "p50": 1.725897,
+      "p95": 2.0092268,
+      "p99": 2.180921620000001,
+      "max": 16.902327
+     },
+     "queries": 4575,
+     "duration": 8.001041448005708,
+     "passes": [
+      {
+       "qps": 571.8005624305742,
+       "avg": 1.7436013790163933,
+       "p50": 1.725897,
+       "p99": 2.180921620000001,
+       "queries": 4575,
+       "duration": 8.001041448005708
+      }
+     ]
+    },
+    {
+     "ladder_index": 33,
+     "knobs": {
+      "ef": 384,
+      "oversample": 4.0
+     },
+     "recall": 0.9999337602119674,
+     "recall_strict": 0.9999337602119674,
+     "tail": 0.0,
+     "short_results": 0,
+     "qps": 566.1003851075687,
+     "latency_ms": {
+      "n": 4529,
+      "min": 1.205147,
+      "avg": 1.7611532318392582,
+      "p50": 1.745377,
+      "p95": 2.0227736,
+      "p99": 2.1932132000000006,
+      "max": 18.005605
+     },
+     "queries": 4529,
+     "duration": 8.000347851979313,
+     "passes": [
+      {
+       "qps": 566.1003851075687,
+       "avg": 1.7611532318392582,
+       "p50": 1.745377,
+       "p99": 2.1932132000000006,
+       "queries": 4529,
+       "duration": 8.000347851979313
+      }
+     ]
+    }
+   ],
+   "plan": "\u256d\u2500 STREAMING_LIMIT \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u256e\n\u2502 ~1,000,000 rows                        \u2502\n\u2570\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u252c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u256f\n\u256d\u2500 PROJECTION \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2534\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u256e\n\u2502 Projections: CAST(#0 AS BIGINT)        \u2502\n\u2502 ~1,000,000 rows                        \u2502\n\u2570\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u252c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u256f\n\u256d\u2500 ORDER_BY \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2534\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u256e\n\u2502 Order By: #1 ASC                       \u2502\n\u2502 ~1,000,000 rows                        \u2502\n\u2570\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u252c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u256f\n\u256d\u2500 PROJECTION \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2534\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u256e\n\u2502 Projections: CAST(#0 AS INTEGER), #1   \u2502\n\u2502 ~1,000,000 rows                        \u2502\n\u2570\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u252c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u256f\n\u256d\u2500 IRESEARCH_SCAN \u2500\u2500\u2500\u2534\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u256e\n\u2502 Index: items                           \u2502\n\u2502 Lookup: search                         \u2502\n\u2502 Score: l2_distance(emb, FLOAT[128])    \u2502\n\u2502 Top: CAST($2 AS BIGINT)                \u2502\n\u2502 Projections: id,                       \u2502\n\u2502              sdb_inverted_index_score  \u2502\n\u2502 ~1,000,000 rows                        \u2502\n\u2570\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u256f",
+   "memory_peak": 1466093568
+  },
+  {
+   "key": "exact/none/10",
+   "filter": "none",
+   "k": 10,
+   "exact": true,
+   "view": "latency",
+   "clients": 1,
+   "status": "ok",
+   "block": "SET sdb_ann_exact = on;\nSELECT id FROM items ORDER BY emb <#> $q LIMIT $k;",
+   "startup": 0.4530686959915329,
+   "points": [
+    {
+     "ladder_index": 0,
+     "knobs": {},
+     "recall": 1.0,
+     "recall_strict": 1.0,
+     "tail": 0.0,
+     "short_results": 0,
+     "qps": 98.47951649420845,
+     "latency_ms": {
+      "n": 2000,
+      "min": 8.392447,
+      "avg": 10.1447367365,
+      "p50": 9.1292095,
+      "p95": 12.74912345,
+      "p99": 13.15088007,
+      "max": 14.077523
+     },
+     "queries": 2000,
+     "duration": 20.3087918300007,
+     "passes": [
+      {
+       "qps": 98.47951649420845,
+       "avg": 10.1447367365,
+       "p50": 9.1292095,
+       "p99": 13.15088007,
+       "queries": 2000,
+       "duration": 20.3087918300007
+      }
+     ]
+    }
+   ],
+   "plan": "\u256d\u2500 STREAMING_LIMIT \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u256e\n\u2502 ~1,000,000 rows                        \u2502\n\u2570\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u252c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u256f\n\u256d\u2500 PROJECTION \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2534\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u256e\n\u2502 Projections: CAST(#0 AS BIGINT)        \u2502\n\u2502 ~1,000,000 rows                        \u2502\n\u2570\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u252c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u256f\n\u256d\u2500 ORDER_BY \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2534\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u256e\n\u2502 Order By: #1 ASC                       \u2502\n\u2502 ~1,000,000 rows                        \u2502\n\u2570\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u252c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u256f\n\u256d\u2500 PROJECTION \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2534\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u256e\n\u2502 Projections: CAST(#0 AS INTEGER), #1   \u2502\n\u2502 ~1,000,000 rows                        \u2502\n\u2570\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u252c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u256f\n\u256d\u2500 IRESEARCH_SCAN \u2500\u2500\u2500\u2534\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u256e\n\u2502 Index: items                           \u2502\n\u2502 Lookup: search                         \u2502\n\u2502 Score: l2_distance(emb, FLOAT[128])    \u2502\n\u2502 Exact:                                 \u2502\n\u2502 brute force over the stored vectors    \u2502\n\u2502 Top: CAST($2 AS BIGINT)                \u2502\n\u2502 Projections: id,                       \u2502\n\u2502              sdb_inverted_index_score  \u2502\n\u2502 ~1,000,000 rows                        \u2502\n\u2570\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u256f",
+   "memory_peak": 1466093568
   },
   {
    "key": "none/100",
@@ -47271,10 +50649,673 @@
    "exact": false,
    "view": "latency",
    "clients": 1,
-   "status": "error",
-   "reason": "worker 0 failed:\nTraceback (most recent call last):\n  File \"/home/mironov/work/projects/serenedb/vectorbench/lib/vectorbench/workers.py\", line 87, in _worker_main\n    handle = client.prepare_group(payload)\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/mironov/work/projects/serenedb/vectorbench/serenedb-hnsw/client.py\", line 49, in prepare_group\n    self.conn.execute(s)\n  File \"/home/mironov/work/projects/serenedb/vectorbench/.venv/lib/python3.12/site-packages/psycopg/connection.py\", line 300, in execute\n    raise ex.with_traceback(None)\npsycopg.errors.UndefinedObject: unrecognized configuration parameter \"sdb_hnsw_rerank_factor\"\n\nDid you mean: \"sdb_rerank_factor\"\n",
-   "points": [],
-   "plan": null
+   "status": "ok",
+   "block": "SET sdb_hnsw_ef_search = {ef};\nSET sdb_ann_oversample = {oversample};\nSELECT id FROM items ORDER BY emb <#> $q LIMIT $k;",
+   "startup": 0.4530686959915329,
+   "points": [
+    {
+     "ladder_index": 0,
+     "knobs": {
+      "ef": 100,
+      "oversample": 1.0
+     },
+     "recall": 0.9947213798332069,
+     "recall_strict": 0.9946626231993935,
+     "tail": 0.0,
+     "short_results": 0,
+     "qps": 659.384698177703,
+     "latency_ms": {
+      "n": 5276,
+      "min": 0.935294,
+      "avg": 1.5080098188021227,
+      "p50": 1.4987005,
+      "p95": 1.7221090000000001,
+      "p99": 1.8734345000000001,
+      "max": 3.888163
+     },
+     "queries": 5276,
+     "duration": 8.001398902008077,
+     "passes": [
+      {
+       "qps": 659.384698177703,
+       "avg": 1.5080098188021227,
+       "p50": 1.4987005,
+       "p99": 1.8734345000000001,
+       "queries": 5276,
+       "duration": 8.001398902008077
+      }
+     ]
+    },
+    {
+     "ladder_index": 1,
+     "knobs": {
+      "ef": 100,
+      "oversample": 4.0
+     },
+     "recall": 0.9998841508503822,
+     "recall_strict": 0.9998471777175253,
+     "tail": 0.0,
+     "short_results": 0,
+     "qps": 507.1124892175085,
+     "latency_ms": {
+      "n": 4057,
+      "min": 1.369965,
+      "avg": 1.963274634951935,
+      "p50": 1.942039,
+      "p95": 2.2663208,
+      "p99": 2.49580056,
+      "max": 17.567382
+     },
+     "queries": 4057,
+     "duration": 8.000197365006898,
+     "passes": [
+      {
+       "qps": 507.1124892175085,
+       "avg": 1.963274634951935,
+       "p50": 1.942039,
+       "p99": 2.49580056,
+       "queries": 4057,
+       "duration": 8.000197365006898
+      }
+     ]
+    },
+    {
+     "ladder_index": 2,
+     "knobs": {
+      "ef": 128,
+      "oversample": 1.0
+     },
+     "recall": 0.9972016380655225,
+     "recall_strict": 0.9971587363494541,
+     "tail": 0.0,
+     "short_results": 0,
+     "qps": 640.9584706185117,
+     "latency_ms": {
+      "n": 5128,
+      "min": 1.043667,
+      "avg": 1.5514517644305772,
+      "p50": 1.537049,
+      "p95": 1.76355745,
+      "p99": 1.9565197499999996,
+      "max": 21.825272
+     },
+     "queries": 5128,
+     "duration": 8.000518340995768,
+     "passes": [
+      {
+       "qps": 640.9584706185117,
+       "avg": 1.5514517644305772,
+       "p50": 1.537049,
+       "p99": 1.9565197499999996,
+       "queries": 5128,
+       "duration": 8.000518340995768
+      }
+     ]
+    },
+    {
+     "ladder_index": 3,
+     "knobs": {
+      "ef": 128,
+      "oversample": 4.0
+     },
+     "recall": 0.9998840078973348,
+     "recall_strict": 0.9998543928923989,
+     "tail": 0.0,
+     "short_results": 0,
+     "qps": 506.43567456678005,
+     "latency_ms": {
+      "n": 4052,
+      "min": 1.388851,
+      "avg": 1.9658563588351432,
+      "p50": 1.9485175,
+      "p95": 2.2600773999999997,
+      "p99": 2.5007688699999995,
+      "max": 3.280435
+     },
+     "queries": 4052,
+     "duration": 8.001016127993353,
+     "passes": [
+      {
+       "qps": 506.43567456678005,
+       "avg": 1.9658563588351432,
+       "p50": 1.9485175,
+       "p99": 2.5007688699999995,
+       "queries": 4052,
+       "duration": 8.001016127993353
+      }
+     ]
+    },
+    {
+     "ladder_index": 4,
+     "knobs": {
+      "ef": 160,
+      "oversample": 1.0
+     },
+     "recall": 0.9984744408945688,
+     "recall_strict": 0.9984325079872206,
+     "tail": 0.0,
+     "short_results": 0,
+     "qps": 625.8918408812655,
+     "latency_ms": {
+      "n": 5008,
+      "min": 1.096121,
+      "avg": 1.5889015499201278,
+      "p50": 1.57565,
+      "p95": 1.8002543,
+      "p99": 1.9718877200000007,
+      "max": 17.787019
+     },
+     "queries": 5008,
+     "duration": 8.001382464019116,
+     "passes": [
+      {
+       "qps": 625.8918408812655,
+       "avg": 1.5889015499201278,
+       "p50": 1.57565,
+       "p99": 1.9718877200000007,
+       "queries": 5008,
+       "duration": 8.001382464019116
+      }
+     ]
+    },
+    {
+     "ladder_index": 5,
+     "knobs": {
+      "ef": 160,
+      "oversample": 4.0
+     },
+     "recall": 0.9998838645910553,
+     "recall_strict": 0.9998418581665431,
+     "tail": 0.0,
+     "short_results": 0,
+     "qps": 505.80028722685165,
+     "latency_ms": {
+      "n": 4047,
+      "min": 1.448608,
+      "avg": 1.9683913303681742,
+      "p50": 1.946145,
+      "p95": 2.2685218000000003,
+      "p99": 2.50000682,
+      "max": 22.171776
+     },
+     "queries": 4047,
+     "duration": 8.001181696017738,
+     "passes": [
+      {
+       "qps": 505.80028722685165,
+       "avg": 1.9683913303681742,
+       "p50": 1.946145,
+       "p99": 2.50000682,
+       "queries": 4047,
+       "duration": 8.001181696017738
+      }
+     ]
+    },
+    {
+     "ladder_index": 6,
+     "knobs": {
+      "ef": 200,
+      "oversample": 1.0
+     },
+     "recall": 0.9991562307534386,
+     "recall_strict": 0.9991090125230958,
+     "tail": 0.0,
+     "short_results": 0,
+     "qps": 608.8790576445294,
+     "latency_ms": {
+      "n": 4871,
+      "min": 1.129866,
+      "avg": 1.6336195881749127,
+      "p50": 1.619797,
+      "p95": 1.8683480000000001,
+      "p99": 2.053656900000001,
+      "max": 3.871113
+     },
+     "queries": 4871,
+     "duration": 7.999946687021293,
+     "passes": [
+      {
+       "qps": 608.8790576445294,
+       "avg": 1.6336195881749127,
+       "p50": 1.619797,
+       "p99": 2.053656900000001,
+       "queries": 4871,
+       "duration": 7.999946687021293
+      }
+     ]
+    },
+    {
+     "ladder_index": 7,
+     "knobs": {
+      "ef": 200,
+      "oversample": 4.0
+     },
+     "recall": 0.9998846342660778,
+     "recall_strict": 0.9998478154148257,
+     "tail": 0.0,
+     "short_results": 0,
+     "qps": 509.2364447629148,
+     "latency_ms": {
+      "n": 4074,
+      "min": 1.340058,
+      "avg": 1.954823177221404,
+      "p50": 1.940159,
+      "p95": 2.254336,
+      "p99": 2.46232388,
+      "max": 18.814625
+     },
+     "queries": 4074,
+     "duration": 8.000212949991692,
+     "passes": [
+      {
+       "qps": 509.2364447629148,
+       "avg": 1.954823177221404,
+       "p50": 1.940159,
+       "p99": 2.46232388,
+       "queries": 4074,
+       "duration": 8.000212949991692
+      }
+     ]
+    },
+    {
+     "ladder_index": 8,
+     "knobs": {
+      "ef": 256,
+      "oversample": 1.0
+     },
+     "recall": 0.9995584524810764,
+     "recall_strict": 0.9995185029436503,
+     "tail": 0.0,
+     "short_results": 0,
+     "qps": 594.4022183087131,
+     "latency_ms": {
+      "n": 4756,
+      "min": 1.128078,
+      "avg": 1.6736146888141294,
+      "p50": 1.6668425,
+      "p95": 1.9360767499999998,
+      "p99": 2.1363426999999984,
+      "max": 22.542802
+     },
+     "queries": 4756,
+     "duration": 8.00131603400223,
+     "passes": [
+      {
+       "qps": 594.4022183087131,
+       "avg": 1.6736146888141294,
+       "p50": 1.6668425,
+       "p99": 2.1363426999999984,
+       "queries": 4756,
+       "duration": 8.00131603400223
+      }
+     ]
+    },
+    {
+     "ladder_index": 9,
+     "knobs": {
+      "ef": 256,
+      "oversample": 4.0
+     },
+     "recall": 0.9998846059415666,
+     "recall_strict": 0.9998526884360424,
+     "tail": 0.0,
+     "short_results": 0,
+     "qps": 509.0590842285039,
+     "latency_ms": {
+      "n": 4073,
+      "min": 1.435624,
+      "avg": 1.9558003641050823,
+      "p50": 1.937838,
+      "p95": 2.2577374,
+      "p99": 2.50810708,
+      "max": 3.553704
+     },
+     "queries": 4073,
+     "duration": 8.001035884022713,
+     "passes": [
+      {
+       "qps": 509.0590842285039,
+       "avg": 1.9558003641050823,
+       "p50": 1.937838,
+       "p99": 2.50810708,
+       "queries": 4073,
+       "duration": 8.001035884022713
+      }
+     ]
+    },
+    {
+     "ladder_index": 10,
+     "knobs": {
+      "ef": 320,
+      "oversample": 1.0
+     },
+     "recall": 0.9997558790593507,
+     "recall_strict": 0.9997222844344905,
+     "tail": 0.0,
+     "short_results": 0,
+     "qps": 558.0724880284487,
+     "latency_ms": {
+      "n": 4465,
+      "min": 1.228525,
+      "avg": 1.7832539442329227,
+      "p50": 1.762478,
+      "p95": 2.0565476000000005,
+      "p99": 2.2749826799999995,
+      "max": 20.552359
+     },
+     "queries": 4465,
+     "duration": 8.000752762018237,
+     "passes": [
+      {
+       "qps": 558.0724880284487,
+       "avg": 1.7832539442329227,
+       "p50": 1.762478,
+       "p99": 2.2749826799999995,
+       "queries": 4465,
+       "duration": 8.000752762018237
+      }
+     ]
+    },
+    {
+     "ladder_index": 11,
+     "knobs": {
+      "ef": 320,
+      "oversample": 4.0
+     },
+     "recall": 0.9998843503937009,
+     "recall_strict": 0.9998523622047245,
+     "tail": 0.0,
+     "short_results": 0,
+     "qps": 507.9884412936458,
+     "latency_ms": {
+      "n": 4064,
+      "min": 1.407845,
+      "avg": 1.9599849205216535,
+      "p50": 1.941709,
+      "p95": 2.2635309500000003,
+      "p99": 2.51160151,
+      "max": 3.664108
+     },
+     "queries": 4064,
+     "duration": 8.000182031013537,
+     "passes": [
+      {
+       "qps": 507.9884412936458,
+       "avg": 1.9599849205216535,
+       "p50": 1.941709,
+       "p99": 2.51160151,
+       "queries": 4064,
+       "duration": 8.000182031013537
+      }
+     ]
+    },
+    {
+     "ladder_index": 12,
+     "knobs": {
+      "ef": 360,
+      "oversample": 1.0
+     },
+     "recall": 0.9998255680514117,
+     "recall_strict": 0.9997980261647925,
+     "tail": 0.0,
+     "short_results": 0,
+     "qps": 544.514383875519,
+     "latency_ms": {
+      "n": 4357,
+      "min": 1.224455,
+      "avg": 1.827809779664907,
+      "p50": 1.806611,
+      "p95": 2.099044,
+      "p99": 2.3481805999999987,
+      "max": 17.840111
+     },
+     "queries": 4357,
+     "duration": 8.001625171018532,
+     "passes": [
+      {
+       "qps": 544.514383875519,
+       "avg": 1.827809779664907,
+       "p50": 1.806611,
+       "p99": 2.3481805999999987,
+       "queries": 4357,
+       "duration": 8.001625171018532
+      }
+     ]
+    },
+    {
+     "ladder_index": 13,
+     "knobs": {
+      "ef": 360,
+      "oversample": 4.0
+     },
+     "recall": 0.9998842364532021,
+     "recall_strict": 0.999857142857143,
+     "tail": 0.0,
+     "short_results": 0,
+     "qps": 507.36933045462126,
+     "latency_ms": {
+      "n": 4060,
+      "min": 1.331099,
+      "avg": 1.962164915270936,
+      "p50": 1.9450195,
+      "p95": 2.2657694999999998,
+      "p99": 2.4769835000000002,
+      "max": 22.110507
+     },
+     "queries": 4060,
+     "duration": 8.002060345985228,
+     "passes": [
+      {
+       "qps": 507.36933045462126,
+       "avg": 1.962164915270936,
+       "p50": 1.9450195,
+       "p99": 2.4769835000000002,
+       "queries": 4060,
+       "duration": 8.002060345985228
+      }
+     ]
+    },
+    {
+     "ladder_index": 14,
+     "knobs": {
+      "ef": 400,
+      "oversample": 1.0
+     },
+     "recall": 0.9998848684210527,
+     "recall_strict": 0.99984022556391,
+     "tail": 0.0,
+     "short_results": 0,
+     "qps": 531.958833436421,
+     "latency_ms": {
+      "n": 4256,
+      "min": 1.315272,
+      "avg": 1.871060127349624,
+      "p50": 1.8545815,
+      "p95": 2.15852875,
+      "p99": 2.3793328999999996,
+      "max": 3.216443
+     },
+     "queries": 4256,
+     "duration": 8.00061909397482,
+     "passes": [
+      {
+       "qps": 531.958833436421,
+       "avg": 1.871060127349624,
+       "p50": 1.8545815,
+       "p99": 2.3793328999999996,
+       "queries": 4256,
+       "duration": 8.00061909397482
+      }
+     ]
+    },
+    {
+     "ladder_index": 15,
+     "knobs": {
+      "ef": 400,
+      "oversample": 4.0
+     },
+     "recall": 0.9998839792643793,
+     "recall_strict": 0.9998543569489016,
+     "tail": 0.0,
+     "short_results": 0,
+     "qps": 506.29514105484446,
+     "latency_ms": {
+      "n": 4051,
+      "min": 1.430462,
+      "avg": 1.966456060478894,
+      "p50": 1.946427,
+      "p95": 2.262088,
+      "p99": 2.5224905,
+      "max": 20.265764
+     },
+     "queries": 4051,
+     "duration": 8.001261855999473,
+     "passes": [
+      {
+       "qps": 506.29514105484446,
+       "avg": 1.966456060478894,
+       "p50": 1.946427,
+       "p99": 2.5224905,
+       "queries": 4051,
+       "duration": 8.001261855999473
+      }
+     ]
+    },
+    {
+     "ladder_index": 16,
+     "knobs": {
+      "ef": 512,
+      "oversample": 1.0
+     },
+     "recall": 0.9999477221807319,
+     "recall_strict": 0.99991287030122,
+     "tail": 0.0,
+     "short_results": 0,
+     "qps": 502.1072919942511,
+     "latency_ms": {
+      "n": 4017,
+      "min": 1.366791,
+      "avg": 1.983078493154095,
+      "p50": 1.961764,
+      "p95": 2.2798602,
+      "p99": 2.4917649600000003,
+      "max": 6.705068
+     },
+     "queries": 4017,
+     "duration": 8.000282138993498,
+     "passes": [
+      {
+       "qps": 502.1072919942511,
+       "avg": 1.983078493154095,
+       "p50": 1.961764,
+       "p99": 2.4917649600000003,
+       "queries": 4017,
+       "duration": 8.000282138993498
+      }
+     ]
+    },
+    {
+     "ladder_index": 17,
+     "knobs": {
+      "ef": 512,
+      "oversample": 4.0
+     },
+     "recall": 0.9999500788229113,
+     "recall_strict": 0.999915922228061,
+     "tail": 0.0,
+     "short_results": 0,
+     "qps": 475.65031398023285,
+     "latency_ms": {
+      "n": 3806,
+      "min": 1.458445,
+      "avg": 2.0937437769311615,
+      "p50": 2.0720655,
+      "p95": 2.42952075,
+      "p99": 2.6459832999999997,
+      "max": 17.672465
+     },
+     "queries": 3806,
+     "duration": 8.001676626998233,
+     "passes": [
+      {
+       "qps": 475.65031398023285,
+       "avg": 2.0937437769311615,
+       "p50": 2.0720655,
+       "p99": 2.6459832999999997,
+       "queries": 3806,
+       "duration": 8.001676626998233
+      }
+     ]
+    },
+    {
+     "ladder_index": 18,
+     "knobs": {
+      "ef": 768,
+      "oversample": 1.0
+     },
+     "recall": 0.9999860724233983,
+     "recall_strict": 0.9999442896935934,
+     "tail": 0.0,
+     "short_results": 0,
+     "qps": 448.68162742633496,
+     "latency_ms": {
+      "n": 3590,
+      "min": 1.424623,
+      "avg": 2.2199878356545963,
+      "p50": 2.190157,
+      "p95": 2.5679954,
+      "p99": 2.818810640000002,
+      "max": 23.18665
+     },
+     "queries": 3590,
+     "duration": 8.0012190839916,
+     "passes": [
+      {
+       "qps": 448.68162742633496,
+       "avg": 2.2199878356545963,
+       "p50": 2.190157,
+       "p99": 2.818810640000002,
+       "queries": 3590,
+       "duration": 8.0012190839916
+      }
+     ]
+    },
+    {
+     "ladder_index": 19,
+     "knobs": {
+      "ef": 768,
+      "oversample": 4.0
+     },
+     "recall": 0.999985380116959,
+     "recall_strict": 0.999953216374269,
+     "tail": 0.0,
+     "short_results": 0,
+     "qps": 427.40007279578356,
+     "latency_ms": {
+      "n": 3420,
+      "min": 1.681434,
+      "avg": 2.330944126315789,
+      "p50": 2.314145,
+      "p95": 2.7053139499999994,
+      "p99": 2.97239461,
+      "max": 3.504848
+     },
+     "queries": 3420,
+     "duration": 8.001870419975603,
+     "passes": [
+      {
+       "qps": 427.40007279578356,
+       "avg": 2.330944126315789,
+       "p50": 2.314145,
+       "p99": 2.97239461,
+       "queries": 3420,
+       "duration": 8.001870419975603
+      }
+     ]
+    }
+   ],
+   "plan": "\u256d\u2500 STREAMING_LIMIT \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u256e\n\u2502 ~1,000,000 rows                        \u2502\n\u2570\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u252c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u256f\n\u256d\u2500 PROJECTION \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2534\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u256e\n\u2502 Projections: CAST(#0 AS BIGINT)        \u2502\n\u2502 ~1,000,000 rows                        \u2502\n\u2570\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u252c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u256f\n\u256d\u2500 ORDER_BY \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2534\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u256e\n\u2502 Order By: #1 ASC                       \u2502\n\u2502 ~1,000,000 rows                        \u2502\n\u2570\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u252c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u256f\n\u256d\u2500 PROJECTION \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2534\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u256e\n\u2502 Projections: CAST(#0 AS INTEGER), #1   \u2502\n\u2502 ~1,000,000 rows                        \u2502\n\u2570\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u252c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u256f\n\u256d\u2500 IRESEARCH_SCAN \u2500\u2500\u2500\u2534\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u256e\n\u2502 Index: items                           \u2502\n\u2502 Lookup: search                         \u2502\n\u2502 Score: l2_distance(emb, FLOAT[128])    \u2502\n\u2502 Top: CAST($2 AS BIGINT)                \u2502\n\u2502 Projections: id,                       \u2502\n\u2502              sdb_inverted_index_score  \u2502\n\u2502 ~1,000,000 rows                        \u2502\n\u2570\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u256f",
+   "memory_peak": 1466093568
   },
   {
    "key": "none/1000",
@@ -47283,25 +51324,490 @@
    "exact": false,
    "view": "latency",
    "clients": 1,
-   "status": "error",
-   "reason": "worker 0 failed:\nTraceback (most recent call last):\n  File \"/home/mironov/work/projects/serenedb/vectorbench/lib/vectorbench/workers.py\", line 87, in _worker_main\n    handle = client.prepare_group(payload)\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/mironov/work/projects/serenedb/vectorbench/serenedb-hnsw/client.py\", line 49, in prepare_group\n    self.conn.execute(s)\n  File \"/home/mironov/work/projects/serenedb/vectorbench/.venv/lib/python3.12/site-packages/psycopg/connection.py\", line 300, in execute\n    raise ex.with_traceback(None)\npsycopg.errors.UndefinedObject: unrecognized configuration parameter \"sdb_hnsw_rerank_factor\"\n\nDid you mean: \"sdb_rerank_factor\"\n",
-   "points": [],
-   "plan": null
+   "status": "ok",
+   "block": "SET sdb_hnsw_ef_search = {ef};\nSET sdb_ann_oversample = {oversample};\nSELECT id FROM items ORDER BY emb <#> $q LIMIT $k;",
+   "startup": 0.4530686959915329,
+   "points": [
+    {
+     "ladder_index": 0,
+     "knobs": {
+      "ef": 1000,
+      "oversample": 1.0
+     },
+     "recall": 0.9998477588871717,
+     "recall_strict": 0.9998477588871717,
+     "tail": 0.0,
+     "short_results": 0,
+     "qps": 323.44860753390316,
+     "latency_ms": {
+      "n": 2588,
+      "min": 2.335373,
+      "avg": 3.0535543960587326,
+      "p50": 2.989436,
+      "p95": 3.5501863499999997,
+      "p99": 3.9579694500000002,
+      "max": 6.829858
+     },
+     "queries": 2588,
+     "duration": 8.00127111299662,
+     "passes": [
+      {
+       "qps": 323.44860753390316,
+       "avg": 3.0535543960587326,
+       "p50": 2.989436,
+       "p99": 3.9579694500000002,
+       "queries": 2588,
+       "duration": 8.00127111299662
+      }
+     ]
+    },
+    {
+     "ladder_index": 1,
+     "knobs": {
+      "ef": 1000,
+      "oversample": 4.0
+     },
+     "recall": 0.9999764999999999,
+     "recall_strict": 0.9999764999999999,
+     "tail": 0.0,
+     "short_results": 0,
+     "qps": 162.56563823946144,
+     "latency_ms": {
+      "n": 2000,
+      "min": 4.616971,
+      "avg": 6.111561868500001,
+      "p50": 5.8994645000000006,
+      "p95": 7.58924285,
+      "p99": 8.07674374,
+      "max": 10.920327
+     },
+     "queries": 2000,
+     "duration": 12.302722898020875,
+     "passes": [
+      {
+       "qps": 162.56563823946144,
+       "avg": 6.111561868500001,
+       "p50": 5.8994645000000006,
+       "p99": 8.07674374,
+       "queries": 2000,
+       "duration": 12.302722898020875
+      }
+     ]
+    },
+    {
+     "ladder_index": 2,
+     "knobs": {
+      "ef": 1200,
+      "oversample": 1.0
+     },
+     "recall": 0.9999053497942387,
+     "recall_strict": 0.9999053497942387,
+     "tail": 0.0,
+     "short_results": 0,
+     "qps": 303.6965923732502,
+     "latency_ms": {
+      "n": 2430,
+      "min": 2.427007,
+      "avg": 3.2545557452674894,
+      "p50": 3.176288,
+      "p95": 3.78690675,
+      "p99": 4.1196095800000005,
+      "max": 35.443307
+     },
+     "queries": 2430,
+     "duration": 8.001406867988408,
+     "passes": [
+      {
+       "qps": 303.6965923732502,
+       "avg": 3.2545557452674894,
+       "p50": 3.176288,
+       "p99": 4.1196095800000005,
+       "queries": 2430,
+       "duration": 8.001406867988408
+      }
+     ]
+    },
+    {
+     "ladder_index": 3,
+     "knobs": {
+      "ef": 1200,
+      "oversample": 4.0
+     },
+     "recall": 0.999975,
+     "recall_strict": 0.999975,
+     "tail": 0.0,
+     "short_results": 0,
+     "qps": 162.21193661872633,
+     "latency_ms": {
+      "n": 2000,
+      "min": 4.498062,
+      "avg": 6.124628647,
+      "p50": 5.9143055,
+      "p95": 7.528859,
+      "p99": 8.05923831,
+      "max": 29.757701
+     },
+     "queries": 2000,
+     "duration": 12.329548870999133,
+     "passes": [
+      {
+       "qps": 162.21193661872633,
+       "avg": 6.124628647,
+       "p50": 5.9143055,
+       "p99": 8.05923831,
+       "queries": 2000,
+       "duration": 12.329548870999133
+      }
+     ]
+    },
+    {
+     "ladder_index": 4,
+     "knobs": {
+      "ef": 1500,
+      "oversample": 1.0
+     },
+     "recall": 0.9999394341290895,
+     "recall_strict": 0.9999394341290895,
+     "tail": 0.0,
+     "short_results": 0,
+     "qps": 282.63655661009227,
+     "latency_ms": {
+      "n": 2262,
+      "min": 2.691685,
+      "avg": 3.499874587975243,
+      "p50": 3.4242425,
+      "p95": 4.09524225,
+      "p99": 4.570062989999995,
+      "max": 9.723773
+     },
+     "queries": 2262,
+     "duration": 8.00321100401925,
+     "passes": [
+      {
+       "qps": 282.63655661009227,
+       "avg": 3.499874587975243,
+       "p50": 3.4242425,
+       "p99": 4.570062989999995,
+       "queries": 2262,
+       "duration": 8.00321100401925
+      }
+     ]
+    },
+    {
+     "ladder_index": 5,
+     "knobs": {
+      "ef": 1500,
+      "oversample": 4.0
+     },
+     "recall": 0.9999725,
+     "recall_strict": 0.9999725,
+     "tail": 0.0,
+     "short_results": 0,
+     "qps": 162.07255480047678,
+     "latency_ms": {
+      "n": 2000,
+      "min": 4.401813,
+      "avg": 6.129782912,
+      "p50": 5.883202,
+      "p95": 7.59145975,
+      "p99": 8.062012280000001,
+      "max": 38.861879
+     },
+     "queries": 2000,
+     "duration": 12.340152238990413,
+     "passes": [
+      {
+       "qps": 162.07255480047678,
+       "avg": 6.129782912,
+       "p50": 5.883202,
+       "p99": 8.062012280000001,
+       "queries": 2000,
+       "duration": 12.340152238990413
+      }
+     ]
+    },
+    {
+     "ladder_index": 6,
+     "knobs": {
+      "ef": 2000,
+      "oversample": 1.0
+     },
+     "recall": 0.9999636627906976,
+     "recall_strict": 0.9999636627906976,
+     "tail": 0.0,
+     "short_results": 0,
+     "qps": 257.9672626324215,
+     "latency_ms": {
+      "n": 2064,
+      "min": 2.770251,
+      "avg": 3.838260925872093,
+      "p50": 3.7692129999999997,
+      "p95": 4.60894885,
+      "p99": 5.023583219999998,
+      "max": 8.210628
+     },
+     "queries": 2064,
+     "duration": 8.001015240995912,
+     "passes": [
+      {
+       "qps": 257.9672626324215,
+       "avg": 3.838260925872093,
+       "p50": 3.7692129999999997,
+       "p99": 5.023583219999998,
+       "queries": 2064,
+       "duration": 8.001015240995912
+      }
+     ]
+    },
+    {
+     "ladder_index": 7,
+     "knobs": {
+      "ef": 2000,
+      "oversample": 4.0
+     },
+     "recall": 0.9999750000000001,
+     "recall_strict": 0.9999750000000001,
+     "tail": 0.0,
+     "short_results": 0,
+     "qps": 163.48827512864244,
+     "latency_ms": {
+      "n": 2000,
+      "min": 4.429358,
+      "avg": 6.076838972000001,
+      "p50": 5.8881175,
+      "p95": 7.5558859,
+      "p99": 8.10147651,
+      "max": 10.876097
+     },
+     "queries": 2000,
+     "duration": 12.233293173019774,
+     "passes": [
+      {
+       "qps": 163.48827512864244,
+       "avg": 6.076838972000001,
+       "p50": 5.8881175,
+       "p99": 8.10147651,
+       "queries": 2000,
+       "duration": 12.233293173019774
+      }
+     ]
+    },
+    {
+     "ladder_index": 8,
+     "knobs": {
+      "ef": 2500,
+      "oversample": 1.0
+     },
+     "recall": 0.9999655000000001,
+     "recall_strict": 0.9999655000000001,
+     "tail": 0.0,
+     "short_results": 0,
+     "qps": 229.31145345264449,
+     "latency_ms": {
+      "n": 2000,
+      "min": 3.244938,
+      "avg": 4.3221890510000005,
+      "p50": 4.195018,
+      "p95": 5.1366176999999995,
+      "p99": 5.560545380000001,
+      "max": 45.850332
+     },
+     "queries": 2000,
+     "duration": 8.721762344997842,
+     "passes": [
+      {
+       "qps": 229.31145345264449,
+       "avg": 4.3221890510000005,
+       "p50": 4.195018,
+       "p99": 5.560545380000001,
+       "queries": 2000,
+       "duration": 8.721762344997842
+      }
+     ]
+    },
+    {
+     "ladder_index": 9,
+     "knobs": {
+      "ef": 2500,
+      "oversample": 4.0
+     },
+     "recall": 0.9999764999999999,
+     "recall_strict": 0.9999764999999999,
+     "tail": 0.0,
+     "short_results": 0,
+     "qps": 162.37521443958536,
+     "latency_ms": {
+      "n": 2000,
+      "min": 4.463145,
+      "avg": 6.118911906499999,
+      "p50": 5.9064285000000005,
+      "p95": 7.56034375,
+      "p99": 8.20361995,
+      "max": 11.371555
+     },
+     "queries": 2000,
+     "duration": 12.317150785005651,
+     "passes": [
+      {
+       "qps": 162.37521443958536,
+       "avg": 6.118911906499999,
+       "p50": 5.9064285000000005,
+       "p99": 8.20361995,
+       "queries": 2000,
+       "duration": 12.317150785005651
+      }
+     ]
+    },
+    {
+     "ladder_index": 10,
+     "knobs": {
+      "ef": 3000,
+      "oversample": 1.0
+     },
+     "recall": 0.9999715000000001,
+     "recall_strict": 0.9999715000000001,
+     "tail": 0.0,
+     "short_results": 0,
+     "qps": 212.00204315522504,
+     "latency_ms": {
+      "n": 2000,
+      "min": 3.477222,
+      "avg": 4.6781736285,
+      "p50": 4.5745235,
+      "p95": 5.58662295,
+      "p99": 6.07041806,
+      "max": 9.058958
+     },
+     "queries": 2000,
+     "duration": 9.433871344983345,
+     "passes": [
+      {
+       "qps": 212.00204315522504,
+       "avg": 4.6781736285,
+       "p50": 4.5745235,
+       "p99": 6.07041806,
+       "queries": 2000,
+       "duration": 9.433871344983345
+      }
+     ]
+    },
+    {
+     "ladder_index": 11,
+     "knobs": {
+      "ef": 3000,
+      "oversample": 4.0
+     },
+     "recall": 0.9999735000000001,
+     "recall_strict": 0.9999735000000001,
+     "tail": 0.0,
+     "short_results": 0,
+     "qps": 162.23211692728037,
+     "latency_ms": {
+      "n": 2000,
+      "min": 4.498123,
+      "avg": 6.124271187000001,
+      "p50": 5.9091925,
+      "p95": 7.5802511,
+      "p99": 8.11206923,
+      "max": 14.627745
+     },
+     "queries": 2000,
+     "duration": 12.328015178994974,
+     "passes": [
+      {
+       "qps": 162.23211692728037,
+       "avg": 6.124271187000001,
+       "p50": 5.9091925,
+       "p99": 8.11206923,
+       "queries": 2000,
+       "duration": 12.328015178994974
+      }
+     ]
+    },
+    {
+     "ladder_index": 12,
+     "knobs": {
+      "ef": 4000,
+      "oversample": 1.0
+     },
+     "recall": 0.9999755,
+     "recall_strict": 0.9999755,
+     "tail": 0.0,
+     "short_results": 0,
+     "qps": 182.87723811850265,
+     "latency_ms": {
+      "n": 2000,
+      "min": 4.00458,
+      "avg": 5.427791928,
+      "p50": 5.3062165,
+      "p95": 6.556104299999999,
+      "p99": 7.100495,
+      "max": 31.842082
+     },
+     "queries": 2000,
+     "duration": 10.936298145010369,
+     "passes": [
+      {
+       "qps": 182.87723811850265,
+       "avg": 5.427791928,
+       "p50": 5.3062165,
+       "p99": 7.100495,
+       "queries": 2000,
+       "duration": 10.936298145010369
+      }
+     ]
+    },
+    {
+     "ladder_index": 13,
+     "knobs": {
+      "ef": 4000,
+      "oversample": 4.0
+     },
+     "recall": 0.9999745,
+     "recall_strict": 0.9999745,
+     "tail": 0.0,
+     "short_results": 0,
+     "qps": 160.43868072053843,
+     "latency_ms": {
+      "n": 2000,
+      "min": 4.471992,
+      "avg": 6.193386891,
+      "p50": 5.9573285,
+      "p95": 7.6006752,
+      "p99": 8.172932170000001,
+      "max": 10.975934
+     },
+     "queries": 2000,
+     "duration": 12.465821777004749,
+     "passes": [
+      {
+       "qps": 160.43868072053843,
+       "avg": 6.193386891,
+       "p50": 5.9573285,
+       "p99": 8.172932170000001,
+       "queries": 2000,
+       "duration": 12.465821777004749
+      }
+     ]
+    }
+   ],
+   "plan": "\u256d\u2500 STREAMING_LIMIT \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u256e\n\u2502 ~1,000,000 rows                        \u2502\n\u2570\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u252c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u256f\n\u256d\u2500 PROJECTION \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2534\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u256e\n\u2502 Projections: CAST(#0 AS BIGINT)        \u2502\n\u2502 ~1,000,000 rows                        \u2502\n\u2570\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u252c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u256f\n\u256d\u2500 ORDER_BY \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2534\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u256e\n\u2502 Order By: #1 ASC                       \u2502\n\u2502 ~1,000,000 rows                        \u2502\n\u2570\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u252c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u256f\n\u256d\u2500 PROJECTION \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2534\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u256e\n\u2502 Projections: CAST(#0 AS INTEGER), #1   \u2502\n\u2502 ~1,000,000 rows                        \u2502\n\u2570\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u252c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u256f\n\u256d\u2500 IRESEARCH_SCAN \u2500\u2500\u2500\u2534\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u256e\n\u2502 Index: items                           \u2502\n\u2502 Lookup: search                         \u2502\n\u2502 Score: l2_distance(emb, FLOAT[128])    \u2502\n\u2502 Top: CAST($2 AS BIGINT)                \u2502\n\u2502 Projections: id,                       \u2502\n\u2502              sdb_inverted_index_score  \u2502\n\u2502 ~1,000,000 rows                        \u2502\n\u2570\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u256f",
+   "memory_peak": 1466093568
   }
  ],
- "load_time": 31.230673432000913,
+ "load_time": 32.89185645899852,
  "load_phases": {
-  "ddl": 0.027,
-  "ingest": 10.527,
-  "compaction": 20.531
+  "ddl": 0.03,
+  "ingest": 10.927,
+  "compaction": 21.79
  },
- "disk_bytes": 842791850,
+ "disk_bytes": 843874623,
  "disk_info": {
   "rows": 1000000,
   "storage": "search",
-  "segments": 35,
-  "files": 141,
-  "index_bytes": 830758003,
+  "segments": 8,
+  "files": 33,
+  "index_bytes": 831843554,
   "ddl": "CREATE INDEX items_vec ON items USING inverted(id, cat10, cat100, cat1000, num, cluster, lang, emb hnsw (metric = 'l2', quant = 'sq8', compression = false, m = 16, ef_construction = 128))",
   "index": {
    "kind": "hnsw",
@@ -47314,16 +51820,16 @@
   }
  },
  "memory_peak": {
-  "load": 1125502976,
-  "unfiltered": 1211088896
+  "load": 1082638336,
+  "unfiltered": 1466093568
  },
  "startup": {
   "n": 1,
-  "min": 0.45341089699650183,
-  "avg": 0.45341089699650183,
-  "p50": 0.45341089699650183,
-  "p95": 0.45341089699650183,
-  "p99": 0.45341089699650183,
-  "max": 0.45341089699650183
+  "min": 0.4530686959915329,
+  "avg": 0.4530686959915329,
+  "p50": 0.4530686959915329,
+  "p95": 0.4530686959915329,
+  "p99": 0.4530686959915329,
+  "max": 0.4530686959915329
  }
 }

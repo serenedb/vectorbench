@@ -1,41 +1,42 @@
 {
  "dataset": "wiki-v3-1024-1m",
  "participant": "serenedb-hnsw",
- "load_time": 94.86465759098064,
+ "load_time": 91.07706741600123,
  "load_phases": {
-  "ddl": 0.028,
-  "ingest": 35.917,
-  "compaction": 58.773
+  "ddl": 0.025,
+  "ingest": 40.987,
+  "compaction": 49.922
  },
- "disk_bytes": 5328960464,
+ "disk_bytes": 5329769351,
  "disk_info": {
   "rows": 1000000,
   "storage": "search",
-  "segments": 1,
-  "files": 5,
-  "index_bytes": 5316930164,
-  "ddl": "CREATE INDEX items_vec ON items USING inverted(id, cat10, cat100, cat1000, num, cluster, lang, emb hnsw (metric = 'ip', quant = 'sq8', compression = false, m = 16, ef_construction = 128))",
+  "segments": 8,
+  "files": 33,
+  "index_bytes": 5317586676,
+  "ddl": "CREATE INDEX items_vec ON items USING inverted(id, cat10, cat100, cat1000, num, cluster, lang, emb hnsw (metric = 'ip', quant = 'usq8', compression = false, m = 16, ef_construction = 128))",
   "index": {
    "kind": "hnsw",
    "metric": "ip",
-   "quant": "sq8",
+   "quant": "usq8",
    "m": 16,
    "ef_construction": 128,
    "compression": false,
    "storage": "search"
   }
  },
- "memory_peak_load": 10162995200,
+ "memory_peak_load": 3664113664,
  "version": "26.09.0",
- "date": "2026-09-16",
+ "date": "2026-09-21",
  "index": {
   "params": {
    "storage": "search",
    "relation": "items",
-   "quant": "sq8",
+   "quant": "usq8",
    "m": 16,
    "ef_construction": 128,
    "compression": false,
+   "segments": 8,
    "dims": 1024,
    "metric": "ip"
   }

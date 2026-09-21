@@ -1,0 +1,204 @@
+{
+ "participant": "qdrant-hnsw",
+ "name": "Qdrant HNSW",
+ "system": "Qdrant",
+ "family": "hnsw",
+ "version": "1.19.1",
+ "label": "big",
+ "os": "Ubuntu 24.04.5 LTS",
+ "date": "2026-09-21",
+ "dataset": "sift-128-1m",
+ "tags": [
+  "Rust",
+  "Qdrant"
+ ],
+ "hardware": {
+  "cpus": 96,
+  "cpuset": null,
+  "memory": null,
+  "host": "Intel(R) Xeon(R) Platinum 8488C, 96 vCPU, 186 GiB"
+ },
+ "tool_version": "0.1.0",
+ "index": {
+  "params": {
+   "m": 16,
+   "ef_construct": 128,
+   "quant": "sq8",
+   "on_disk_vectors": false,
+   "on_disk_hnsw": false,
+   "segments": 8,
+   "full_scan_threshold_kb": 10,
+   "payload_m": 0,
+   "dims": 128,
+   "metric": "l2"
+  }
+ },
+ "groups": [
+  {
+   "key": "exact/none/10",
+   "filter": "none",
+   "k": 10,
+   "exact": true,
+   "view": "throughput",
+   "clients": 32,
+   "status": "ok",
+   "block": "{\"filter\": null, \"params\": {\"exact\": true}}",
+   "startup": 1.6916195459998562,
+   "points": [
+    {
+     "ladder_index": 0,
+     "knobs": {},
+     "recall": 1.0,
+     "recall_strict": 0.99995,
+     "tail": 0.0,
+     "short_results": 0,
+     "qps": 653.4133397533357,
+     "latency_ms": {
+      "n": 10000,
+      "min": 12.175628,
+      "avg": 48.675237986700004,
+      "p50": 49.017423,
+      "p95": 57.0046132,
+      "p99": 61.38329764,
+      "max": 72.338742
+     },
+     "queries": 10000,
+     "duration": 15.304248309003015,
+     "passes": [
+      {
+       "qps": 650.6021805309229,
+       "avg": 48.8668137397,
+       "p50": 49.213196499999995,
+       "p99": 62.160873980000005,
+       "queries": 10000,
+       "duration": 15.370375783000782
+      },
+      {
+       "qps": 652.44996189903,
+       "avg": 48.8151749821,
+       "p50": 49.096921,
+       "p99": 62.13081606000001,
+       "queries": 10000,
+       "duration": 15.32684586400137
+      },
+      {
+       "qps": 653.4133397533357,
+       "avg": 48.675237986700004,
+       "p50": 49.017423,
+       "p99": 61.38329764,
+       "queries": 10000,
+       "duration": 15.304248309003015
+      }
+     ]
+    }
+   ],
+   "memory_peak": 1000468480
+  },
+  {
+   "key": "exact/eq-1/10",
+   "filter": "eq-1",
+   "k": 10,
+   "exact": true,
+   "view": "throughput",
+   "clients": 32,
+   "status": "ok",
+   "block": "{\"filter\": {\"must\": [{\"key\": \"cat100\", \"match\": {\"value\": \"$v\"}}]}, \"params\": {\"exact\": true}}",
+   "startup": 1.8331940729985945,
+   "points": [
+    {
+     "ladder_index": 0,
+     "knobs": {},
+     "recall": 1.0,
+     "recall_strict": 0.99998,
+     "tail": 0.0,
+     "short_results": 0,
+     "qps": 18668.875184685716,
+     "latency_ms": {
+      "n": 10000,
+      "min": 0.924416,
+      "avg": 1.6679902775000002,
+      "p50": 1.628304,
+      "p95": 2.18612825,
+      "p99": 2.55637484,
+      "max": 3.940039
+     },
+     "queries": 10000,
+     "duration": 0.535650910998811,
+     "passes": [
+      {
+       "qps": 18668.875184685716,
+       "avg": 1.6679902775000002,
+       "p50": 1.628304,
+       "p99": 2.55637484,
+       "queries": 10000,
+       "duration": 0.535650910998811
+      },
+      {
+       "qps": 18567.00053281914,
+       "avg": 1.6834922888999997,
+       "p50": 1.6450825,
+       "p99": 2.535959490000002,
+       "queries": 10000,
+       "duration": 0.5385899559987593
+      },
+      {
+       "qps": 18011.379769827065,
+       "avg": 1.7418319069000001,
+       "p50": 1.697201,
+       "p99": 2.7500216600000003,
+       "queries": 10000,
+       "duration": 0.5552045500007807
+      }
+     ]
+    }
+   ],
+   "memory_peak": 1028698112
+  }
+ ],
+ "load_time": 50.517408086001524,
+ "load_phases": {
+  "ingest": 20.621,
+  "index": 29.079
+ },
+ "disk_bytes": 1102835712,
+ "disk_info": {
+  "segments": 8,
+  "points": 1000000,
+  "indexed_vectors": 1000000,
+  "index": {
+   "m": 16,
+   "ef_construct": 128,
+   "quant": "sq8",
+   "on_disk_vectors": false,
+   "on_disk_hnsw": false,
+   "segments": 8,
+   "full_scan_threshold_kb": 10,
+   "max_segment_size_kb": null,
+   "payload_m": 0
+  },
+  "payload_indexes": [
+   "cat10",
+   "cat100",
+   "cat1000",
+   "cluster",
+   "lang",
+   "num"
+  ],
+  "indexing_threshold_kb": 1,
+  "upload_workers": 4
+ },
+ "memory_peak": {
+  "load": 4087566336,
+  "unfiltered": 1000468480,
+  "filtered": 1028698112
+ },
+ "startup": {
+  "n": 2,
+  "min": 1.6916195459998562,
+  "avg": 1.7624068094992253,
+  "p50": 1.7624068094992253,
+  "p95": 1.8261153466486575,
+  "p99": 1.831778327728607,
+  "max": 1.8331940729985945
+ }
+}
