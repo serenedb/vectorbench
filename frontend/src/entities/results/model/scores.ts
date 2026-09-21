@@ -10,6 +10,7 @@
 import { cellValue, type Direction } from './frontier.ts';
 import { gridCell, type Grid } from './cells.ts';
 import type { QueryRow, ResultModel, Section } from './model.ts';
+import type { GroupRowModel, ParticipantCurve } from './groupRows.ts';
 
 export interface Coverage {
   ok: number;
@@ -48,6 +49,37 @@ export function sectionScores(
     }
     score.set(r.id, ok ? Math.exp(logSum / ok) : null);
     coverage.set(r.id, { ok, total: rows.length });
+  }
+  return { section, score, coverage };
+}
+
+/** The same geomean and coverage over group rows, for the by-group reading.
+
+   A group row is counted when the row has a bar every participant can be read
+   at; a row where the engines differ in what they can answer at all
+   (`qualityGap`) is no more a speed comparison here than it was a cell, so it
+   counts towards neither score nor coverage for anybody. */
+export function sectionScoresByGroup(
+  rows: readonly GroupRowModel[],
+  results: readonly ResultModel[],
+  direction: Direction,
+  section: Section,
+): SectionScores {
+  const mine = rows.filter((g) => g.section === section);
+  const scored = mine.filter((g) => !g.qualityGap && g.best !== null);
+  const score = new Map<string, number | null>();
+  const coverage = new Map<string, Coverage>();
+  for (const r of results) {
+    let logSum = 0;
+    let ok = 0;
+    for (const g of scored) {
+      const c = g.curves.find((x: ParticipantCurve) => x.pid === r.id);
+      if (!c || c.value === null || g.best === null) continue;
+      logSum += Math.log(ratioTo(c.value, g.best, direction));
+      ok++;
+    }
+    score.set(r.id, ok ? Math.exp(logSum / ok) : null);
+    coverage.set(r.id, { ok, total: scored.length });
   }
   return { section, score, coverage };
 }

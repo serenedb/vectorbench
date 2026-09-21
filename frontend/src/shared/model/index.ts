@@ -3,6 +3,8 @@
 export {
   INITIAL_STATE,
   LATENCY_METRICS,
+  ROW_MODES,
+  ROW_MODE_LABELS,
   VIEWS,
   VIEW_LABELS,
   isLatencyMetric,
@@ -11,6 +13,7 @@ export {
   type Detail,
   type HeaderRowKey,
   type LatencyMetric,
+  type RowMode,
   type SortSection,
   type View,
 } from './state';

@@ -26,6 +26,20 @@ export function isLatencyMetric(x: unknown): x is LatencyMetric {
 /** "x1.00" against the row's best, or the value itself. */
 export type CellMode = 'relative' | 'absolute';
 
+/** How the grid is cut into rows.
+
+   `bars` is the published reading: one row per (group, recall bar), each cell
+   the metric at that bar. `groups` folds a group's bars into one row and reads
+   every participant at the strongest bar all of them reach, so a participant
+   whose curve stops short of a declared bar shows its number and its reach
+   instead of a word. Both read the same frontier. */
+export type RowMode = 'bars' | 'groups';
+export const ROW_MODES: readonly RowMode[] = ['bars', 'groups'];
+export const ROW_MODE_LABELS: Record<RowMode, string> = {
+  bars: 'by recall bar',
+  groups: 'by group',
+};
+
 /** The section whose coverage and score order the columns. */
 export type SortSection = 'nofilter' | 'filtered';
 
@@ -42,6 +56,7 @@ export interface BenchState {
   view: View;
   latencyMetric: LatencyMetric;
   cells: CellMode;
+  rowMode: RowMode;
   /** Active chip tags: `filter:eq`, `k:10`, `recall:0.95`, `recall:exact`. */
   chips: ReadonlySet<string>;
   sortSection: SortSection;
@@ -58,6 +73,7 @@ export const INITIAL_STATE: BenchState = {
   view: 'throughput',
   latencyMetric: 'p50',
   cells: 'relative',
+  rowMode: 'groups',
   chips: new Set(),
   sortSection: 'nofilter',
   openRow: null,

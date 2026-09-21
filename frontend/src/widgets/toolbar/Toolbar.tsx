@@ -14,12 +14,18 @@ import {
   type DatasetModel,
 } from '../../entities/results';
 import { fmtBytes, fmtInt } from '../../shared/lib/format';
-import { LATENCY_METRICS, VIEWS, VIEW_LABELS, type BenchAction, type BenchState, type CellMode, type LatencyMetric, type View } from '../../shared/model';
+import { LATENCY_METRICS, VIEWS, VIEW_LABELS, type BenchAction, type BenchState, type CellMode,
+  type RowMode, type LatencyMetric, type View } from '../../shared/model';
 import { Labeled, Panel, Seg, type SegOption } from '../../shared/ui';
 
 const CELLS: readonly SegOption<CellMode>[] = [
   { label: 'relative', v: 'relative', title: 'x1.00 = the row’s best; colour by ratio' },
   { label: 'absolute', v: 'absolute', title: 'QPS as an integer, latency in ms' },
+];
+
+const ROWS_OPTS: readonly SegOption<RowMode>[] = [
+  { v: 'groups', label: 'by group', title: 'one row per group, every participant read at the strongest recall bar all of them reach, with each curve drawn in its cell' },
+  { v: 'bars', label: 'by recall bar', title: 'the published reading: one row per (group, recall bar); a participant whose curve stops short of the bar reads as a word' },
 ];
 const VIEW_OPTS: readonly SegOption<View>[] = VIEWS.map((v) => ({ label: VIEW_LABELS[v], v }));
 const METRIC_OPTS: readonly SegOption<LatencyMetric>[] = LATENCY_METRICS.map((m) => ({ label: m, v: m }));
@@ -83,6 +89,9 @@ export function Toolbar({
         </Labeled>
         <Labeled label="view">
           <Seg act="view" opts={VIEW_OPTS} cur={state.view} onPick={(value) => dispatch({ type: 'view', value })} />
+        </Labeled>
+        <Labeled label="rows">
+          <Seg act="row-mode" opts={ROWS_OPTS} cur={state.rowMode} onPick={(value) => dispatch({ type: 'row-mode', value })} />
         </Labeled>
         <Labeled label="cells">
           <Seg act="cells" opts={CELLS} cur={state.cells} onPick={(value) => dispatch({ type: 'cells', value })} />

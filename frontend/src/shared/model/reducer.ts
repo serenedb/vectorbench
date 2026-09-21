@@ -2,7 +2,7 @@
    are replaced, never mutated, and any guard that needs the data travels in the
    action payload (`tags` on `dataset`), so shared/model never imports upward. */
 
-import type { BenchState, CellMode, Detail, LatencyMetric, SortSection, View } from './state.ts';
+import type { BenchState, CellMode, Detail, LatencyMetric, RowMode, SortSection, View } from './state.ts';
 
 export type BenchAction =
   /** `tags`: every chip tag the new dataset's family offers; stale chips are dropped. */
@@ -10,6 +10,7 @@ export type BenchAction =
   | { type: 'view'; value: View }
   | { type: 'metric'; value: LatencyMetric }
   | { type: 'cells'; value: CellMode }
+  | { type: 'row-mode'; value: RowMode }
   | { type: 'chip'; tag: string }
   | { type: 'clear-chips' }
   | { type: 'sort'; section: SortSection }
@@ -40,6 +41,9 @@ export function benchReducer(state: BenchState, action: BenchAction): BenchState
       return { ...state, latencyMetric: action.value };
     case 'cells':
       return { ...state, cells: action.value };
+    case 'row-mode':
+      // The open row is a query id in one mode and a group key in the other.
+      return { ...state, rowMode: action.value, openRow: null, graphRows: null, detail: null };
     case 'chip': {
       const next = new Set(state.chips);
       if (next.has(action.tag)) next.delete(action.tag);

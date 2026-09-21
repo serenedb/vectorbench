@@ -39,7 +39,13 @@ test('committed HTML renders, graphs and details work over file:// without netwo
     const names = new Set(results.results.map((r) => r.name));
     for (const n of names) assert.ok(text.includes(n), n);
     if (results.sample) await page.locator('[data-role="sample-banner"]').waitFor();
-    const firstRow = results.families[Object.keys(results.families)[0]].queries[0].id;
+    // Rows are keyed by query id in the by-recall-bar reading and by group key
+    // in the by-group one, so take the ids the page actually rendered rather
+    // than assuming which reading is on.
+    const rowIds = await page.$$eval('[data-act="row"]', (ns) => ns.map((n) => n.getAttribute('data-id')));
+    assert.ok(rowIds.length >= 2, 'the table drew query rows');
+    const firstRow = rowIds[0];
+    const secondRow = rowIds[1];
     assert.ok(text.includes(firstRow));
 
     // a row click opens the inline graph with one line per participant and the dashed row line
@@ -57,8 +63,7 @@ test('committed HTML renders, graphs and details work over file:// without netwo
     await graph.locator('[data-act="graph-open"]').click();
     const full = page.locator('[data-role="full-graph"]');
     await full.waitFor();
-    const secondRow = results.families[Object.keys(results.families)[0]].queries[1].id;
-    await full.locator(`[data-act="graph-toggle"][data-id="${secondRow}"]`).check();
+    await full.locator('[data-act="graph-toggle"]').first().check();
     assert.ok((await full.locator('svg.curve-graph line[style*="dasharray"], svg.curve-graph line').count()) >= 2);
     await page.keyboard.press('Escape');
     await full.waitFor({ state: 'detached' });

@@ -13,7 +13,9 @@ import {
   datasetById,
   metricFor,
   orderResults,
+  groupRows,
   sectionScores,
+  sectionScoresByGroup,
   visibleRows,
   type Grid,
   type Section,
@@ -50,13 +52,27 @@ export function BenchPage() {
   const metric = metricFor(state.view, state.latencyMetric);
   const grid: Grid | null = useMemo(() => (dataset ? computeGrid(dataset, state.view, metric) : null), [dataset, state.view, metric]);
   const rows = useMemo(() => (dataset ? visibleRows(dataset.queries, state.chips) : []), [dataset, state.chips]);
+  // In group mode the score and coverage rows have to describe the rows the
+  // table is actually drawing, or the page ranks its columns by a grid the
+  // reader cannot see.
+  const visibleKeys = useMemo(() => new Set(rows.map((r) => r.key)), [rows]);
+  const gRows = useMemo(
+    () => (dataset && grid && state.rowMode === 'groups' ? groupRows(dataset, grid.view, grid.metric, grid.direction).filter((g) => visibleKeys.has(g.key)) : []),
+    [dataset, grid, state.rowMode, visibleKeys],
+  );
   const scores = useMemo<Record<Section, SectionScores> | null>(() => {
     if (!dataset || !grid) return null;
+    if (state.rowMode === 'groups') {
+      return {
+        nofilter: sectionScoresByGroup(gRows, dataset.results, grid.direction, 'nofilter'),
+        filtered: sectionScoresByGroup(gRows, dataset.results, grid.direction, 'filtered'),
+      };
+    }
     return {
       nofilter: sectionScores(grid, dataset.results, rows.filter((r) => r.section === 'nofilter'), 'nofilter'),
       filtered: sectionScores(grid, dataset.results, rows.filter((r) => r.section === 'filtered'), 'filtered'),
     };
-  }, [dataset, grid, rows]);
+  }, [dataset, grid, rows, gRows, state.rowMode]);
   const results = useMemo(() => (dataset && scores ? orderResults(dataset.results, scores[state.sortSection]) : []), [dataset, scores, state.sortSection]);
 
   if (!BENCH || !dataset || !grid || !scores) {
