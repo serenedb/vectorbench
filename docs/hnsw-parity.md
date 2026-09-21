@@ -21,7 +21,7 @@ column is a reason a measured difference is not an implementation difference.
 | Backlink pruning | append to a free slot, else re-run the heuristic over existing + new | same |
 | Both-processed skip | pairs a previous heuristic already cleared are not re-tested | same |
 | Entry point, unfiltered | one point, the highest level seen | one point, the highest level in the segment |
-| ef floor | `ef = max(hnsw_ef, top)` | `ef = max(ef_search, min_ef)` |
+| ef floor | `ef = max(hnsw_ef, oversampling * top)` | `ef = max(ef_search, min_ef)` — **but `top` and `min_ef` are not the same quantity; see below** |
 
 The descent's visited set is safe rather than merely cheap: `cur` only improves, so a
 node that did not beat `cur` when it was first scored cannot beat it later, and
@@ -50,7 +50,7 @@ Ours *capped* the pool at the beam, which collapses two knobs into one: asking t
 re-score 400 of a beam of 100 re-scored 100, and the recall the oversample was asked
 for never arrived.
 
-`sdb_hnsw_rerank_factor` now means what their knob means, including the `0`:
+`sdb_ann_oversample` (named `sdb_hnsw_rerank_factor` when this was written) now means what their knob means, including the `0`:
 Elasticsearch accepts "greater than 1 or exactly 0" and reads 0 as no rescore, and
 Qdrant says the same thing with `quantization.rescore: false`. The default is 3, which
 is Elasticsearch's `DEFAULT_OVERSAMPLE`. What this replaced — a pool of the whole beam
@@ -86,6 +86,53 @@ which is nondeterministic in both.
 order 0 into `None`, so the first existing link always looks unprocessed and its
 redundancy check is re-run. The check is known to pass, so this is wasted work, not a
 different answer.
+
+## Knobs that do not mean the same thing
+
+Three settings read as if they were shared and are not. None of them makes the
+comparison unfair on its own -- the frontier scores achieved (recall, qps) pairs,
+not knob values -- but each makes a ladder column unreadable next to the other's,
+and two of them were set wrongly here for weeks.
+
+**The per-segment beam floor.** Qdrant asks every segment for the whole `top` and
+floors its beam there: `ef = max(hnsw_ef, oversampling * top)`, with `top = k`.
+We ask each segment only for the share it is likely to hold --
+`SegmentBeamShare(k, segments)`, the mean plus three sigma of a Binomial(k, 1/segments).
+At eight segments:
+
+| k | our floor | theirs |
+| --- | --- | --- |
+| 10 | 5 | 10 |
+| 100 | 23 | 100 |
+| 1000 | **157** | **1000** |
+
+So at k=1000 their `hnsw_ef=256` is a 1000-wide beam per segment and ours is 256:
+four times the work behind the same number. Lined up by *effective* beam the two
+engines are within noise on recall and we are faster (eff 1000: 0.9984 at 1411 qps
+against 0.9981 at 1270). Ours is also the cheaper design -- asking eight segments
+for a thousand each produces eight thousand candidates to answer with one thousand,
+and their cost grows linearly in segment count where ours does not. The price is
+that our recall depends slightly on segment count, which theirs does not; the floor
+is only a floor, so `ef_search = k` reproduces their semantics.
+
+**`full_scan_threshold`.** Qdrant's planner switch: below this many kilobytes of
+matching vectors it reads the rows instead of walking the graph -- the same choice
+`sdb_hnsw_filter_mode = auto` makes for us. Their default is 10000. This benchmark
+pinned it at **10**, which disabled it, and left Qdrant walking a graph restricted
+to a few percent of its nodes on every filtered group: it topped out at 0.903 recall
+on eq-1/10 and 0.013 on eq-0.1/10 while SereneDB answered the same rows exactly at
+its cheapest beam. Restored to their default on 2026-09-21. Ours is not a byte
+threshold but a cost model that scales with the beam and the code length, so the two
+crossovers differ in kind: on sift they cross around ef=160, on wiki ours is the more
+scan-happy.
+
+**Scalar quantization range.** `quant: sq8` is uniform 8-bit on both sides, but the
+participant passes Qdrant `quantile=0.99`, which clips half a percent off each tail
+before quantizing, and we train on absolute min/max. Clipping is *worse* here, not
+better: ranking 100k base vectors against 200 real queries, minmax gives top-10
+recall 0.9870 on wiki and 0.9860 on sift where q=0.99 gives 0.9220 and 0.9625. The
+large-magnitude components decide both an inner product and a squared L2, and the
+finer step on the bulk does not pay for clipping them. Do not "match" this one.
 
 ## Filtered search: deliberately not the same shape
 
