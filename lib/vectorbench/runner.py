@@ -8,6 +8,7 @@ import os
 import time
 from dataclasses import dataclass, field
 from pathlib import Path
+from collections.abc import Sequence
 from typing import Any
 
 import numpy as np
@@ -98,12 +99,13 @@ class GroundTruth:
                 self._args[str(cname)] = {k: cols[k][m][order] for k in ("v", "lo", "hi", "v2")} | {"s": s[m][order]}
         return self._args[name]
 
-    def per_query_args(self, name: str, nq: int) -> list[dict[str, Any]]:
+    def per_query_args(self, name: str, qsel: Sequence[int]) -> list[dict[str, Any]]:
+        """Args for the selected queries, in the order the workers will use them."""
         spec = self.family.case(name)
         if not spec:
-            return [{} for _ in range(nq)]
+            return [{} for _ in qsel]
         a = self.args(name)
-        return [attributes.args_for_query(a, i, spec) for i in range(nq)]
+        return [attributes.args_for_query(a, i, spec) for i in qsel]
 
 
 def cpu_lists(cpuset: str | None, tier_cpus: int) -> tuple[list[int] | None, list[int] | None]:
@@ -164,9 +166,18 @@ class Runner:
         self.manifest = load_manifest(family, size, opts.data_dir)
         self.blocks = load_blocks(participant.query_file())
         self.gt = GroundTruth(self.dsdir, family)
-        self.nq = int(self.manifest["nq"])
-        if opts.query_limit:
-            self.nq = min(self.nq, opts.query_limit)
+        nq_all = int(self.manifest["nq"])
+        # A limit selects evenly across the query set, not a prefix of it. The
+        # families order their queries (wiki's come grouped by language), so a
+        # prefix is one language and measures a different workload: on
+        # wiki-v3-1024-1m xlang the first 300 queries ran 2.6x faster than the
+        # full ten thousand, which is bias, not sampling error.
+        if opts.query_limit and opts.query_limit < nq_all:
+            stride = nq_all / float(opts.query_limit)
+            self.qsel = [int(i * stride) for i in range(opts.query_limit)]
+        else:
+            self.qsel = list(range(nq_all))
+        self.nq = len(self.qsel)
         self.engine_cpus, self.client_cpus = cpu_lists(opts.cpuset, opts.tier_cpus)
         self.index_settings = {**resolve_settings(participant.settings, family, size)["index"], "dims": family.dims, "metric": family.metric}
         self.env = participant.env(family, size, opts.data_dir, opts.cpuset, opts.memory, self.index_settings)
@@ -293,8 +304,8 @@ class Runner:
             startups.append(self.p.start(self.env))
         startup = startups[-1] if startups else 0.0
         gt = self.gt.case(g.filter)
-        args = self.gt.per_query_args(g.filter, self.nq)
-        pool = WorkerPool(clients, self.p.dir / "client.py", self.p.connection(self.family, self.dataset, self.index_settings), self.dsdir / "queries.parquet", self.family.dims, self.client_cpus, nq_limit=self.nq)
+        args = self.gt.per_query_args(g.filter, self.qsel)
+        pool = WorkerPool(clients, self.p.dir / "client.py", self.p.connection(self.family, self.dataset, self.index_settings), self.dsdir / "queries.parquet", self.family.dims, self.client_cpus, qsel=self.qsel)
         group_rec: dict[str, Any] = {**base, "status": "ok", "block": block, "startup": startup, "points": []}
         try:
             pool.set_group(args)

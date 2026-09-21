@@ -45,12 +45,18 @@ def run_check(p: Participant, family: Family, size: str, data_dir: Path, queries
     blocks = load_blocks(p.query_file())
     gt = GroundTruth(dsdir, family)
     base = _base_attributes(dsdir, manifest)
-    nq = min(queries, int(manifest["nq"]))
+    nq_all = int(manifest["nq"])
+    # Same even sampling the runner uses: a prefix of a family whose queries are
+    # grouped (wiki's by language) is one group, not a sample of the workload.
+    n = min(queries, nq_all)
+    stride = nq_all / float(n) if n else 1.0
+    qsel = [int(i * stride) for i in range(n)]
+    nq = len(qsel)
     failures = 0
     p.stop(env)
     startup = p.start(env)
     log.info("engine ready in %.2fs", startup)
-    pool = WorkerPool(1, p.dir / "client.py", p.connection(family, family.dataset_id(size), resolve_settings(p.settings, family, size)["index"]), dsdir / "queries.parquet", family.dims, nq_limit=nq)
+    pool = WorkerPool(1, p.dir / "client.py", p.connection(family, family.dataset_id(size), resolve_settings(p.settings, family, size)["index"]), dsdir / "queries.parquet", family.dims, qsel=qsel)
     try:
         for g in family.groups():
             block = resolve_block(blocks, g)
@@ -58,7 +64,7 @@ def run_check(p: Participant, family: Family, size: str, data_dir: Path, queries
                 log.info("%-22s unsupported (no block)", g.key)
                 continue
             spec = family.case(g.filter)
-            args = gt.per_query_args(g.filter, nq)
+            args = gt.per_query_args(g.filter, qsel)
             pool.set_group(args)
             st = resolve_settings(p.settings, family, size, g)
             block = substitute_index(block, {**st["index"], "dims": family.dims, "metric": family.metric})
@@ -68,12 +74,15 @@ def run_check(p: Participant, family: Family, size: str, data_dir: Path, queries
             plan_bad = check_plan(plan, g, p.settings.get("plan_rules") or {}) if plan is not None else None
             res = pool.run_pass(PassSpec(deadline_s=600, min_queries=nq, collect_ids=True, k=g.k))
             ids = res["ids"]
-            qis = sorted(q for q in ids if q < nq)
+            qis = sorted(ids)
+            # `ids` is keyed by the global query id; `args` follows the
+            # selection, so one has to be mapped onto the other.
+            at = {q: i for i, q in enumerate(qsel)}
             short = sum(1 for q in qis if len(ids[q]) != g.k)
             bad_pred = 0
             unknown = 0
             for q in qis:
-                qa = args[q]
+                qa = args[at[q]]
                 for rid in ids[q]:
                     pos = np.searchsorted(base["id"], rid)
                     if pos >= len(base["id"]) or base["id"][pos] != rid:

@@ -52,7 +52,7 @@ def _worker_main(
     cfg: dict[str, Any],
     queries_path: str,
     dims: int,
-    nq_limit: int | None,
+    qsel: Any,
     cpus: list[int] | None,
     cmd_q: mp.Queue,
     res_q: mp.Queue,
@@ -68,9 +68,12 @@ def _worker_main(
 
         t = pq.read_table(queries_path, columns=["emb"])
         qvec = np.asarray(t.column("emb").combine_chunks().flatten().to_numpy(zero_copy_only=False), dtype=np.float32).reshape(len(t), dims)
-        if nq_limit:
-            qvec = qvec[:nq_limit]
-        nq = len(qvec)
+        # `qsel` are global query ids: positions into the full query set, so a
+        # subset stays a subset of the same queries the ground truth is keyed
+        # by. Taking a prefix instead would not be a sample -- wiki's queries
+        # are grouped by language, so the first thousand are all English.
+        sel = np.arange(len(qvec), dtype=np.int64) if qsel is None else np.asarray(qsel, dtype=np.int64)
+        nq = len(sel)
         client = _load_client_class(Path(client_path))(cfg)
         client.connect()
         handle = None
@@ -89,15 +92,15 @@ def _worker_main(
             elif cmd == "explain":
                 plan = None
                 if wid == 0 and hasattr(client, "explain"):
-                    qi = int(payload.get("qi", 0))
-                    plan = client.explain(handle, qvec[qi], int(payload["k"]), group_args[qi])
+                    j = min(int(payload.get("qi", 0)), nq - 1)
+                    plan = client.explain(handle, qvec[sel[j]], int(payload["k"]), group_args[j])
                 res_q.put(("ok", wid, plan))
             elif cmd == "warmup":
                 n = int(payload["n"])
                 k = int(payload["k"])
                 rng = np.random.default_rng(1000 + wid)
-                for qi in rng.integers(0, nq, size=n):
-                    client.search(handle, qvec[qi], k, group_args[qi])
+                for j in rng.integers(0, nq, size=n):
+                    client.search(handle, qvec[sel[j]], k, group_args[j])
                 res_q.put(("ok", wid, None))
             elif cmd == "pass":
                 spec = PassSpec(**payload)
@@ -110,12 +113,12 @@ def _worker_main(
                 barrier.wait()
                 t_start = time.perf_counter()
                 done = 0
-                for qi in order:
+                for j in order:
                     t0 = time.perf_counter_ns()
-                    ids = client.search(handle, qvec[qi], spec.k, group_args[qi])
+                    ids = client.search(handle, qvec[sel[j]], spec.k, group_args[j])
                     lat[done] = (time.perf_counter_ns() - t0) / 1e6
                     if spec.collect_ids:
-                        ids_out.append((qi, [int(x) for x in ids]))
+                        ids_out.append((int(sel[j]), [int(x) for x in ids]))
                     done += 1
                     if done >= my_min and (time.perf_counter() - t_start) >= spec.deadline_s:
                         break
@@ -129,7 +132,7 @@ def _worker_main(
 
 
 class WorkerPool:
-    def __init__(self, n: int, client_path: Path, cfg: dict[str, Any], queries_path: Path, dims: int, cpus: list[int] | None = None, nq_limit: int | None = None):
+    def __init__(self, n: int, client_path: Path, cfg: dict[str, Any], queries_path: Path, dims: int, cpus: list[int] | None = None, qsel: Any = None):
         self.n = n
         ctx = mp.get_context("fork")
         self.cmd_qs = [ctx.Queue() for _ in range(n)]
@@ -138,7 +141,7 @@ class WorkerPool:
         self.procs = [
             ctx.Process(
                 target=_worker_main,
-                args=(i, n, str(client_path), cfg, str(queries_path), dims, nq_limit, cpus, self.cmd_qs[i], self.res_q, self.barrier),
+                args=(i, n, str(client_path), cfg, str(queries_path), dims, qsel, cpus, self.cmd_qs[i], self.res_q, self.barrier),
                 daemon=True,
             )
             for i in range(n)
