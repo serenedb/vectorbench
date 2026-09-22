@@ -29,8 +29,22 @@ def collect_results(root: Path = REPO_ROOT) -> list[dict[str, Any]]:
             log.warning("skipping %s: not a result file", p)
             continue
         obj["_source"] = str(p.relative_to(root))
+        obj["_mtime"] = p.stat().st_mtime
         out.append(obj)
-    return out
+    newest: dict[tuple[str, str], dict[str, Any]] = {}
+    for obj in out:
+        key = (obj.get("participant") or "", obj["dataset"])
+        prev = newest.get(key)
+        if prev is None or obj["_mtime"] > prev["_mtime"]:
+            newest[key] = obj
+    for obj in out:
+        key = (obj.get("participant") or "", obj["dataset"])
+        if newest[key] is not obj:
+            log.info("superseded: %s (label %s)", obj["_source"], obj.get("label"))
+    kept = list(newest.values())
+    for obj in kept:
+        obj.pop("_mtime", None)
+    return sorted(kept, key=lambda o: (o.get("participant") or "", o["dataset"]))
 
 
 def assemble(root: Path = REPO_ROOT, out_path: Path | None = None) -> Path:
