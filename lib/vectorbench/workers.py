@@ -120,7 +120,12 @@ def _worker_main(
                     if spec.collect_ids:
                         ids_out.append((int(sel[j]), [int(x) for x in ids]))
                     done += 1
-                    if done >= my_min and (time.perf_counter() - t_start) >= spec.deadline_s:
+                    # `deadline_s` bounds a pass, it is not a quota to fill: once the pass has the
+                    # samples it was asked for it is done. Requiring both made every one-client
+                    # pass run the full deadline -- at 32 clients a worker exhausts its slice of
+                    # the query set long before, which is why only the latency view paid it, at
+                    # sixty seconds a point and six hours a run.
+                    if done >= my_min or (time.perf_counter() - t_start) >= spec.deadline_s:
                         break
                 t_end = time.perf_counter()
                 res_q.put(("pass", wid, {"lat": lat[:done], "ids": ids_out, "t_start": t_start, "t_end": t_end, "done": done}))

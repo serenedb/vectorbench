@@ -182,6 +182,19 @@ class Runner:
         self.index_settings = {**resolve_settings(participant.settings, family, size)["index"], "dims": family.dims, "metric": family.metric}
         self.env = participant.env(family, size, opts.data_dir, opts.cpuset, opts.memory, self.index_settings)
 
+    def recall_ceiling(self, key: str) -> float | None:
+        """The highest recall any row of this group asks for.
+
+        A wider beam costs more and returns at least as much, so the first rung that reaches this
+        is the best qps at every target the group carries, and every rung above it is strictly
+        worse. Measuring those is the bulk of a run: on wiki-1m most filtered groups reach 1.0 by
+        the third rung of sixteen. `None` means no row has a numeric target (an exact group), so
+        the ladder runs in full.
+        """
+        wanted = [q.recall for q in self.family.queries_for(self.size)
+                  if q.group_key == key and isinstance(q.recall, (int, float))]
+        return max(wanted) if wanted else None
+
     # ----------------------------------------------------------------- plan
     def selected_groups(self) -> list[Group]:
         groups = self.family.groups(self.size)
@@ -304,6 +317,7 @@ class Runner:
             startups.append(self.p.start(self.env))
         startup = startups[-1] if startups else 0.0
         gt = self.gt.case(g.filter)
+        ceiling = None if g.exact else self.recall_ceiling(g.key)
         args = self.gt.per_query_args(g.filter, self.qsel)
         pool = WorkerPool(clients, self.p.dir / "client.py", self.p.connection(self.family, self.dataset, self.index_settings), self.dsdir / "queries.parquet", self.family.dims, self.client_cpus, qsel=self.qsel)
         group_rec: dict[str, Any] = {**base, "status": "ok", "block": block, "startup": startup, "points": []}
@@ -364,6 +378,13 @@ class Runner:
                 log.info("[%s %s] %s recall=%.4f qps=%.1f p50=%.2fms p99=%.2fms (%d queries, %d passes)",
                          view, g.key, knobs or "exact", rec["recall"] or 0.0, best["qps"] or 0.0, best["p50"] or 0.0, best["p99"] or 0.0, best["queries"], len(passes))
                 rf.upsert_group(group_rec)
+                # Every rung above this one is a wider beam: at least as much recall for strictly
+                # less throughput. Once the group's highest target is met, they cannot win a row
+                # and measuring them is the bulk of the run.
+                if ceiling is not None and (rec["recall"] or 0.0) >= ceiling:
+                    log.info("[%s %s] target %.2f met at rung %d of %d; the rest can only be slower",
+                             view, g.key, ceiling, li + 1, len(points))
+                    break
             group_rec["memory_peak"] = self.p.memory_peak(self.env)
             rf.upsert_group(group_rec)
         except PlanCheckError as e:
