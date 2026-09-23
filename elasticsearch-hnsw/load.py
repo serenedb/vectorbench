@@ -83,15 +83,21 @@ class IndexConfig:
     m: int
     ef_construction: int
     shards: int
+    segments: int
 
     @staticmethod
     def from_env() -> "IndexConfig":
+        shards = env_int("VB_INDEX_SHARDS", 1)
         return IndexConfig(
             type=env_str("VB_INDEX_TYPE", "int8_hnsw").lower(),
             m=env_int("VB_INDEX_M", 16),
             ef_construction=env_int("VB_INDEX_EF_CONSTRUCTION", 128),
-            shards=env_int("VB_INDEX_SHARDS", 1),
+            shards=shards,
+            segments=env_int("VB_INDEX_SEGMENTS", shards),
         )
+
+    def per_shard(self) -> int:
+        return max(1, self.segments // self.shards)
 
 
 class Es:
@@ -134,6 +140,7 @@ def create_index(es: Es, cfg: IndexConfig) -> None:
                 "similarity": similarity(), "index_options": options},
         "cat10": {"type": "integer"}, "cat100": {"type": "integer"},
         "cat1000": {"type": "integer"}, "cluster": {"type": "integer"},
+        "id": {"type": "long", "index": False},
         "num": {"type": "integer"}, "lang": {"type": "keyword"},
         # Carried but never searched, so no inverted index and no doc values.
         "ts": {"type": "date", "index": False, "doc_values": False},
@@ -142,7 +149,8 @@ def create_index(es: Es, cfg: IndexConfig) -> None:
     settings = {"index": {
         "number_of_shards": cfg.shards, "number_of_replicas": 0,
         "refresh_interval": "-1",             # no refresh while ingesting
-        "translog": {"durability": "async"},
+        "translog": {"durability": "async", "flush_threshold_age": "1h"},
+        "merge": {"policy": {"segments_per_tier": 100}},
     }}
     body = {"settings": settings,
             "mappings": {"_source": {"excludes": ["emb"]}, "properties": properties}}
@@ -160,6 +168,9 @@ def shards() -> list[str]:
 def ingest(es: Es, cfg: IndexConfig) -> int:
     total = 0
     t0 = time.perf_counter()
+    rows_all = sum(pq.ParquetFile(p).metadata.num_rows for p in shards())
+    step = -(-rows_all // cfg.segments) if cfg.per_shard() > 1 else 0
+    cut = step
     for path in shards():
         table = pq.read_table(path)
         cols = {name: table.column(name).to_numpy(zero_copy_only=False)
@@ -171,6 +182,7 @@ def ingest(es: Es, cfg: IndexConfig) -> int:
             lines: list[bytes] = []
             for i in range(start, stop):
                 doc = {name: json_value(v[i]) for name, v in cols.items() if name != "id"}
+                doc["id"] = int(cols["id"][i])
                 doc["emb"] = emb[i]
                 lines.append(dumps({"index": {"_id": str(int(cols["id"][i]))}}))
                 lines.append(dumps(doc))
@@ -180,8 +192,38 @@ def ingest(es: Es, cfg: IndexConfig) -> int:
                 first = next(item for item in out["items"] if "error" in item.get("index", {}))
                 raise SystemExit(f"bulk error: {json.dumps(first)[:400]}")
             total += stop - start
+            if step and total >= cut:
+                es.json("POST", f"/{INDEX}/_refresh")
+                cut += step
         log(f"  {os.path.basename(path)}: {total} docs, {time.perf_counter() - t0:.1f}s")
     return total
+
+
+def segment_docs(es: Es) -> list[int]:
+    segs = es.json("GET", f"/_cat/segments/{INDEX}?format=json&h=shard,docs.count")
+    return sorted(int(s["docs.count"]) for s in segs)
+
+
+def compact(es: Es, cfg: IndexConfig) -> None:
+    es.json("POST", f"/{INDEX}/_refresh")
+    size = es.json("GET", f"/{INDEX}/_stats/store")["_all"]["primaries"]["store"]["size_in_bytes"]
+    es.json("PUT", f"/{INDEX}/_settings",
+            {"index": {"merge": {"policy": {"max_merged_segment": f"{size // cfg.segments + 1}b"}}}})
+    before = segment_docs(es)
+    log(f"after ingest: {len(before)} segment(s): {before}")
+    out = es.json("POST", f"/{INDEX}/_forcemerge?max_num_segments={cfg.per_shard()}&wait_for_completion=false")
+    task = out.get("task")
+    t0 = time.perf_counter()
+    while task:
+        time.sleep(5)
+        st = es.json("GET", f"/_tasks/{task}", allow_fail=True)
+        if not isinstance(st, dict) or "__error__" in st or st.get("completed"):
+            break
+        log(f"forcemerge to {cfg.per_shard()} segment(s) per shard: {time.perf_counter() - t0:.0f}s")
+    counts = segment_docs(es)
+    log(f"compacted to {len(counts)} segment(s) in {time.perf_counter() - t0:.1f}s: {counts}")
+    if len(counts) != cfg.segments:
+        raise SystemExit(f"wanted {cfg.segments} segments, the index has {len(counts)}: {counts}")
 
 
 def settle(es: Es) -> dict:
@@ -214,8 +256,11 @@ def main() -> None:
     log(f"ingested {rows} docs in {phases['ingest']:.1f}s")
 
     t = time.perf_counter()
+    compact(es, cfg)
     info = settle(es)
     phases["index"] = time.perf_counter() - t
+    if info["segments"] != cfg.segments:
+        raise SystemExit(f"wanted {cfg.segments} segments after settling, the index has {info['segments']}: {segment_docs(es)}")
 
     count = es.json("GET", f"/{INDEX}/_count")["count"]
     if count != rows:

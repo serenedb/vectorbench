@@ -72,6 +72,7 @@ class Client:
             inner: dict[str, Any] = flt if flt is not None else {"match_all": {}}
             return {
                 "size": k, "_source": False, "track_total_hits": False,
+                "stored_fields": "_none_", "docvalue_fields": ["id"],
                 "query": {"script_score": {
                     "query": inner,
                     "script": {"source": self._exact_script(), "params": {"q": query}},
@@ -84,7 +85,8 @@ class Client:
             knn["rescore_vector"] = {"oversample": handle.oversample}
         if flt is not None:
             knn["filter"] = flt
-        return {"size": k, "_source": False, "track_total_hits": False, "knn": knn}
+        return {"size": k, "_source": False, "track_total_hits": False,
+                "stored_fields": "_none_", "docvalue_fields": ["id"], "knn": knn}
 
     def _exact_script(self) -> str:
         """Painless for a brute-force score, per metric.
@@ -118,7 +120,7 @@ class Client:
 
     def search(self, handle: Handle, vec: np.ndarray, k: int, args: dict[str, Any]) -> list[int]:
         out = self._post(f"/{self.index}/_search", self._body(handle, vec, k, args))
-        return [int(hit["_id"]) for hit in out["hits"]["hits"]]
+        return [int(hit["fields"]["id"][0]) for hit in out["hits"]["hits"]]
 
     def explain(self, handle: Handle, vec: np.ndarray, k: int, args: dict[str, Any]) -> str:
         body = self._body(handle, vec, k, args) | {"profile": True}
