@@ -1,0 +1,35 @@
+{
+ "dataset": "wiki-v3-1024-1m",
+ "participant": "elasticsearch-hnsw",
+ "load_time": 861.7231423630001,
+ "load_phases": {
+  "ingest": 816.29,
+  "index": 45.153
+ },
+ "disk_bytes": 5271750986,
+ "disk_info": {
+  "segments": 8,
+  "index_bytes": 5271637551,
+  "index": {
+   "type": "int8_hnsw",
+   "m": 16,
+   "ef_construction": 128,
+   "shards": 1,
+   "segments": 8
+  }
+ },
+ "memory_peak_load": 26448531456,
+ "version": "9.5.4",
+ "date": "2026-09-22",
+ "index": {
+  "params": {
+   "type": "int8_hnsw",
+   "m": 16,
+   "ef_construction": 128,
+   "shards": 1,
+   "segments": 8,
+   "dims": 1024,
+   "metric": "ip"
+  }
+ }
+}

@@ -1,19 +1,19 @@
 {
  "dataset": "wiki-v3-1024-1m",
  "participant": "serenedb-hnsw",
- "load_time": 91.68089219398098,
+ "load_time": 92.76037808500041,
  "load_phases": {
-  "ddl": 0.029,
-  "ingest": 41.473,
-  "compaction": 50.034
+  "ddl": 0.027,
+  "ingest": 43.294,
+  "compaction": 49.273
  },
- "disk_bytes": 5329743263,
+ "disk_bytes": 5329766544,
  "disk_info": {
   "rows": 1000000,
   "storage": "search",
   "segments": 8,
   "files": 33,
-  "index_bytes": 5317560585,
+  "index_bytes": 5317583871,
   "ddl": "CREATE INDEX items_vec ON items USING inverted(id, cat10, cat100, cat1000, num, cluster, lang, emb hnsw (metric = 'ip', quant = 'usq8', compression = false, m = 16, ef_construction = 128))",
   "index": {
    "kind": "hnsw",
@@ -25,7 +25,7 @@
    "storage": "search"
   }
  },
- "memory_peak_load": 3551047680,
+ "memory_peak_load": 3596988416,
  "version": "26.09.0",
  "date": "2026-09-22",
  "index": {

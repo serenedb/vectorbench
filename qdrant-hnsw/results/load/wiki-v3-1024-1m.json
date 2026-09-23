@@ -1,12 +1,12 @@
 {
  "dataset": "wiki-v3-1024-1m",
  "participant": "qdrant-hnsw",
- "load_time": 90.58485127199674,
+ "load_time": 89.51064941999903,
  "load_phases": {
-  "ingest": 44.688,
-  "index": 45.075
+  "ingest": 43.61,
+  "index": 45.076
  },
- "disk_bytes": 5703516160,
+ "disk_bytes": 5703507968,
  "disk_info": {
   "segments": 8,
   "points": 1000000,
@@ -33,7 +33,7 @@
   "indexing_threshold_kb": 1,
   "upload_workers": 4
  },
- "memory_peak_load": 13053014016,
+ "memory_peak_load": 13032120320,
  "version": "1.19.1",
  "date": "2026-09-22",
  "index": {

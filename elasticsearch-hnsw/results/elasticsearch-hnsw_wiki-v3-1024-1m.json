@@ -1,0 +1,5624 @@
+{
+ "participant": "elasticsearch-hnsw",
+ "name": "Elasticsearch HNSW",
+ "system": "Elasticsearch",
+ "family": "hnsw",
+ "version": "9.5.4",
+ "label": null,
+ "os": "Ubuntu 24.04.5 LTS",
+ "date": "2026-09-23",
+ "dataset": "wiki-v3-1024-1m",
+ "tags": [
+  "Java",
+  "Lucene",
+  "Elasticsearch"
+ ],
+ "hardware": {
+  "cpus": 96,
+  "cpuset": null,
+  "memory_bytes": 199368785920,
+  "host": "Intel(R) Xeon(R) Platinum 8488C, 96 vCPU, 186 GiB",
+  "storage": "nvme"
+ },
+ "tool_version": "0.1.0",
+ "index": {
+  "params": {
+   "type": "int8_hnsw",
+   "m": 16,
+   "ef_construction": 128,
+   "shards": 1,
+   "segments": 8,
+   "dims": 1024,
+   "metric": "ip"
+  }
+ },
+ "groups": [
+  {
+   "key": "none/10",
+   "filter": "none",
+   "k": 10,
+   "exact": false,
+   "view": "throughput",
+   "clients": 32,
+   "status": "ok",
+   "block": "{\"filter\": null, \"num_candidates\": \"{num_candidates}\", \"rescore_oversample\": \"{oversample}\"}",
+   "startup": 12.125054715004808,
+   "points": [
+    {
+     "ladder_index": 0,
+     "knobs": {
+      "num_candidates": 40,
+      "oversample": 4.0
+     },
+     "recall": 0.9746400000000002,
+     "recall_strict": 0.9746100000000001,
+     "tail": 0.0008,
+     "short_results": 0,
+     "qps": 8871.639354368037,
+     "latency_ms": {
+      "n": 10000,
+      "min": 2.256997,
+      "avg": 3.5370341937000003,
+      "p50": 3.1856264999999997,
+      "p95": 3.9768600999999992,
+      "p99": 5.70359557,
+      "max": 64.438086
+     },
+     "queries": 10000,
+     "duration": 1.127187389000028,
+     "passes": [
+      {
+       "qps": 8871.639354368037,
+       "avg": 3.5370341937000003,
+       "p50": 3.1856264999999997,
+       "p99": 5.70359557,
+       "queries": 10000,
+       "duration": 1.127187389000028
+      }
+     ]
+    },
+    {
+     "ladder_index": 1,
+     "knobs": {
+      "num_candidates": 64,
+      "oversample": 4.0
+     },
+     "recall": 0.98256,
+     "recall_strict": 0.9825299999999999,
+     "tail": 0.0003,
+     "short_results": 0,
+     "qps": 9231.040788097394,
+     "latency_ms": {
+      "n": 10000,
+      "min": 2.185307,
+      "avg": 3.4055174259000007,
+      "p50": 3.0276579999999997,
+      "p95": 3.82886585,
+      "p99": 20.00726965000001,
+      "max": 40.171098
+     },
+     "queries": 10000,
+     "duration": 1.0833014640011243,
+     "passes": [
+      {
+       "qps": 9231.040788097394,
+       "avg": 3.4055174259000007,
+       "p50": 3.0276579999999997,
+       "p99": 20.00726965000001,
+       "queries": 10000,
+       "duration": 1.0833014640011243
+      }
+     ]
+    },
+    {
+     "ladder_index": 2,
+     "knobs": {
+      "num_candidates": 96,
+      "oversample": 4.0
+     },
+     "recall": 0.987,
+     "recall_strict": 0.9869699999999999,
+     "tail": 0.0002,
+     "short_results": 0,
+     "qps": 8698.472740710871,
+     "latency_ms": {
+      "n": 10000,
+      "min": 2.253494,
+      "avg": 3.5905305280999995,
+      "p50": 3.122601,
+      "p95": 3.9612958,
+      "p99": 23.656955880000012,
+      "max": 40.644335
+     },
+     "queries": 10000,
+     "duration": 1.1496271009964403,
+     "passes": [
+      {
+       "qps": 8698.472740710871,
+       "avg": 3.5905305280999995,
+       "p50": 3.122601,
+       "p99": 23.656955880000012,
+       "queries": 10000,
+       "duration": 1.1496271009964403
+      }
+     ]
+    },
+    {
+     "ladder_index": 3,
+     "knobs": {
+      "num_candidates": 128,
+      "oversample": 4.0
+     },
+     "recall": 0.98988,
+     "recall_strict": 0.98985,
+     "tail": 0.0001,
+     "short_results": 0,
+     "qps": 8198.818428112598,
+     "latency_ms": {
+      "n": 10000,
+      "min": 2.346019,
+      "avg": 3.8407092667,
+      "p50": 3.3562485,
+      "p95": 4.213498999999999,
+      "p99": 24.382388090000113,
+      "max": 43.493876
+     },
+     "queries": 10000,
+     "duration": 1.2196879449984408,
+     "passes": [
+      {
+       "qps": 8198.818428112598,
+       "avg": 3.8407092667,
+       "p50": 3.3562485,
+       "p99": 24.382388090000113,
+       "queries": 10000,
+       "duration": 1.2196879449984408
+      }
+     ]
+    },
+    {
+     "ladder_index": 4,
+     "knobs": {
+      "num_candidates": 192,
+      "oversample": 4.0
+     },
+     "recall": 0.993,
+     "recall_strict": 0.9929699999999999,
+     "tail": 0.0,
+     "short_results": 0,
+     "qps": 6680.948347327782,
+     "latency_ms": {
+      "n": 10000,
+      "min": 2.393715,
+      "avg": 4.720807585,
+      "p50": 3.592387,
+      "p95": 12.908891949999992,
+      "p99": 34.32837449,
+      "max": 89.06977
+     },
+     "queries": 10000,
+     "duration": 1.4967934910018812,
+     "passes": [
+      {
+       "qps": 6680.948347327782,
+       "avg": 4.720807585,
+       "p50": 3.592387,
+       "p99": 34.32837449,
+       "queries": 10000,
+       "duration": 1.4967934910018812
+      }
+     ]
+    },
+    {
+     "ladder_index": 5,
+     "knobs": {
+      "num_candidates": 384,
+      "oversample": 4.0
+     },
+     "recall": 0.99605,
+     "recall_strict": 0.9960200000000001,
+     "tail": 0.0,
+     "short_results": 0,
+     "qps": 6935.318744961862,
+     "latency_ms": {
+      "n": 10000,
+      "min": 2.424627,
+      "avg": 4.5441092249,
+      "p50": 4.061078,
+      "p95": 5.318464799999999,
+      "p99": 25.384289040000002,
+      "max": 35.874396
+     },
+     "queries": 10000,
+     "duration": 1.4418947949961876,
+     "passes": [
+      {
+       "qps": 6935.318744961862,
+       "avg": 4.5441092249,
+       "p50": 4.061078,
+       "p99": 25.384289040000002,
+       "queries": 10000,
+       "duration": 1.4418947949961876
+      }
+     ]
+    },
+    {
+     "ladder_index": 6,
+     "knobs": {
+      "num_candidates": 512,
+      "oversample": 4.0
+     },
+     "recall": 0.99692,
+     "recall_strict": 0.9968899999999999,
+     "tail": 0.0,
+     "short_results": 0,
+     "qps": 6646.128295871017,
+     "latency_ms": {
+      "n": 10000,
+      "min": 2.512029,
+      "avg": 4.7405763766,
+      "p50": 4.318199,
+      "p95": 5.6886098,
+      "p99": 23.466795730000023,
+      "max": 37.059181
+     },
+     "queries": 10000,
+     "duration": 1.5046354140067706,
+     "passes": [
+      {
+       "qps": 6646.128295871017,
+       "avg": 4.7405763766,
+       "p50": 4.318199,
+       "p99": 23.466795730000023,
+       "queries": 10000,
+       "duration": 1.5046354140067706
+      }
+     ]
+    }
+   ],
+   "plan": "{\"query_types\": [\"KnnScoreDocQuery\"]}",
+   "memory_peak": 10164158464
+  },
+  {
+   "key": "exact/none/10",
+   "filter": "none",
+   "k": 10,
+   "exact": true,
+   "view": "throughput",
+   "clients": 32,
+   "status": "ok",
+   "block": "{\"filter\": null, \"exact\": true}",
+   "startup": 11.900189011998009,
+   "points": [
+    {
+     "ladder_index": 0,
+     "knobs": {},
+     "recall": 1.0,
+     "recall_strict": 0.9999421631000579,
+     "tail": 0.0,
+     "short_results": 0,
+     "qps": 57.405064585388295,
+     "latency_ms": {
+      "n": 3458,
+      "min": 307.606903,
+      "avg": 556.6127890772123,
+      "p50": 557.6957454999999,
+      "p95": 672.1205698999996,
+      "p99": 726.9921536899999,
+      "max": 832.395992
+     },
+     "queries": 3458,
+     "duration": 60.238587396001094,
+     "passes": [
+      {
+       "qps": 57.405064585388295,
+       "avg": 556.6127890772123,
+       "p50": 557.6957454999999,
+       "p99": 726.9921536899999,
+       "queries": 3458,
+       "duration": 60.238587396001094
+      }
+     ]
+    }
+   ],
+   "plan": "{\"query_types\": [\"ScriptScoreQuery\"]}",
+   "memory_peak": 10111500288
+  },
+  {
+   "key": "none/100",
+   "filter": "none",
+   "k": 100,
+   "exact": false,
+   "view": "throughput",
+   "clients": 32,
+   "status": "ok",
+   "block": "{\"filter\": null, \"num_candidates\": \"{num_candidates}\", \"rescore_oversample\": \"{oversample}\"}",
+   "startup": 11.785336622000614,
+   "points": [
+    {
+     "ladder_index": 0,
+     "knobs": {
+      "num_candidates": 400,
+      "oversample": 4.0
+     },
+     "recall": 0.989455,
+     "recall_strict": 0.989426,
+     "tail": 0.0,
+     "short_results": 0,
+     "qps": 5333.943798224691,
+     "latency_ms": {
+      "n": 10000,
+      "min": 3.509525,
+      "avg": 5.9074675465,
+      "p50": 5.178865500000001,
+      "p95": 6.501572749999999,
+      "p99": 27.650033630000014,
+      "max": 72.962283
+     },
+     "queries": 10000,
+     "duration": 1.8747854079992976,
+     "passes": [
+      {
+       "qps": 5333.943798224691,
+       "avg": 5.9074675465,
+       "p50": 5.178865500000001,
+       "p99": 27.650033630000014,
+       "queries": 10000,
+       "duration": 1.8747854079992976
+      }
+     ]
+    },
+    {
+     "ladder_index": 1,
+     "knobs": {
+      "num_candidates": 640,
+      "oversample": 4.0
+     },
+     "recall": 0.992843,
+     "recall_strict": 0.992819,
+     "tail": 0.0,
+     "short_results": 0,
+     "qps": 5171.37990764615,
+     "latency_ms": {
+      "n": 10000,
+      "min": 3.972282,
+      "avg": 6.0978343292,
+      "p50": 5.431665000000001,
+      "p95": 6.734081349999999,
+      "p99": 32.05301223000007,
+      "max": 51.291531
+     },
+     "queries": 10000,
+     "duration": 1.933719854001538,
+     "passes": [
+      {
+       "qps": 5171.37990764615,
+       "avg": 6.0978343292,
+       "p50": 5.431665000000001,
+       "p99": 32.05301223000007,
+       "queries": 10000,
+       "duration": 1.933719854001538
+      }
+     ]
+    },
+    {
+     "ladder_index": 2,
+     "knobs": {
+      "num_candidates": 800,
+      "oversample": 4.0
+     },
+     "recall": 0.994129,
+     "recall_strict": 0.9941080000000002,
+     "tail": 0.0,
+     "short_results": 0,
+     "qps": 4988.9587259206455,
+     "latency_ms": {
+      "n": 10000,
+      "min": 3.714623,
+      "avg": 6.330466768,
+      "p50": 5.7132575,
+      "p95": 7.1407498999999985,
+      "p99": 26.809884380000046,
+      "max": 47.787735
+     },
+     "queries": 10000,
+     "duration": 2.0044262839946896,
+     "passes": [
+      {
+       "qps": 4988.9587259206455,
+       "avg": 6.330466768,
+       "p50": 5.7132575,
+       "p99": 26.809884380000046,
+       "queries": 10000,
+       "duration": 2.0044262839946896
+      }
+     ]
+    },
+    {
+     "ladder_index": 3,
+     "knobs": {
+      "num_candidates": 1280,
+      "oversample": 4.0
+     },
+     "recall": 0.996109,
+     "recall_strict": 0.996092,
+     "tail": 0.0,
+     "short_results": 0,
+     "qps": 4338.7675269936,
+     "latency_ms": {
+      "n": 10000,
+      "min": 4.284537,
+      "avg": 7.291975829100001,
+      "p50": 6.4802935,
+      "p95": 8.6126735,
+      "p99": 40.68523585000001,
+      "max": 61.877543
+     },
+     "queries": 10000,
+     "duration": 2.3048019830021076,
+     "passes": [
+      {
+       "qps": 4338.7675269936,
+       "avg": 7.291975829100001,
+       "p50": 6.4802935,
+       "p99": 40.68523585000001,
+       "queries": 10000,
+       "duration": 2.3048019830021076
+      }
+     ]
+    }
+   ],
+   "plan": "{\"query_types\": [\"KnnScoreDocQuery\"]}",
+   "memory_peak": 10148139008
+  },
+  {
+   "key": "none/1000",
+   "filter": "none",
+   "k": 1000,
+   "exact": false,
+   "view": "throughput",
+   "clients": 32,
+   "status": "ok",
+   "block": "{\"filter\": null, \"num_candidates\": \"{num_candidates}\", \"rescore_oversample\": \"{oversample}\"}",
+   "startup": 11.99660967499949,
+   "points": [
+    {
+     "ladder_index": 0,
+     "knobs": {
+      "num_candidates": 4000,
+      "oversample": 4.0
+     },
+     "recall": 0.9889138999999999,
+     "recall_strict": 0.9889138999999999,
+     "tail": 0.0,
+     "short_results": 0,
+     "qps": 1622.1740938703845,
+     "latency_ms": {
+      "n": 10000,
+      "min": 10.590496,
+      "avg": 19.5066522815,
+      "p50": 17.3194225,
+      "p95": 26.213969199999998,
+      "p99": 81.90468448000001,
+      "max": 103.587255
+     },
+     "queries": 10000,
+     "duration": 6.164566453000589,
+     "passes": [
+      {
+       "qps": 1622.1740938703845,
+       "avg": 19.5066522815,
+       "p50": 17.3194225,
+       "p99": 81.90468448000001,
+       "queries": 10000,
+       "duration": 6.164566453000589
+      }
+     ]
+    },
+    {
+     "ladder_index": 1,
+     "knobs": {
+      "num_candidates": 6000,
+      "oversample": 4.0
+     },
+     "recall": 0.9927915999999999,
+     "recall_strict": 0.9927915999999999,
+     "tail": 0.0,
+     "short_results": 0,
+     "qps": 1533.9356937634645,
+     "latency_ms": {
+      "n": 10000,
+      "min": 11.750908,
+      "avg": 20.5863739592,
+      "p50": 19.999464000000003,
+      "p95": 25.070963799999905,
+      "p99": 35.94235123000001,
+      "max": 70.780198
+     },
+     "queries": 10000,
+     "duration": 6.5191781120011,
+     "passes": [
+      {
+       "qps": 1533.9356937634645,
+       "avg": 20.5863739592,
+       "p50": 19.999464000000003,
+       "p99": 35.94235123000001,
+       "queries": 10000,
+       "duration": 6.5191781120011
+      }
+     ]
+    },
+    {
+     "ladder_index": 2,
+     "knobs": {
+      "num_candidates": 10000,
+      "oversample": 4.0
+     },
+     "recall": 0.9959960999999999,
+     "recall_strict": 0.9959960999999999,
+     "tail": 0.0,
+     "short_results": 0,
+     "qps": 1357.8974140241658,
+     "latency_ms": {
+      "n": 10000,
+      "min": 12.69004,
+      "avg": 23.354138727800002,
+      "p50": 22.6246555,
+      "p95": 30.759780199999955,
+      "p99": 41.370922260000015,
+      "max": 66.117082
+     },
+     "queries": 10000,
+     "duration": 7.364326565999363,
+     "passes": [
+      {
+       "qps": 1357.8974140241658,
+       "avg": 23.354138727800002,
+       "p50": 22.6246555,
+       "p99": 41.370922260000015,
+       "queries": 10000,
+       "duration": 7.364326565999363
+      }
+     ]
+    }
+   ],
+   "plan": "{\"query_types\": [\"KnnScoreDocQuery\"]}",
+   "memory_peak": 10180452352
+  },
+  {
+   "key": "eq-10/10",
+   "filter": "eq-10",
+   "k": 10,
+   "exact": false,
+   "view": "throughput",
+   "clients": 32,
+   "status": "ok",
+   "block": "{\"filter\": {\"term\": {\"cat10\": \"$v\"}}, \"num_candidates\": \"{num_candidates}\", \"rescore_oversample\": \"{oversample}\"}",
+   "startup": 11.718662291998044,
+   "points": [
+    {
+     "ladder_index": 0,
+     "knobs": {
+      "num_candidates": 40,
+      "oversample": 4.0
+     },
+     "recall": 0.9328500000000002,
+     "recall_strict": 0.9328100000000003,
+     "tail": 0.0013,
+     "short_results": 0,
+     "qps": 7357.1824785682065,
+     "latency_ms": {
+      "n": 10000,
+      "min": 2.411041,
+      "avg": 4.271155509100001,
+      "p50": 3.5467625,
+      "p95": 4.684719099999996,
+      "p99": 31.037062290000016,
+      "max": 65.758996
+     },
+     "queries": 10000,
+     "duration": 1.3592159809995792,
+     "passes": [
+      {
+       "qps": 7357.1824785682065,
+       "avg": 4.271155509100001,
+       "p50": 3.5467625,
+       "p99": 31.037062290000016,
+       "queries": 10000,
+       "duration": 1.3592159809995792
+      }
+     ]
+    },
+    {
+     "ladder_index": 1,
+     "knobs": {
+      "num_candidates": 64,
+      "oversample": 4.0
+     },
+     "recall": 0.94706,
+     "recall_strict": 0.9470200000000001,
+     "tail": 0.0005,
+     "short_results": 0,
+     "qps": 7982.25716646062,
+     "latency_ms": {
+      "n": 10000,
+      "min": 2.562265,
+      "avg": 3.9316746060999996,
+      "p50": 3.456002,
+      "p95": 4.383841649999999,
+      "p99": 30.994481350000004,
+      "max": 39.187753
+     },
+     "queries": 10000,
+     "duration": 1.2527784800040536,
+     "passes": [
+      {
+       "qps": 7982.25716646062,
+       "avg": 3.9316746060999996,
+       "p50": 3.456002,
+       "p99": 30.994481350000004,
+       "queries": 10000,
+       "duration": 1.2527784800040536
+      }
+     ]
+    },
+    {
+     "ladder_index": 2,
+     "knobs": {
+      "num_candidates": 80,
+      "oversample": 4.0
+     },
+     "recall": 0.9525399999999999,
+     "recall_strict": 0.9525,
+     "tail": 0.0003,
+     "short_results": 0,
+     "qps": 7519.580374418197,
+     "latency_ms": {
+      "n": 10000,
+      "min": 2.597675,
+      "avg": 4.1642924807,
+      "p50": 3.603803,
+      "p95": 4.62201345,
+      "p99": 31.295256860000155,
+      "max": 37.024813
+     },
+     "queries": 10000,
+     "duration": 1.3298614420054946,
+     "passes": [
+      {
+       "qps": 7519.580374418197,
+       "avg": 4.1642924807,
+       "p50": 3.603803,
+       "p99": 31.295256860000155,
+       "queries": 10000,
+       "duration": 1.3298614420054946
+      }
+     ]
+    },
+    {
+     "ladder_index": 3,
+     "knobs": {
+      "num_candidates": 128,
+      "oversample": 4.0
+     },
+     "recall": 0.9612,
+     "recall_strict": 0.9611600000000002,
+     "tail": 0.0,
+     "short_results": 0,
+     "qps": 7130.691312527322,
+     "latency_ms": {
+      "n": 10000,
+      "min": 2.651641,
+      "avg": 4.395525027000001,
+      "p50": 3.9358440000000003,
+      "p95": 5.1078331,
+      "p99": 23.923910520000042,
+      "max": 42.009307
+     },
+     "queries": 10000,
+     "duration": 1.402388570997573,
+     "passes": [
+      {
+       "qps": 7130.691312527322,
+       "avg": 4.395525027000001,
+       "p50": 3.9358440000000003,
+       "p99": 23.923910520000042,
+       "queries": 10000,
+       "duration": 1.402388570997573
+      }
+     ]
+    },
+    {
+     "ladder_index": 4,
+     "knobs": {
+      "num_candidates": 192,
+      "oversample": 4.0
+     },
+     "recall": 0.9677400000000002,
+     "recall_strict": 0.9677100000000001,
+     "tail": 0.0,
+     "short_results": 0,
+     "qps": 6508.3995839787185,
+     "latency_ms": {
+      "n": 10000,
+      "min": 2.732172,
+      "avg": 4.806070407399999,
+      "p50": 4.3615935,
+      "p95": 5.71876395,
+      "p99": 24.48068964000003,
+      "max": 41.721615
+     },
+     "queries": 10000,
+     "duration": 1.5364760369993746,
+     "passes": [
+      {
+       "qps": 6508.3995839787185,
+       "avg": 4.806070407399999,
+       "p50": 4.3615935,
+       "p99": 24.48068964000003,
+       "queries": 10000,
+       "duration": 1.5364760369993746
+      }
+     ]
+    },
+    {
+     "ladder_index": 5,
+     "knobs": {
+      "num_candidates": 256,
+      "oversample": 4.0
+     },
+     "recall": 0.97126,
+     "recall_strict": 0.9712299999999999,
+     "tail": 0.0,
+     "short_results": 0,
+     "qps": 6118.642324951045,
+     "latency_ms": {
+      "n": 10000,
+      "min": 3.065157,
+      "avg": 5.1474822786,
+      "p50": 4.672238,
+      "p95": 6.265819399999999,
+      "p99": 26.562554190000018,
+      "max": 40.367085
+     },
+     "queries": 10000,
+     "duration": 1.6343494960019598,
+     "passes": [
+      {
+       "qps": 6118.642324951045,
+       "avg": 5.1474822786,
+       "p50": 4.672238,
+       "p99": 26.562554190000018,
+       "queries": 10000,
+       "duration": 1.6343494960019598
+      }
+     ]
+    },
+    {
+     "ladder_index": 6,
+     "knobs": {
+      "num_candidates": 384,
+      "oversample": 4.0
+     },
+     "recall": 0.9756599999999999,
+     "recall_strict": 0.9756299999999999,
+     "tail": 0.0,
+     "short_results": 0,
+     "qps": 5621.583729826477,
+     "latency_ms": {
+      "n": 10000,
+      "min": 2.99134,
+      "avg": 5.566389340500001,
+      "p50": 5.153778,
+      "p95": 6.96229675,
+      "p99": 22.937347720000005,
+      "max": 48.716343
+     },
+     "queries": 10000,
+     "duration": 1.7788581440036069,
+     "passes": [
+      {
+       "qps": 5621.583729826477,
+       "avg": 5.566389340500001,
+       "p50": 5.153778,
+       "p99": 22.937347720000005,
+       "queries": 10000,
+       "duration": 1.7788581440036069
+      }
+     ]
+    }
+   ],
+   "plan": "{\"query_types\": [\"KnnScoreDocQuery\"]}",
+   "memory_peak": 10191421440
+  },
+  {
+   "key": "eq-10/100",
+   "filter": "eq-10",
+   "k": 100,
+   "exact": false,
+   "view": "throughput",
+   "clients": 32,
+   "status": "ok",
+   "block": "{\"filter\": {\"term\": {\"cat10\": \"$v\"}}, \"num_candidates\": \"{num_candidates}\", \"rescore_oversample\": \"{oversample}\"}",
+   "startup": 11.718662291998044,
+   "points": [
+    {
+     "ladder_index": 0,
+     "knobs": {
+      "num_candidates": 400,
+      "oversample": 4.0
+     },
+     "recall": 0.956368,
+     "recall_strict": 0.9563349999999998,
+     "tail": 0.0,
+     "short_results": 0,
+     "qps": 4860.288782658417,
+     "latency_ms": {
+      "n": 10000,
+      "min": 4.141512,
+      "avg": 6.4167622828,
+      "p50": 5.906942,
+      "p95": 7.641647299999999,
+      "p99": 26.92208168,
+      "max": 44.260364
+     },
+     "queries": 10000,
+     "duration": 2.057490911996865,
+     "passes": [
+      {
+       "qps": 4860.288782658417,
+       "avg": 6.4167622828,
+       "p50": 5.906942,
+       "p99": 26.92208168,
+       "queries": 10000,
+       "duration": 2.057490911996865
+      }
+     ]
+    },
+    {
+     "ladder_index": 1,
+     "knobs": {
+      "num_candidates": 640,
+      "oversample": 4.0
+     },
+     "recall": 0.963834,
+     "recall_strict": 0.963801,
+     "tail": 0.0,
+     "short_results": 0,
+     "qps": 4476.102829582054,
+     "latency_ms": {
+      "n": 10000,
+      "min": 4.420765,
+      "avg": 7.0590680292000005,
+      "p50": 6.5849315,
+      "p95": 8.683652399999998,
+      "p99": 25.292544480000004,
+      "max": 31.056801
+     },
+     "queries": 10000,
+     "duration": 2.2340862979981466,
+     "passes": [
+      {
+       "qps": 4476.102829582054,
+       "avg": 7.0590680292000005,
+       "p50": 6.5849315,
+       "p99": 25.292544480000004,
+       "queries": 10000,
+       "duration": 2.2340862979981466
+      }
+     ]
+    },
+    {
+     "ladder_index": 2,
+     "knobs": {
+      "num_candidates": 1024,
+      "oversample": 4.0
+     },
+     "recall": 0.9699810000000001,
+     "recall_strict": 0.969949,
+     "tail": 0.0,
+     "short_results": 0,
+     "qps": 3996.9141440717317,
+     "latency_ms": {
+      "n": 10000,
+      "min": 4.697983,
+      "avg": 7.8639663793,
+      "p50": 7.3763974999999995,
+      "p95": 10.036741949999998,
+      "p99": 26.106078180000008,
+      "max": 35.368668
+     },
+     "queries": 10000,
+     "duration": 2.501930148995598,
+     "passes": [
+      {
+       "qps": 3996.9141440717317,
+       "avg": 7.8639663793,
+       "p50": 7.3763974999999995,
+       "p99": 26.106078180000008,
+       "queries": 10000,
+       "duration": 2.501930148995598
+      }
+     ]
+    },
+    {
+     "ladder_index": 3,
+     "knobs": {
+      "num_candidates": 1280,
+      "oversample": 4.0
+     },
+     "recall": 0.9725619999999999,
+     "recall_strict": 0.9725299999999999,
+     "tail": 0.0,
+     "short_results": 0,
+     "qps": 3733.7306225874904,
+     "latency_ms": {
+      "n": 10000,
+      "min": 5.117043,
+      "avg": 8.4092586841,
+      "p50": 7.848807000000001,
+      "p95": 10.821009199999995,
+      "p99": 27.82503953,
+      "max": 37.154813
+     },
+     "queries": 10000,
+     "duration": 2.6782864139968297,
+     "passes": [
+      {
+       "qps": 3733.7306225874904,
+       "avg": 8.4092586841,
+       "p50": 7.848807000000001,
+       "p99": 27.82503953,
+       "queries": 10000,
+       "duration": 2.6782864139968297
+      }
+     ]
+    },
+    {
+     "ladder_index": 4,
+     "knobs": {
+      "num_candidates": 2048,
+      "oversample": 4.0
+     },
+     "recall": 0.977073,
+     "recall_strict": 0.9770400000000001,
+     "tail": 0.0,
+     "short_results": 0,
+     "qps": 3316.6120565590572,
+     "latency_ms": {
+      "n": 10000,
+      "min": 5.300204,
+      "avg": 9.4830384169,
+      "p50": 8.948754999999998,
+      "p95": 12.684730199999999,
+      "p99": 26.69956955000001,
+      "max": 32.946326
+     },
+     "queries": 10000,
+     "duration": 3.015125022000575,
+     "passes": [
+      {
+       "qps": 3316.6120565590572,
+       "avg": 9.4830384169,
+       "p50": 8.948754999999998,
+       "p99": 26.69956955000001,
+       "queries": 10000,
+       "duration": 3.015125022000575
+      }
+     ]
+    }
+   ],
+   "plan": "{\"query_types\": [\"KnnScoreDocQuery\"]}",
+   "memory_peak": 10327621632
+  },
+  {
+   "key": "eq-10/1000",
+   "filter": "eq-10",
+   "k": 1000,
+   "exact": false,
+   "view": "throughput",
+   "clients": 32,
+   "status": "ok",
+   "block": "{\"filter\": {\"term\": {\"cat10\": \"$v\"}}, \"num_candidates\": \"{num_candidates}\", \"rescore_oversample\": \"{oversample}\"}",
+   "startup": 11.718662291998044,
+   "points": [
+    {
+     "ladder_index": 0,
+     "knobs": {
+      "num_candidates": 4000,
+      "oversample": 4.0
+     },
+     "recall": 0.9570238,
+     "recall_strict": 0.9570238,
+     "tail": 0.0,
+     "short_results": 0,
+     "qps": 1671.7711823014176,
+     "latency_ms": {
+      "n": 10000,
+      "min": 11.909148,
+      "avg": 18.9282246281,
+      "p50": 18.197741,
+      "p95": 22.646828699999993,
+      "p99": 35.82187836,
+      "max": 64.30727
+     },
+     "queries": 10000,
+     "duration": 5.981679853000969,
+     "passes": [
+      {
+       "qps": 1671.7711823014176,
+       "avg": 18.9282246281,
+       "p50": 18.197741,
+       "p99": 35.82187836,
+       "queries": 10000,
+       "duration": 5.981679853000969
+      }
+     ]
+    },
+    {
+     "ladder_index": 1,
+     "knobs": {
+      "num_candidates": 6000,
+      "oversample": 4.0
+     },
+     "recall": 0.9999977999999999,
+     "recall_strict": 0.9999977999999999,
+     "tail": 0.0,
+     "short_results": 0,
+     "qps": 1144.6978523259133,
+     "latency_ms": {
+      "n": 10000,
+      "min": 13.990293,
+      "avg": 27.6671997353,
+      "p50": 27.110289,
+      "p95": 32.87146889999999,
+      "p99": 44.68843305000001,
+      "max": 87.962121
+     },
+     "queries": 10000,
+     "duration": 8.735929729999043,
+     "passes": [
+      {
+       "qps": 1144.6978523259133,
+       "avg": 27.6671997353,
+       "p50": 27.110289,
+       "p99": 44.68843305000001,
+       "queries": 10000,
+       "duration": 8.735929729999043
+      }
+     ]
+    }
+   ],
+   "plan": "{\"query_types\": [\"KnnScoreDocQuery\"]}",
+   "memory_peak": 10448814080
+  },
+  {
+   "key": "eq-1/10",
+   "filter": "eq-1",
+   "k": 10,
+   "exact": false,
+   "view": "throughput",
+   "clients": 32,
+   "status": "ok",
+   "block": "{\"filter\": {\"term\": {\"cat100\": \"$v\"}}, \"num_candidates\": \"{num_candidates}\", \"rescore_oversample\": \"{oversample}\"}",
+   "startup": 11.718662291998044,
+   "points": [
+    {
+     "ladder_index": 0,
+     "knobs": {
+      "num_candidates": 192,
+      "oversample": 4.0
+     },
+     "recall": 0.76147,
+     "recall_strict": 0.7614200000000001,
+     "tail": 0.0499,
+     "short_results": 0,
+     "qps": 6513.471022381256,
+     "latency_ms": {
+      "n": 10000,
+      "min": 3.0201,
+      "avg": 4.8077348179,
+      "p50": 4.4447624999999995,
+      "p95": 5.9878699,
+      "p99": 24.034342810000012,
+      "max": 35.354078
+     },
+     "queries": 10000,
+     "duration": 1.535279724994325,
+     "passes": [
+      {
+       "qps": 6513.471022381256,
+       "avg": 4.8077348179,
+       "p50": 4.4447624999999995,
+       "p99": 24.034342810000012,
+       "queries": 10000,
+       "duration": 1.535279724994325
+      }
+     ]
+    },
+    {
+     "ladder_index": 1,
+     "knobs": {
+      "num_candidates": 256,
+      "oversample": 4.0
+     },
+     "recall": 1.0,
+     "recall_strict": 0.99998,
+     "tail": 0.0,
+     "short_results": 0,
+     "qps": 7925.581107675968,
+     "latency_ms": {
+      "n": 10000,
+      "min": 2.681429,
+      "avg": 3.9665481197,
+      "p50": 3.6358794999999997,
+      "p95": 4.54579755,
+      "p99": 19.072619820000085,
+      "max": 41.894877
+     },
+     "queries": 10000,
+     "duration": 1.2617371349988389,
+     "passes": [
+      {
+       "qps": 7925.581107675968,
+       "avg": 3.9665481197,
+       "p50": 3.6358794999999997,
+       "p99": 19.072619820000085,
+       "queries": 10000,
+       "duration": 1.2617371349988389
+      }
+     ]
+    }
+   ],
+   "plan": "{\"query_types\": [\"KnnScoreDocQuery\"]}",
+   "memory_peak": 10545418240
+  },
+  {
+   "key": "eq-1/100",
+   "filter": "eq-1",
+   "k": 100,
+   "exact": false,
+   "view": "throughput",
+   "clients": 32,
+   "status": "ok",
+   "block": "{\"filter\": {\"term\": {\"cat100\": \"$v\"}}, \"num_candidates\": \"{num_candidates}\", \"rescore_oversample\": \"{oversample}\"}",
+   "startup": 11.718662291998044,
+   "points": [
+    {
+     "ladder_index": 0,
+     "knobs": {
+      "num_candidates": 400,
+      "oversample": 4.0
+     },
+     "recall": 1.0,
+     "recall_strict": 0.999999,
+     "tail": 0.0,
+     "short_results": 0,
+     "qps": 6215.39510406422,
+     "latency_ms": {
+      "n": 10000,
+      "min": 3.453492,
+      "avg": 5.0824756021,
+      "p50": 4.6609765,
+      "p95": 5.74800065,
+      "p99": 21.152796690000006,
+      "max": 35.726097
+     },
+     "queries": 10000,
+     "duration": 1.6089081760001136,
+     "passes": [
+      {
+       "qps": 6215.39510406422,
+       "avg": 5.0824756021,
+       "p50": 4.6609765,
+       "p99": 21.152796690000006,
+       "queries": 10000,
+       "duration": 1.6089081760001136
+      }
+     ]
+    }
+   ],
+   "plan": "{\"query_types\": [\"KnnScoreDocQuery\"]}",
+   "memory_peak": 10545483776
+  },
+  {
+   "key": "eq-0.1/10",
+   "filter": "eq-0.1",
+   "k": 10,
+   "exact": false,
+   "view": "throughput",
+   "clients": 32,
+   "status": "ok",
+   "block": "{\"filter\": {\"term\": {\"cat1000\": \"$v\"}}, \"num_candidates\": \"{num_candidates}\", \"rescore_oversample\": \"{oversample}\"}",
+   "startup": 11.718662291998044,
+   "points": [
+    {
+     "ladder_index": 0,
+     "knobs": {
+      "num_candidates": 40,
+      "oversample": 4.0
+     },
+     "recall": 1.0,
+     "recall_strict": 1.0,
+     "tail": 0.0,
+     "short_results": 0,
+     "qps": 9272.447916974013,
+     "latency_ms": {
+      "n": 10000,
+      "min": 2.364566,
+      "avg": 3.3942684888000003,
+      "p50": 3.0247805,
+      "p95": 3.8041009999999993,
+      "p99": 16.519485270000054,
+      "max": 41.990349
+     },
+     "queries": 10000,
+     "duration": 1.0784638629993424,
+     "passes": [
+      {
+       "qps": 9272.447916974013,
+       "avg": 3.3942684888000003,
+       "p50": 3.0247805,
+       "p99": 16.519485270000054,
+       "queries": 10000,
+       "duration": 1.0784638629993424
+      }
+     ]
+    }
+   ],
+   "plan": "{\"query_types\": [\"KnnScoreDocQuery\"]}",
+   "memory_peak": 10554945536
+  },
+  {
+   "key": "range-10/10",
+   "filter": "range-10",
+   "k": 10,
+   "exact": false,
+   "view": "throughput",
+   "clients": 32,
+   "status": "ok",
+   "block": "{\"filter\": {\"range\": {\"num\": {\"gte\": \"$lo\", \"lte\": \"$hi\"}}}, \"num_candidates\": \"{num_candidates}\", \"rescore_oversample\": \"{oversample}\"}",
+   "startup": 11.718662291998044,
+   "points": [
+    {
+     "ladder_index": 0,
+     "knobs": {
+      "num_candidates": 40,
+      "oversample": 4.0
+     },
+     "recall": 0.93345,
+     "recall_strict": 0.9334100000000001,
+     "tail": 0.0021,
+     "short_results": 0,
+     "qps": 8077.286703653964,
+     "latency_ms": {
+      "n": 10000,
+      "min": 2.501969,
+      "avg": 3.9133380406,
+      "p50": 3.4535644999999997,
+      "p95": 4.490142399999999,
+      "p99": 22.37966647000001,
+      "max": 32.429104
+     },
+     "queries": 10000,
+     "duration": 1.2380395009968197,
+     "passes": [
+      {
+       "qps": 8077.286703653964,
+       "avg": 3.9133380406,
+       "p50": 3.4535644999999997,
+       "p99": 22.37966647000001,
+       "queries": 10000,
+       "duration": 1.2380395009968197
+      }
+     ]
+    },
+    {
+     "ladder_index": 1,
+     "knobs": {
+      "num_candidates": 64,
+      "oversample": 4.0
+     },
+     "recall": 0.9478900000000001,
+     "recall_strict": 0.94785,
+     "tail": 0.001,
+     "short_results": 0,
+     "qps": 7846.454896071252,
+     "latency_ms": {
+      "n": 10000,
+      "min": 2.508939,
+      "avg": 3.9844109838000006,
+      "p50": 3.6362205000000003,
+      "p95": 4.608628749999999,
+      "p99": 22.853787020000006,
+      "max": 30.308905
+     },
+     "queries": 10000,
+     "duration": 1.2744609039946226,
+     "passes": [
+      {
+       "qps": 7846.454896071252,
+       "avg": 3.9844109838000006,
+       "p50": 3.6362205000000003,
+       "p99": 22.853787020000006,
+       "queries": 10000,
+       "duration": 1.2744609039946226
+      }
+     ]
+    },
+    {
+     "ladder_index": 2,
+     "knobs": {
+      "num_candidates": 80,
+      "oversample": 4.0
+     },
+     "recall": 0.9536399999999999,
+     "recall_strict": 0.9536,
+     "tail": 0.0004,
+     "short_results": 0,
+     "qps": 7299.731655787708,
+     "latency_ms": {
+      "n": 10000,
+      "min": 2.712859,
+      "avg": 4.3178180312,
+      "p50": 3.8347875,
+      "p95": 4.997839599999997,
+      "p99": 23.35703530000001,
+      "max": 34.451692
+     },
+     "queries": 10000,
+     "duration": 1.3699133710033493,
+     "passes": [
+      {
+       "qps": 7299.731655787708,
+       "avg": 4.3178180312,
+       "p50": 3.8347875,
+       "p99": 23.35703530000001,
+       "queries": 10000,
+       "duration": 1.3699133710033493
+      }
+     ]
+    },
+    {
+     "ladder_index": 3,
+     "knobs": {
+      "num_candidates": 128,
+      "oversample": 4.0
+     },
+     "recall": 0.9627600000000002,
+     "recall_strict": 0.9627300000000001,
+     "tail": 0.0,
+     "short_results": 0,
+     "qps": 6634.937466791039,
+     "latency_ms": {
+      "n": 10000,
+      "min": 2.893037,
+      "avg": 4.7277003855999995,
+      "p50": 4.197001,
+      "p95": 5.535088599999997,
+      "p99": 26.63438246000001,
+      "max": 40.309422
+     },
+     "queries": 10000,
+     "duration": 1.5071732100041118,
+     "passes": [
+      {
+       "qps": 6634.937466791039,
+       "avg": 4.7277003855999995,
+       "p50": 4.197001,
+       "p99": 26.63438246000001,
+       "queries": 10000,
+       "duration": 1.5071732100041118
+      }
+     ]
+    },
+    {
+     "ladder_index": 4,
+     "knobs": {
+      "num_candidates": 192,
+      "oversample": 4.0
+     },
+     "recall": 0.96877,
+     "recall_strict": 0.96875,
+     "tail": 0.0,
+     "short_results": 0,
+     "qps": 6195.032629306209,
+     "latency_ms": {
+      "n": 10000,
+      "min": 2.903837,
+      "avg": 5.0608424579,
+      "p50": 4.605817999999999,
+      "p95": 6.139302099999999,
+      "p99": 22.42064362,
+      "max": 33.274692
+     },
+     "queries": 10000,
+     "duration": 1.614196501999686,
+     "passes": [
+      {
+       "qps": 6195.032629306209,
+       "avg": 5.0608424579,
+       "p50": 4.605817999999999,
+       "p99": 22.42064362,
+       "queries": 10000,
+       "duration": 1.614196501999686
+      }
+     ]
+    },
+    {
+     "ladder_index": 5,
+     "knobs": {
+      "num_candidates": 256,
+      "oversample": 4.0
+     },
+     "recall": 0.9722799999999999,
+     "recall_strict": 0.97226,
+     "tail": 0.0,
+     "short_results": 0,
+     "qps": 5836.309441157456,
+     "latency_ms": {
+      "n": 10000,
+      "min": 3.099783,
+      "avg": 5.364224818,
+      "p50": 4.9186035,
+      "p95": 6.6037203,
+      "p99": 25.788478080000004,
+      "max": 32.740709
+     },
+     "queries": 10000,
+     "duration": 1.713411548997101,
+     "passes": [
+      {
+       "qps": 5836.309441157456,
+       "avg": 5.364224818,
+       "p50": 4.9186035,
+       "p99": 25.788478080000004,
+       "queries": 10000,
+       "duration": 1.713411548997101
+      }
+     ]
+    },
+    {
+     "ladder_index": 6,
+     "knobs": {
+      "num_candidates": 384,
+      "oversample": 4.0
+     },
+     "recall": 0.9762799999999999,
+     "recall_strict": 0.9762599999999999,
+     "tail": 0.0,
+     "short_results": 0,
+     "qps": 5316.5842696539,
+     "latency_ms": {
+      "n": 10000,
+      "min": 3.453544,
+      "avg": 5.8458471186,
+      "p50": 5.4211975,
+      "p95": 7.404925999999998,
+      "p99": 26.32494500000003,
+      "max": 32.429694
+     },
+     "queries": 10000,
+     "duration": 1.8809068929986097,
+     "passes": [
+      {
+       "qps": 5316.5842696539,
+       "avg": 5.8458471186,
+       "p50": 5.4211975,
+       "p99": 26.32494500000003,
+       "queries": 10000,
+       "duration": 1.8809068929986097
+      }
+     ]
+    }
+   ],
+   "plan": "{\"query_types\": [\"KnnScoreDocQuery\"]}",
+   "memory_peak": 10577031168
+  },
+  {
+   "key": "range-10/100",
+   "filter": "range-10",
+   "k": 100,
+   "exact": false,
+   "view": "throughput",
+   "clients": 32,
+   "status": "ok",
+   "block": "{\"filter\": {\"range\": {\"num\": {\"gte\": \"$lo\", \"lte\": \"$hi\"}}}, \"num_candidates\": \"{num_candidates}\", \"rescore_oversample\": \"{oversample}\"}",
+   "startup": 11.718662291998044,
+   "points": [
+    {
+     "ladder_index": 0,
+     "knobs": {
+      "num_candidates": 400,
+      "oversample": 4.0
+     },
+     "recall": 0.956464,
+     "recall_strict": 0.9564329999999998,
+     "tail": 0.0,
+     "short_results": 0,
+     "qps": 4806.621540313222,
+     "latency_ms": {
+      "n": 10000,
+      "min": 4.143613,
+      "avg": 6.5732649668,
+      "p50": 6.103903,
+      "p95": 7.942305199999999,
+      "p99": 24.833367790000004,
+      "max": 30.588062
+     },
+     "queries": 10000,
+     "duration": 2.080463359998248,
+     "passes": [
+      {
+       "qps": 4806.621540313222,
+       "avg": 6.5732649668,
+       "p50": 6.103903,
+       "p99": 24.833367790000004,
+       "queries": 10000,
+       "duration": 2.080463359998248
+      }
+     ]
+    },
+    {
+     "ladder_index": 1,
+     "knobs": {
+      "num_candidates": 640,
+      "oversample": 4.0
+     },
+     "recall": 0.963675,
+     "recall_strict": 0.9636449999999999,
+     "tail": 0.0,
+     "short_results": 0,
+     "qps": 4250.015995249796,
+     "latency_ms": {
+      "n": 10000,
+      "min": 4.470395,
+      "avg": 7.402163535299999,
+      "p50": 6.848829,
+      "p95": 9.186565249999996,
+      "p99": 24.725637500000012,
+      "max": 34.019267
+     },
+     "queries": 10000,
+     "duration": 2.3529323210022994,
+     "passes": [
+      {
+       "qps": 4250.015995249796,
+       "avg": 7.402163535299999,
+       "p50": 6.848829,
+       "p99": 24.725637500000012,
+       "queries": 10000,
+       "duration": 2.3529323210022994
+      }
+     ]
+    },
+    {
+     "ladder_index": 2,
+     "knobs": {
+      "num_candidates": 1024,
+      "oversample": 4.0
+     },
+     "recall": 0.969771,
+     "recall_strict": 0.9697420000000002,
+     "tail": 0.0,
+     "short_results": 0,
+     "qps": 3799.00198940367,
+     "latency_ms": {
+      "n": 10000,
+      "min": 4.805938,
+      "avg": 8.224771300599999,
+      "p50": 7.6577515,
+      "p95": 10.692689149999996,
+      "p99": 25.627954720000005,
+      "max": 32.160989
+     },
+     "queries": 10000,
+     "duration": 2.6322702720062807,
+     "passes": [
+      {
+       "qps": 3799.00198940367,
+       "avg": 8.224771300599999,
+       "p50": 7.6577515,
+       "p99": 25.627954720000005,
+       "queries": 10000,
+       "duration": 2.6322702720062807
+      }
+     ]
+    },
+    {
+     "ladder_index": 3,
+     "knobs": {
+      "num_candidates": 1280,
+      "oversample": 4.0
+     },
+     "recall": 0.9722670000000002,
+     "recall_strict": 0.972239,
+     "tail": 0.0,
+     "short_results": 0,
+     "qps": 3633.1571981027296,
+     "latency_ms": {
+      "n": 10000,
+      "min": 4.972741,
+      "avg": 8.6639230542,
+      "p50": 8.0743265,
+      "p95": 11.266136699999999,
+      "p99": 26.33259192000001,
+      "max": 34.838177
+     },
+     "queries": 10000,
+     "duration": 2.7524270089998026,
+     "passes": [
+      {
+       "qps": 3633.1571981027296,
+       "avg": 8.6639230542,
+       "p50": 8.0743265,
+       "p99": 26.33259192000001,
+       "queries": 10000,
+       "duration": 2.7524270089998026
+      }
+     ]
+    },
+    {
+     "ladder_index": 4,
+     "knobs": {
+      "num_candidates": 2048,
+      "oversample": 4.0
+     },
+     "recall": 0.9766600000000001,
+     "recall_strict": 0.976632,
+     "tail": 0.0,
+     "short_results": 0,
+     "qps": 3197.0553350466985,
+     "latency_ms": {
+      "n": 10000,
+      "min": 5.291867,
+      "avg": 9.879288508899998,
+      "p50": 9.27904,
+      "p95": 13.645157649999996,
+      "p99": 27.943147890000006,
+      "max": 34.898866
+     },
+     "queries": 10000,
+     "duration": 3.1278782980007236,
+     "passes": [
+      {
+       "qps": 3197.0553350466985,
+       "avg": 9.879288508899998,
+       "p50": 9.27904,
+       "p99": 27.943147890000006,
+       "queries": 10000,
+       "duration": 3.1278782980007236
+      }
+     ]
+    }
+   ],
+   "plan": "{\"query_types\": [\"KnnScoreDocQuery\"]}",
+   "memory_peak": 10578169856
+  },
+  {
+   "key": "range-10/1000",
+   "filter": "range-10",
+   "k": 1000,
+   "exact": false,
+   "view": "throughput",
+   "clients": 32,
+   "status": "ok",
+   "block": "{\"filter\": {\"range\": {\"num\": {\"gte\": \"$lo\", \"lte\": \"$hi\"}}}, \"num_candidates\": \"{num_candidates}\", \"rescore_oversample\": \"{oversample}\"}",
+   "startup": 11.718662291998044,
+   "points": [
+    {
+     "ladder_index": 0,
+     "knobs": {
+      "num_candidates": 4000,
+      "oversample": 4.0
+     },
+     "recall": 0.9572011999999999,
+     "recall_strict": 0.9572011999999999,
+     "tail": 0.0,
+     "short_results": 0,
+     "qps": 1645.774765661402,
+     "latency_ms": {
+      "n": 10000,
+      "min": 12.767427,
+      "avg": 19.2058944502,
+      "p50": 18.517828,
+      "p95": 23.34157814999998,
+      "p99": 33.949671040000034,
+      "max": 52.682728
+     },
+     "queries": 10000,
+     "duration": 6.076165589998709,
+     "passes": [
+      {
+       "qps": 1645.774765661402,
+       "avg": 19.2058944502,
+       "p50": 18.517828,
+       "p99": 33.949671040000034,
+       "queries": 10000,
+       "duration": 6.076165589998709
+      }
+     ]
+    },
+    {
+     "ladder_index": 1,
+     "knobs": {
+      "num_candidates": 6000,
+      "oversample": 4.0
+     },
+     "recall": 0.9999989000000001,
+     "recall_strict": 0.9999989000000001,
+     "tail": 0.0,
+     "short_results": 0,
+     "qps": 1125.0662434083927,
+     "latency_ms": {
+      "n": 10000,
+      "min": 14.439597,
+      "avg": 28.193433818799996,
+      "p50": 27.575601,
+      "p95": 33.72671355,
+      "p99": 46.682556850000005,
+      "max": 85.235407
+     },
+     "queries": 10000,
+     "duration": 8.88836551499844,
+     "passes": [
+      {
+       "qps": 1125.0662434083927,
+       "avg": 28.193433818799996,
+       "p50": 27.575601,
+       "p99": 46.682556850000005,
+       "queries": 10000,
+       "duration": 8.88836551499844
+      }
+     ]
+    }
+   ],
+   "plan": "{\"query_types\": [\"KnnScoreDocQuery\"]}",
+   "memory_peak": 10579091456
+  },
+  {
+   "key": "range-1/10",
+   "filter": "range-1",
+   "k": 10,
+   "exact": false,
+   "view": "throughput",
+   "clients": 32,
+   "status": "ok",
+   "block": "{\"filter\": {\"range\": {\"num\": {\"gte\": \"$lo\", \"lte\": \"$hi\"}}}, \"num_candidates\": \"{num_candidates}\", \"rescore_oversample\": \"{oversample}\"}",
+   "startup": 11.718662291998044,
+   "points": [
+    {
+     "ladder_index": 0,
+     "knobs": {
+      "num_candidates": 192,
+      "oversample": 4.0
+     },
+     "recall": 0.75987,
+     "recall_strict": 0.7598600000000001,
+     "tail": 0.0466,
+     "short_results": 0,
+     "qps": 6454.524955861701,
+     "latency_ms": {
+      "n": 10000,
+      "min": 3.047608,
+      "avg": 4.8490698363,
+      "p50": 4.3897414999999995,
+      "p95": 5.8119134999999975,
+      "p99": 25.470067020000005,
+      "max": 38.139832
+     },
+     "queries": 10000,
+     "duration": 1.5493006949982373,
+     "passes": [
+      {
+       "qps": 6454.524955861701,
+       "avg": 4.8490698363,
+       "p50": 4.3897414999999995,
+       "p99": 25.470067020000005,
+       "queries": 10000,
+       "duration": 1.5493006949982373
+      }
+     ]
+    },
+    {
+     "ladder_index": 1,
+     "knobs": {
+      "num_candidates": 256,
+      "oversample": 4.0
+     },
+     "recall": 0.99989,
+     "recall_strict": 0.99989,
+     "tail": 0.0,
+     "short_results": 0,
+     "qps": 7303.729837079243,
+     "latency_ms": {
+      "n": 10000,
+      "min": 2.80796,
+      "avg": 4.3112058772,
+      "p50": 3.984389,
+      "p95": 5.0275321,
+      "p99": 16.443194440000003,
+      "max": 37.227557
+     },
+     "queries": 10000,
+     "duration": 1.3691634579954552,
+     "passes": [
+      {
+       "qps": 7303.729837079243,
+       "avg": 4.3112058772,
+       "p50": 3.984389,
+       "p99": 16.443194440000003,
+       "queries": 10000,
+       "duration": 1.3691634579954552
+      }
+     ]
+    }
+   ],
+   "plan": "{\"query_types\": [\"KnnScoreDocQuery\"]}",
+   "memory_peak": 10579091456
+  },
+  {
+   "key": "range-1/100",
+   "filter": "range-1",
+   "k": 100,
+   "exact": false,
+   "view": "throughput",
+   "clients": 32,
+   "status": "ok",
+   "block": "{\"filter\": {\"range\": {\"num\": {\"gte\": \"$lo\", \"lte\": \"$hi\"}}}, \"num_candidates\": \"{num_candidates}\", \"rescore_oversample\": \"{oversample}\"}",
+   "startup": 11.718662291998044,
+   "points": [
+    {
+     "ladder_index": 0,
+     "knobs": {
+      "num_candidates": 400,
+      "oversample": 4.0
+     },
+     "recall": 1.0,
+     "recall_strict": 0.9999969999999999,
+     "tail": 0.0,
+     "short_results": 0,
+     "qps": 6139.35035048344,
+     "latency_ms": {
+      "n": 10000,
+      "min": 3.686553,
+      "avg": 5.1301213411,
+      "p50": 4.724718,
+      "p95": 5.807500849999998,
+      "p99": 20.102287110000002,
+      "max": 34.435707
+     },
+     "queries": 10000,
+     "duration": 1.6288368360037566,
+     "passes": [
+      {
+       "qps": 6139.35035048344,
+       "avg": 5.1301213411,
+       "p50": 4.724718,
+       "p99": 20.102287110000002,
+       "queries": 10000,
+       "duration": 1.6288368360037566
+      }
+     ]
+    }
+   ],
+   "plan": "{\"query_types\": [\"KnnScoreDocQuery\"]}",
+   "memory_peak": 10579091456
+  },
+  {
+   "key": "and-1/10",
+   "filter": "and-1",
+   "k": 10,
+   "exact": false,
+   "view": "throughput",
+   "clients": 32,
+   "status": "ok",
+   "block": "{\"filter\": {\"bool\": {\"filter\": [{\"term\": {\"cat10\": \"$v\"}}, {\"range\": {\"num\": {\"gte\": \"$lo\", \"lte\": \"$hi\"}}}]}}, \"num_candidates\": \"{num_candidates}\", \"rescore_oversample\": \"{oversample}\"}",
+   "startup": 11.718662291998044,
+   "points": [
+    {
+     "ladder_index": 0,
+     "knobs": {
+      "num_candidates": 192,
+      "oversample": 4.0
+     },
+     "recall": 0.76173,
+     "recall_strict": 0.76171,
+     "tail": 0.0478,
+     "short_results": 0,
+     "qps": 5989.481723794462,
+     "latency_ms": {
+      "n": 10000,
+      "min": 3.288911,
+      "avg": 5.2570405128,
+      "p50": 4.8981025,
+      "p95": 6.619860799999998,
+      "p99": 21.604181340000007,
+      "max": 31.00424
+     },
+     "queries": 10000,
+     "duration": 1.6695935410025413,
+     "passes": [
+      {
+       "qps": 5989.481723794462,
+       "avg": 5.2570405128,
+       "p50": 4.8981025,
+       "p99": 21.604181340000007,
+       "queries": 10000,
+       "duration": 1.6695935410025413
+      }
+     ]
+    },
+    {
+     "ladder_index": 1,
+     "knobs": {
+      "num_candidates": 256,
+      "oversample": 4.0
+     },
+     "recall": 0.99987,
+     "recall_strict": 0.99987,
+     "tail": 0.0,
+     "short_results": 0,
+     "qps": 6521.4120518342215,
+     "latency_ms": {
+      "n": 10000,
+      "min": 2.998808,
+      "avg": 4.7678830533,
+      "p50": 4.508587,
+      "p95": 5.8225674499999975,
+      "p99": 17.08799934000004,
+      "max": 33.419615
+     },
+     "queries": 10000,
+     "duration": 1.5334102370034088,
+     "passes": [
+      {
+       "qps": 6521.4120518342215,
+       "avg": 4.7678830533,
+       "p50": 4.508587,
+       "p99": 17.08799934000004,
+       "queries": 10000,
+       "duration": 1.5334102370034088
+      }
+     ]
+    }
+   ],
+   "plan": "{\"query_types\": [\"KnnScoreDocQuery\"]}",
+   "memory_peak": 10589192192
+  },
+  {
+   "key": "and-1/100",
+   "filter": "and-1",
+   "k": 100,
+   "exact": false,
+   "view": "throughput",
+   "clients": 32,
+   "status": "ok",
+   "block": "{\"filter\": {\"bool\": {\"filter\": [{\"term\": {\"cat10\": \"$v\"}}, {\"range\": {\"num\": {\"gte\": \"$lo\", \"lte\": \"$hi\"}}}]}}, \"num_candidates\": \"{num_candidates}\", \"rescore_oversample\": \"{oversample}\"}",
+   "startup": 11.718662291998044,
+   "points": [
+    {
+     "ladder_index": 0,
+     "knobs": {
+      "num_candidates": 400,
+      "oversample": 4.0
+     },
+     "recall": 1.0,
+     "recall_strict": 0.9999969999999999,
+     "tail": 0.0,
+     "short_results": 0,
+     "qps": 5578.436373896485,
+     "latency_ms": {
+      "n": 10000,
+      "min": 3.989561,
+      "avg": 5.5992595799,
+      "p50": 5.130247,
+      "p95": 6.599877799999999,
+      "p99": 19.70129775,
+      "max": 37.291776
+     },
+     "queries": 10000,
+     "duration": 1.7926170220016502,
+     "passes": [
+      {
+       "qps": 5578.436373896485,
+       "avg": 5.5992595799,
+       "p50": 5.130247,
+       "p99": 19.70129775,
+       "queries": 10000,
+       "duration": 1.7926170220016502
+      }
+     ]
+    }
+   ],
+   "plan": "{\"query_types\": [\"KnnScoreDocQuery\"]}",
+   "memory_peak": 10589192192
+  },
+  {
+   "key": "corr/10",
+   "filter": "corr",
+   "k": 10,
+   "exact": false,
+   "view": "throughput",
+   "clients": 32,
+   "status": "ok",
+   "block": "{\"filter\": {\"term\": {\"cluster\": \"$v\"}}, \"num_candidates\": \"{num_candidates}\", \"rescore_oversample\": \"{oversample}\"}",
+   "startup": 11.718662291998044,
+   "points": [
+    {
+     "ladder_index": 0,
+     "knobs": {
+      "num_candidates": 40,
+      "oversample": 4.0
+     },
+     "recall": 0.99311,
+     "recall_strict": 0.9930800000000001,
+     "tail": 0.0,
+     "short_results": 0,
+     "qps": 9424.898588143265,
+     "latency_ms": {
+      "n": 10000,
+      "min": 2.289546,
+      "avg": 3.3520012516000004,
+      "p50": 3.0403054999999997,
+      "p95": 3.785932149999999,
+      "p99": 18.37096727,
+      "max": 29.015774
+     },
+     "queries": 10000,
+     "duration": 1.061019373999443,
+     "passes": [
+      {
+       "qps": 9424.898588143265,
+       "avg": 3.3520012516000004,
+       "p50": 3.0403054999999997,
+       "p99": 18.37096727,
+       "queries": 10000,
+       "duration": 1.061019373999443
+      }
+     ]
+    },
+    {
+     "ladder_index": 1,
+     "knobs": {
+      "num_candidates": 64,
+      "oversample": 4.0
+     },
+     "recall": 0.99545,
+     "recall_strict": 0.9954200000000001,
+     "tail": 0.0,
+     "short_results": 0,
+     "qps": 8810.538795770795,
+     "latency_ms": {
+      "n": 10000,
+      "min": 2.337752,
+      "avg": 3.5712836079,
+      "p50": 3.158704,
+      "p95": 3.9017996999999998,
+      "p99": 21.564725750000015,
+      "max": 34.409643
+     },
+     "queries": 10000,
+     "duration": 1.1350043659986113,
+     "passes": [
+      {
+       "qps": 8810.538795770795,
+       "avg": 3.5712836079,
+       "p50": 3.158704,
+       "p99": 21.564725750000015,
+       "queries": 10000,
+       "duration": 1.1350043659986113
+      }
+     ]
+    },
+    {
+     "ladder_index": 2,
+     "knobs": {
+      "num_candidates": 80,
+      "oversample": 4.0
+     },
+     "recall": 0.9960399999999999,
+     "recall_strict": 0.9960099999999998,
+     "tail": 0.0,
+     "short_results": 0,
+     "qps": 8815.812402232707,
+     "latency_ms": {
+      "n": 10000,
+      "min": 2.453341,
+      "avg": 3.5717502478000003,
+      "p50": 3.2385135,
+      "p95": 3.988527399999999,
+      "p99": 18.949938910000025,
+      "max": 34.612687
+     },
+     "queries": 10000,
+     "duration": 1.1343254079984035,
+     "passes": [
+      {
+       "qps": 8815.812402232707,
+       "avg": 3.5717502478000003,
+       "p50": 3.2385135,
+       "p99": 18.949938910000025,
+       "queries": 10000,
+       "duration": 1.1343254079984035
+      }
+     ]
+    }
+   ],
+   "plan": "{\"query_types\": [\"KnnScoreDocQuery\"]}",
+   "memory_peak": 10589839360
+  },
+  {
+   "key": "corr/100",
+   "filter": "corr",
+   "k": 100,
+   "exact": false,
+   "view": "throughput",
+   "clients": 32,
+   "status": "ok",
+   "block": "{\"filter\": {\"term\": {\"cluster\": \"$v\"}}, \"num_candidates\": \"{num_candidates}\", \"rescore_oversample\": \"{oversample}\"}",
+   "startup": 11.718662291998044,
+   "points": [
+    {
+     "ladder_index": 0,
+     "knobs": {
+      "num_candidates": 400,
+      "oversample": 4.0
+     },
+     "recall": 0.9989290000000001,
+     "recall_strict": 0.998926,
+     "tail": 0.0,
+     "short_results": 0,
+     "qps": 6384.686730334372,
+     "latency_ms": {
+      "n": 10000,
+      "min": 3.567632,
+      "avg": 4.9164135902,
+      "p50": 4.605041,
+      "p95": 5.569342099999999,
+      "p99": 19.595467430000006,
+      "max": 33.634601
+     },
+     "queries": 10000,
+     "duration": 1.5662475580029422,
+     "passes": [
+      {
+       "qps": 6384.686730334372,
+       "avg": 4.9164135902,
+       "p50": 4.605041,
+       "p99": 19.595467430000006,
+       "queries": 10000,
+       "duration": 1.5662475580029422
+      }
+     ]
+    }
+   ],
+   "plan": "{\"query_types\": [\"KnnScoreDocQuery\"]}",
+   "memory_peak": 10589839360
+  },
+  {
+   "key": "corr/1000",
+   "filter": "corr",
+   "k": 1000,
+   "exact": false,
+   "view": "throughput",
+   "clients": 32,
+   "status": "ok",
+   "block": "{\"filter\": {\"term\": {\"cluster\": \"$v\"}}, \"num_candidates\": \"{num_candidates}\", \"rescore_oversample\": \"{oversample}\"}",
+   "startup": 11.718662291998044,
+   "points": [
+    {
+     "ladder_index": 0,
+     "knobs": {
+      "num_candidates": 4000,
+      "oversample": 4.0
+     },
+     "recall": 0.9999984000000001,
+     "recall_strict": 0.9999984000000001,
+     "tail": 0.0,
+     "short_results": 0,
+     "qps": 2314.2326545921155,
+     "latency_ms": {
+      "n": 10000,
+      "min": 9.493779,
+      "avg": 13.622222210299999,
+      "p50": 13.069213000000001,
+      "p95": 15.678535949999995,
+      "p99": 27.417000050000006,
+      "max": 65.285493
+     },
+     "queries": 10000,
+     "duration": 4.321086723997723,
+     "passes": [
+      {
+       "qps": 2314.2326545921155,
+       "avg": 13.622222210299999,
+       "p50": 13.069213000000001,
+       "p99": 27.417000050000006,
+       "queries": 10000,
+       "duration": 4.321086723997723
+      }
+     ]
+    }
+   ],
+   "plan": "{\"query_types\": [\"KnnScoreDocQuery\"]}",
+   "memory_peak": 10591686656
+  },
+  {
+   "key": "xcorr/10",
+   "filter": "xcorr",
+   "k": 10,
+   "exact": false,
+   "view": "throughput",
+   "clients": 32,
+   "status": "ok",
+   "block": "{\"filter\": {\"term\": {\"cluster\": \"$v\"}}, \"num_candidates\": \"{num_candidates}\", \"rescore_oversample\": \"{oversample}\"}",
+   "startup": 11.718662291998044,
+   "points": [
+    {
+     "ladder_index": 0,
+     "knobs": {
+      "num_candidates": 40,
+      "oversample": 4.0
+     },
+     "recall": 0.9999,
+     "recall_strict": 0.99984,
+     "tail": 0.0,
+     "short_results": 0,
+     "qps": 9822.205401798306,
+     "latency_ms": {
+      "n": 10000,
+      "min": 2.14517,
+      "avg": 3.1932612028,
+      "p50": 2.944285,
+      "p95": 3.6526940499999982,
+      "p99": 4.453687000000012,
+      "max": 42.808376
+     },
+     "queries": 10000,
+     "duration": 1.0181012909961282,
+     "passes": [
+      {
+       "qps": 9822.205401798306,
+       "avg": 3.1932612028,
+       "p50": 2.944285,
+       "p99": 4.453687000000012,
+       "queries": 10000,
+       "duration": 1.0181012909961282
+      }
+     ]
+    }
+   ],
+   "plan": "{\"query_types\": [\"KnnScoreDocQuery\"]}",
+   "memory_peak": 10591686656
+  },
+  {
+   "key": "xcorr/100",
+   "filter": "xcorr",
+   "k": 100,
+   "exact": false,
+   "view": "throughput",
+   "clients": 32,
+   "status": "ok",
+   "block": "{\"filter\": {\"term\": {\"cluster\": \"$v\"}}, \"num_candidates\": \"{num_candidates}\", \"rescore_oversample\": \"{oversample}\"}",
+   "startup": 11.718662291998044,
+   "points": [
+    {
+     "ladder_index": 0,
+     "knobs": {
+      "num_candidates": 400,
+      "oversample": 4.0
+     },
+     "recall": 1.0,
+     "recall_strict": 0.999986,
+     "tail": 0.0,
+     "short_results": 0,
+     "qps": 6961.480114475961,
+     "latency_ms": {
+      "n": 10000,
+      "min": 2.867846,
+      "avg": 4.515592193,
+      "p50": 4.1039655,
+      "p95": 5.21601655,
+      "p99": 20.68901100000001,
+      "max": 31.631064
+     },
+     "queries": 10000,
+     "duration": 1.4364761280012317,
+     "passes": [
+      {
+       "qps": 6961.480114475961,
+       "avg": 4.515592193,
+       "p50": 4.1039655,
+       "p99": 20.68901100000001,
+       "queries": 10000,
+       "duration": 1.4364761280012317
+      }
+     ]
+    }
+   ],
+   "plan": "{\"query_types\": [\"KnnScoreDocQuery\"]}",
+   "memory_peak": 10591686656
+  },
+  {
+   "key": "exact/eq-1/10",
+   "filter": "eq-1",
+   "k": 10,
+   "exact": true,
+   "view": "throughput",
+   "clients": 32,
+   "status": "ok",
+   "block": "{\"filter\": {\"term\": {\"cat100\": \"$v\"}}, \"exact\": true}",
+   "startup": 11.718662291998044,
+   "points": [
+    {
+     "ladder_index": 0,
+     "knobs": {},
+     "recall": 1.0,
+     "recall_strict": 0.99998,
+     "tail": 0.0,
+     "short_results": 0,
+     "qps": 3990.058058523293,
+     "latency_ms": {
+      "n": 10000,
+      "min": 3.239023,
+      "avg": 7.919166594099998,
+      "p50": 7.6832785,
+      "p95": 10.93442235,
+      "p99": 13.072459460000001,
+      "max": 22.169211
+     },
+     "queries": 10000,
+     "duration": 2.5062291959984577,
+     "passes": [
+      {
+       "qps": 3990.058058523293,
+       "avg": 7.919166594099998,
+       "p50": 7.6832785,
+       "p99": 13.072459460000001,
+       "queries": 10000,
+       "duration": 2.5062291959984577
+      }
+     ]
+    }
+   ],
+   "plan": "{\"query_types\": [\"ScriptScoreQuery\"]}",
+   "memory_peak": 10623647744
+  },
+  {
+   "key": "lang/10",
+   "filter": "lang",
+   "k": 10,
+   "exact": false,
+   "view": "throughput",
+   "clients": 32,
+   "status": "ok",
+   "block": "{\"filter\": {\"term\": {\"lang\": \"$s\"}}, \"num_candidates\": \"{num_candidates}\", \"rescore_oversample\": \"{oversample}\"}",
+   "startup": 11.718662291998044,
+   "points": [
+    {
+     "ladder_index": 0,
+     "knobs": {
+      "num_candidates": 40,
+      "oversample": 4.0
+     },
+     "recall": 0.98324,
+     "recall_strict": 0.9832,
+     "tail": 0.0006,
+     "short_results": 0,
+     "qps": 8470.889811726569,
+     "latency_ms": {
+      "n": 10000,
+      "min": 2.066613,
+      "avg": 3.637777175,
+      "p50": 3.0374369999999997,
+      "p95": 5.846586299999999,
+      "p99": 21.235468120000007,
+      "max": 41.291342
+     },
+     "queries": 10000,
+     "duration": 1.1805135260001407,
+     "passes": [
+      {
+       "qps": 8470.889811726569,
+       "avg": 3.637777175,
+       "p50": 3.0374369999999997,
+       "p99": 21.235468120000007,
+       "queries": 10000,
+       "duration": 1.1805135260001407
+      }
+     ]
+    },
+    {
+     "ladder_index": 1,
+     "knobs": {
+      "num_candidates": 64,
+      "oversample": 4.0
+     },
+     "recall": 0.98934,
+     "recall_strict": 0.9893,
+     "tail": 0.0004,
+     "short_results": 0,
+     "qps": 8203.902510083844,
+     "latency_ms": {
+      "n": 10000,
+      "min": 2.168977,
+      "avg": 3.7505060718000003,
+      "p50": 3.134496,
+      "p95": 5.961557449999998,
+      "p99": 23.6167768,
+      "max": 44.214925
+     },
+     "queries": 10000,
+     "duration": 1.2189320860052248,
+     "passes": [
+      {
+       "qps": 8203.902510083844,
+       "avg": 3.7505060718000003,
+       "p50": 3.134496,
+       "p99": 23.6167768,
+       "queries": 10000,
+       "duration": 1.2189320860052248
+      }
+     ]
+    },
+    {
+     "ladder_index": 2,
+     "knobs": {
+      "num_candidates": 80,
+      "oversample": 4.0
+     },
+     "recall": 0.99106,
+     "recall_strict": 0.9910199999999999,
+     "tail": 0.0001,
+     "short_results": 0,
+     "qps": 8213.3136255122,
+     "latency_ms": {
+      "n": 10000,
+      "min": 2.338692,
+      "avg": 3.758459395,
+      "p50": 3.1755329999999997,
+      "p95": 6.088364099999997,
+      "p99": 21.322626080000006,
+      "max": 37.570206
+     },
+     "queries": 10000,
+     "duration": 1.2175353889979306,
+     "passes": [
+      {
+       "qps": 8213.3136255122,
+       "avg": 3.758459395,
+       "p50": 3.1755329999999997,
+       "p99": 21.322626080000006,
+       "queries": 10000,
+       "duration": 1.2175353889979306
+      }
+     ]
+    },
+    {
+     "ladder_index": 3,
+     "knobs": {
+      "num_candidates": 128,
+      "oversample": 4.0
+     },
+     "recall": 0.9943699999999999,
+     "recall_strict": 0.99435,
+     "tail": 0.0,
+     "short_results": 0,
+     "qps": 7658.932814410059,
+     "latency_ms": {
+      "n": 10000,
+      "min": 2.391347,
+      "avg": 3.9711974344,
+      "p50": 3.3382614999999998,
+      "p95": 6.361025199999997,
+      "p99": 22.50933480000007,
+      "max": 34.848163
+     },
+     "queries": 10000,
+     "duration": 1.305664933002845,
+     "passes": [
+      {
+       "qps": 7658.932814410059,
+       "avg": 3.9711974344,
+       "p50": 3.3382614999999998,
+       "p99": 22.50933480000007,
+       "queries": 10000,
+       "duration": 1.305664933002845
+      }
+     ]
+    },
+    {
+     "ladder_index": 4,
+     "knobs": {
+      "num_candidates": 192,
+      "oversample": 4.0
+     },
+     "recall": 0.9963200000000001,
+     "recall_strict": 0.9963,
+     "tail": 0.0,
+     "short_results": 0,
+     "qps": 7420.564849410329,
+     "latency_ms": {
+      "n": 10000,
+      "min": 2.483211,
+      "avg": 4.1691405254,
+      "p50": 3.5615115,
+      "p95": 6.6033915,
+      "p99": 25.338653700000012,
+      "max": 39.201793
+     },
+     "queries": 10000,
+     "duration": 1.3476063080015592,
+     "passes": [
+      {
+       "qps": 7420.564849410329,
+       "avg": 4.1691405254,
+       "p50": 3.5615115,
+       "p99": 25.338653700000012,
+       "queries": 10000,
+       "duration": 1.3476063080015592
+      }
+     ]
+    }
+   ],
+   "plan": "{\"query_types\": [\"KnnScoreDocQuery\"]}",
+   "memory_peak": 10626977792
+  },
+  {
+   "key": "xlang/10",
+   "filter": "xlang",
+   "k": 10,
+   "exact": false,
+   "view": "throughput",
+   "clients": 32,
+   "status": "ok",
+   "block": "{\"filter\": {\"term\": {\"lang\": \"$s\"}}, \"num_candidates\": \"{num_candidates}\", \"rescore_oversample\": \"{oversample}\"}",
+   "startup": 11.718662291998044,
+   "points": [
+    {
+     "ladder_index": 0,
+     "knobs": {
+      "num_candidates": 40,
+      "oversample": 4.0
+     },
+     "recall": 0.9742599999999999,
+     "recall_strict": 0.97424,
+     "tail": 0.0008,
+     "short_results": 0,
+     "qps": 6506.012587468978,
+     "latency_ms": {
+      "n": 10000,
+      "min": 2.328676,
+      "avg": 4.7208421543,
+      "p50": 3.6448495,
+      "p95": 7.387054599999999,
+      "p99": 23.467910420000013,
+      "max": 38.537947
+     },
+     "queries": 10000,
+     "duration": 1.5370397560036508,
+     "passes": [
+      {
+       "qps": 6506.012587468978,
+       "avg": 4.7208421543,
+       "p50": 3.6448495,
+       "p99": 23.467910420000013,
+       "queries": 10000,
+       "duration": 1.5370397560036508
+      }
+     ]
+    },
+    {
+     "ladder_index": 1,
+     "knobs": {
+      "num_candidates": 64,
+      "oversample": 4.0
+     },
+     "recall": 0.9818900000000002,
+     "recall_strict": 0.98187,
+     "tail": 0.0004,
+     "short_results": 0,
+     "qps": 6501.245390258925,
+     "latency_ms": {
+      "n": 10000,
+      "min": 2.397509,
+      "avg": 4.7687720604,
+      "p50": 3.6633635,
+      "p95": 7.43306005,
+      "p99": 20.679966700000016,
+      "max": 40.72849
+     },
+     "queries": 10000,
+     "duration": 1.5381668280024314,
+     "passes": [
+      {
+       "qps": 6501.245390258925,
+       "avg": 4.7687720604,
+       "p50": 3.6633635,
+       "p99": 20.679966700000016,
+       "queries": 10000,
+       "duration": 1.5381668280024314
+      }
+     ]
+    },
+    {
+     "ladder_index": 2,
+     "knobs": {
+      "num_candidates": 96,
+      "oversample": 4.0
+     },
+     "recall": 0.98665,
+     "recall_strict": 0.9866300000000001,
+     "tail": 0.0003,
+     "short_results": 0,
+     "qps": 6292.9768588984725,
+     "latency_ms": {
+      "n": 10000,
+      "min": 2.235345,
+      "avg": 4.9495829759,
+      "p50": 3.8245839999999998,
+      "p95": 7.650254249999999,
+      "p99": 22.95190061000001,
+      "max": 40.660993
+     },
+     "queries": 10000,
+     "duration": 1.5890730610044557,
+     "passes": [
+      {
+       "qps": 6292.9768588984725,
+       "avg": 4.9495829759,
+       "p50": 3.8245839999999998,
+       "p99": 22.95190061000001,
+       "queries": 10000,
+       "duration": 1.5890730610044557
+      }
+     ]
+    },
+    {
+     "ladder_index": 3,
+     "knobs": {
+      "num_candidates": 128,
+      "oversample": 4.0
+     },
+     "recall": 0.98895,
+     "recall_strict": 0.98893,
+     "tail": 0.0003,
+     "short_results": 0,
+     "qps": 6085.51941363113,
+     "latency_ms": {
+      "n": 10000,
+      "min": 2.556162,
+      "avg": 5.0860782092,
+      "p50": 3.9478295,
+      "p95": 7.816330949999998,
+      "p99": 22.64265266000005,
+      "max": 50.416223
+     },
+     "queries": 10000,
+     "duration": 1.6432451069995295,
+     "passes": [
+      {
+       "qps": 6085.51941363113,
+       "avg": 5.0860782092,
+       "p50": 3.9478295,
+       "p99": 22.64265266000005,
+       "queries": 10000,
+       "duration": 1.6432451069995295
+      }
+     ]
+    },
+    {
+     "ladder_index": 4,
+     "knobs": {
+      "num_candidates": 192,
+      "oversample": 4.0
+     },
+     "recall": 0.9915200000000001,
+     "recall_strict": 0.9915,
+     "tail": 0.0003,
+     "short_results": 0,
+     "qps": 5688.050675890451,
+     "latency_ms": {
+      "n": 10000,
+      "min": 2.508448,
+      "avg": 5.4629863709999995,
+      "p50": 4.2322679999999995,
+      "p95": 8.211387899999995,
+      "p99": 26.309234550000014,
+      "max": 43.326119
+     },
+     "queries": 10000,
+     "duration": 1.7580715380026959,
+     "passes": [
+      {
+       "qps": 5688.050675890451,
+       "avg": 5.4629863709999995,
+       "p50": 4.2322679999999995,
+       "p99": 26.309234550000014,
+       "queries": 10000,
+       "duration": 1.7580715380026959
+      }
+     ]
+    },
+    {
+     "ladder_index": 5,
+     "knobs": {
+      "num_candidates": 384,
+      "oversample": 4.0
+     },
+     "recall": 0.99485,
+     "recall_strict": 0.9948300000000001,
+     "tail": 0.0002,
+     "short_results": 0,
+     "qps": 5353.032298051281,
+     "latency_ms": {
+      "n": 10000,
+      "min": 2.94532,
+      "avg": 5.7963406315,
+      "p50": 4.8284205,
+      "p95": 8.679649949999996,
+      "p99": 22.22776793,
+      "max": 40.411944
+     },
+     "queries": 10000,
+     "duration": 1.8681000680007855,
+     "passes": [
+      {
+       "qps": 5353.032298051281,
+       "avg": 5.7963406315,
+       "p50": 4.8284205,
+       "p99": 22.22776793,
+       "queries": 10000,
+       "duration": 1.8681000680007855
+      }
+     ]
+    },
+    {
+     "ladder_index": 6,
+     "knobs": {
+      "num_candidates": 512,
+      "oversample": 4.0
+     },
+     "recall": 0.99561,
+     "recall_strict": 0.99559,
+     "tail": 0.0001,
+     "short_results": 0,
+     "qps": 4991.687420306963,
+     "latency_ms": {
+      "n": 10000,
+      "min": 3.003315,
+      "avg": 6.2519203881,
+      "p50": 5.2071515,
+      "p95": 9.229560399999999,
+      "p99": 26.489876440000003,
+      "max": 37.935687
+     },
+     "queries": 10000,
+     "duration": 2.003330569001264,
+     "passes": [
+      {
+       "qps": 4991.687420306963,
+       "avg": 6.2519203881,
+       "p50": 5.2071515,
+       "p99": 26.489876440000003,
+       "queries": 10000,
+       "duration": 2.003330569001264
+      }
+     ]
+    }
+   ],
+   "plan": "{\"query_types\": [\"KnnScoreDocQuery\"]}",
+   "memory_peak": 10627178496
+  },
+  {
+   "key": "none/10",
+   "filter": "none",
+   "k": 10,
+   "exact": false,
+   "view": "latency",
+   "clients": 1,
+   "status": "ok",
+   "block": "{\"filter\": null, \"num_candidates\": \"{num_candidates}\", \"rescore_oversample\": \"{oversample}\"}",
+   "startup": 11.718662291998044,
+   "points": [
+    {
+     "ladder_index": 0,
+     "knobs": {
+      "num_candidates": 40,
+      "oversample": 4.0
+     },
+     "recall": 0.9745499999999999,
+     "recall_strict": 0.9745499999999999,
+     "tail": 0.0005,
+     "short_results": 0,
+     "qps": 326.08446194038936,
+     "latency_ms": {
+      "n": 2000,
+      "min": 2.507682,
+      "avg": 3.0600346600000004,
+      "p50": 3.0450135,
+      "p95": 3.3673332499999997,
+      "p99": 3.96750984,
+      "max": 4.349591
+     },
+     "queries": 2000,
+     "duration": 6.1333802539957105,
+     "passes": [
+      {
+       "qps": 326.08446194038936,
+       "avg": 3.0600346600000004,
+       "p50": 3.0450135,
+       "p99": 3.96750984,
+       "queries": 2000,
+       "duration": 6.1333802539957105
+      }
+     ]
+    },
+    {
+     "ladder_index": 1,
+     "knobs": {
+      "num_candidates": 64,
+      "oversample": 4.0
+     },
+     "recall": 0.9820000000000001,
+     "recall_strict": 0.9820000000000001,
+     "tail": 0.0,
+     "short_results": 0,
+     "qps": 324.5772478639833,
+     "latency_ms": {
+      "n": 2000,
+      "min": 2.504227,
+      "avg": 3.074264773,
+      "p50": 3.0722695,
+      "p95": 3.3606014500000003,
+      "p99": 3.50716539,
+      "max": 4.249218
+     },
+     "queries": 2000,
+     "duration": 6.161861353997665,
+     "passes": [
+      {
+       "qps": 324.5772478639833,
+       "avg": 3.074264773,
+       "p50": 3.0722695,
+       "p99": 3.50716539,
+       "queries": 2000,
+       "duration": 6.161861353997665
+      }
+     ]
+    },
+    {
+     "ladder_index": 2,
+     "knobs": {
+      "num_candidates": 96,
+      "oversample": 4.0
+     },
+     "recall": 0.98585,
+     "recall_strict": 0.98585,
+     "tail": 0.0,
+     "short_results": 0,
+     "qps": 317.92286823518185,
+     "latency_ms": {
+      "n": 2000,
+      "min": 2.581528,
+      "avg": 3.1386272749999997,
+      "p50": 3.1140074999999996,
+      "p95": 3.42750975,
+      "p99": 3.55724672,
+      "max": 26.640346
+     },
+     "queries": 2000,
+     "duration": 6.290834035004082,
+     "passes": [
+      {
+       "qps": 317.92286823518185,
+       "avg": 3.1386272749999997,
+       "p50": 3.1140074999999996,
+       "p99": 3.55724672,
+       "queries": 2000,
+       "duration": 6.290834035004082
+      }
+     ]
+    },
+    {
+     "ladder_index": 3,
+     "knobs": {
+      "num_candidates": 128,
+      "oversample": 4.0
+     },
+     "recall": 0.9885,
+     "recall_strict": 0.9885,
+     "tail": 0.0,
+     "short_results": 0,
+     "qps": 317.70771928527836,
+     "latency_ms": {
+      "n": 2000,
+      "min": 2.518156,
+      "avg": 3.1409153655,
+      "p50": 3.1348725,
+      "p95": 3.46914955,
+      "p99": 3.57958974,
+      "max": 3.772271
+     },
+     "queries": 2000,
+     "duration": 6.295094134002284,
+     "passes": [
+      {
+       "qps": 317.70771928527836,
+       "avg": 3.1409153655,
+       "p50": 3.1348725,
+       "p99": 3.57958974,
+       "queries": 2000,
+       "duration": 6.295094134002284
+      }
+     ]
+    },
+    {
+     "ladder_index": 4,
+     "knobs": {
+      "num_candidates": 192,
+      "oversample": 4.0
+     },
+     "recall": 0.99205,
+     "recall_strict": 0.99205,
+     "tail": 0.0,
+     "short_results": 0,
+     "qps": 310.1273480456686,
+     "latency_ms": {
+      "n": 2000,
+      "min": 2.602962,
+      "avg": 3.2179041255,
+      "p50": 3.185287,
+      "p95": 3.5451422499999996,
+      "p99": 3.81017993,
+      "max": 28.812375
+     },
+     "queries": 2000,
+     "duration": 6.448963668000943,
+     "passes": [
+      {
+       "qps": 310.1273480456686,
+       "avg": 3.2179041255,
+       "p50": 3.185287,
+       "p99": 3.81017993,
+       "queries": 2000,
+       "duration": 6.448963668000943
+      }
+     ]
+    },
+    {
+     "ladder_index": 5,
+     "knobs": {
+      "num_candidates": 384,
+      "oversample": 4.0
+     },
+     "recall": 0.99535,
+     "recall_strict": 0.99535,
+     "tail": 0.0,
+     "short_results": 0,
+     "qps": 302.70667130171864,
+     "latency_ms": {
+      "n": 2000,
+      "min": 2.572634,
+      "avg": 3.296688212,
+      "p50": 3.284259,
+      "p95": 3.7010015999999997,
+      "p99": 3.85372417,
+      "max": 4.017423
+     },
+     "queries": 2000,
+     "duration": 6.607056234999618,
+     "passes": [
+      {
+       "qps": 302.70667130171864,
+       "avg": 3.296688212,
+       "p50": 3.284259,
+       "p99": 3.85372417,
+       "queries": 2000,
+       "duration": 6.607056234999618
+      }
+     ]
+    },
+    {
+     "ladder_index": 6,
+     "knobs": {
+      "num_candidates": 512,
+      "oversample": 4.0
+     },
+     "recall": 0.9961,
+     "recall_strict": 0.9961,
+     "tail": 0.0,
+     "short_results": 0,
+     "qps": 296.4715064326861,
+     "latency_ms": {
+      "n": 2000,
+      "min": 2.697713,
+      "avg": 3.3660997399999997,
+      "p50": 3.3430915,
+      "p95": 3.81254125,
+      "p99": 4.0229294200000005,
+      "max": 5.67899
+     },
+     "queries": 2000,
+     "duration": 6.746010852999461,
+     "passes": [
+      {
+       "qps": 296.4715064326861,
+       "avg": 3.3660997399999997,
+       "p50": 3.3430915,
+       "p99": 4.0229294200000005,
+       "queries": 2000,
+       "duration": 6.746010852999461
+      }
+     ]
+    }
+   ],
+   "plan": "{\"query_types\": [\"KnnScoreDocQuery\"]}",
+   "memory_peak": 10627178496
+  },
+  {
+   "key": "exact/none/10",
+   "filter": "none",
+   "k": 10,
+   "exact": true,
+   "view": "latency",
+   "clients": 1,
+   "status": "ok",
+   "block": "{\"filter\": null, \"exact\": true}",
+   "startup": 11.718662291998044,
+   "points": [
+    {
+     "ladder_index": 0,
+     "knobs": {},
+     "recall": 1.0,
+     "recall_strict": 1.0,
+     "tail": 0.0,
+     "short_results": 0,
+     "qps": 13.618938963989356,
+     "latency_ms": {
+      "n": 818,
+      "min": 63.986093,
+      "avg": 73.4136105183374,
+      "p50": 67.44116299999999,
+      "p95": 93.84929325,
+      "p99": 94.83456835000001,
+      "max": 96.103106
+     },
+     "queries": 818,
+     "duration": 60.063416258999496,
+     "passes": [
+      {
+       "qps": 13.618938963989356,
+       "avg": 73.4136105183374,
+       "p50": 67.44116299999999,
+       "p99": 94.83456835000001,
+       "queries": 818,
+       "duration": 60.063416258999496
+      }
+     ]
+    }
+   ],
+   "plan": "{\"query_types\": [\"ScriptScoreQuery\"]}",
+   "memory_peak": 10627178496
+  },
+  {
+   "key": "none/100",
+   "filter": "none",
+   "k": 100,
+   "exact": false,
+   "view": "latency",
+   "clients": 1,
+   "status": "ok",
+   "block": "{\"filter\": null, \"num_candidates\": \"{num_candidates}\", \"rescore_oversample\": \"{oversample}\"}",
+   "startup": 11.718662291998044,
+   "points": [
+    {
+     "ladder_index": 0,
+     "knobs": {
+      "num_candidates": 400,
+      "oversample": 4.0
+     },
+     "recall": 0.9865050000000001,
+     "recall_strict": 0.9864750000000001,
+     "tail": 0.0,
+     "short_results": 0,
+     "qps": 263.33101963673283,
+     "latency_ms": {
+      "n": 2000,
+      "min": 3.154718,
+      "avg": 3.786954375,
+      "p50": 3.770607,
+      "p95": 4.2122551,
+      "p99": 4.39643936,
+      "max": 4.815654
+     },
+     "queries": 2000,
+     "duration": 7.595003440001165,
+     "passes": [
+      {
+       "qps": 263.33101963673283,
+       "avg": 3.786954375,
+       "p50": 3.770607,
+       "p99": 4.39643936,
+       "queries": 2000,
+       "duration": 7.595003440001165
+      }
+     ]
+    },
+    {
+     "ladder_index": 1,
+     "knobs": {
+      "num_candidates": 640,
+      "oversample": 4.0
+     },
+     "recall": 0.9902900000000001,
+     "recall_strict": 0.9902650000000001,
+     "tail": 0.0,
+     "short_results": 0,
+     "qps": 246.77852832078617,
+     "latency_ms": {
+      "n": 2000,
+      "min": 3.399378,
+      "avg": 4.041734820499999,
+      "p50": 4.001832,
+      "p95": 4.52334685,
+      "p99": 4.7438052,
+      "max": 16.265259
+     },
+     "queries": 2000,
+     "duration": 8.104432803003874,
+     "passes": [
+      {
+       "qps": 246.77852832078617,
+       "avg": 4.041734820499999,
+       "p50": 4.001832,
+       "p99": 4.7438052,
+       "queries": 2000,
+       "duration": 8.104432803003874
+      }
+     ]
+    },
+    {
+     "ladder_index": 2,
+     "knobs": {
+      "num_candidates": 800,
+      "oversample": 4.0
+     },
+     "recall": 0.9917750000000001,
+     "recall_strict": 0.99175,
+     "tail": 0.0,
+     "short_results": 0,
+     "qps": 244.04311991311772,
+     "latency_ms": {
+      "n": 2000,
+      "min": 3.334225,
+      "avg": 4.0870452585,
+      "p50": 4.0446919999999995,
+      "p95": 4.63281765,
+      "p99": 4.898196749999999,
+      "max": 5.110069
+     },
+     "queries": 2000,
+     "duration": 8.195273034994898,
+     "passes": [
+      {
+       "qps": 244.04311991311772,
+       "avg": 4.0870452585,
+       "p50": 4.0446919999999995,
+       "p99": 4.898196749999999,
+       "queries": 2000,
+       "duration": 8.195273034994898
+      }
+     ]
+    },
+    {
+     "ladder_index": 3,
+     "knobs": {
+      "num_candidates": 1280,
+      "oversample": 4.0
+     },
+     "recall": 0.9942600000000001,
+     "recall_strict": 0.9942350000000001,
+     "tail": 0.0,
+     "short_results": 0,
+     "qps": 233.4644063639043,
+     "latency_ms": {
+      "n": 2000,
+      "min": 3.464353,
+      "avg": 4.2727014605,
+      "p50": 4.210108,
+      "p95": 4.936600599999999,
+      "p99": 5.30011866,
+      "max": 16.803671
+     },
+     "queries": 2000,
+     "duration": 8.5666163470014,
+     "passes": [
+      {
+       "qps": 233.4644063639043,
+       "avg": 4.2727014605,
+       "p50": 4.210108,
+       "p99": 5.30011866,
+       "queries": 2000,
+       "duration": 8.5666163470014
+      }
+     ]
+    }
+   ],
+   "plan": "{\"query_types\": [\"KnnScoreDocQuery\"]}",
+   "memory_peak": 10627178496
+  },
+  {
+   "key": "none/1000",
+   "filter": "none",
+   "k": 1000,
+   "exact": false,
+   "view": "latency",
+   "clients": 1,
+   "status": "ok",
+   "block": "{\"filter\": null, \"num_candidates\": \"{num_candidates}\", \"rescore_oversample\": \"{oversample}\"}",
+   "startup": 11.718662291998044,
+   "points": [
+    {
+     "ladder_index": 0,
+     "knobs": {
+      "num_candidates": 4000,
+      "oversample": 4.0
+     },
+     "recall": 0.988659,
+     "recall_strict": 0.988659,
+     "tail": 0.0,
+     "short_results": 0,
+     "qps": 94.45509124600254,
+     "latency_ms": {
+      "n": 2000,
+      "min": 8.900138,
+      "avg": 10.5469778275,
+      "p50": 10.241426,
+      "p95": 11.750751249999999,
+      "p99": 14.337286909999998,
+      "max": 46.032189
+     },
+     "queries": 2000,
+     "duration": 21.174083616002463,
+     "passes": [
+      {
+       "qps": 94.45509124600254,
+       "avg": 10.5469778275,
+       "p50": 10.241426,
+       "p99": 14.337286909999998,
+       "queries": 2000,
+       "duration": 21.174083616002463
+      }
+     ]
+    },
+    {
+     "ladder_index": 1,
+     "knobs": {
+      "num_candidates": 6000,
+      "oversample": 4.0
+     },
+     "recall": 0.9921945,
+     "recall_strict": 0.9921945,
+     "tail": 0.0,
+     "short_results": 0,
+     "qps": 81.87326447992729,
+     "latency_ms": {
+      "n": 2000,
+      "min": 10.565719,
+      "avg": 12.1732520425,
+      "p50": 11.904351,
+      "p95": 13.1927546,
+      "p99": 15.781831829999996,
+      "max": 49.37854
+     },
+     "queries": 2000,
+     "duration": 24.42799872100295,
+     "passes": [
+      {
+       "qps": 81.87326447992729,
+       "avg": 12.1732520425,
+       "p50": 11.904351,
+       "p99": 15.781831829999996,
+       "queries": 2000,
+       "duration": 24.42799872100295
+      }
+     ]
+    },
+    {
+     "ladder_index": 2,
+     "knobs": {
+      "num_candidates": 10000,
+      "oversample": 4.0
+     },
+     "recall": 0.995457,
+     "recall_strict": 0.995457,
+     "tail": 0.0,
+     "short_results": 0,
+     "qps": 77.03890198770176,
+     "latency_ms": {
+      "n": 2000,
+      "min": 11.13857,
+      "avg": 12.938648252499998,
+      "p50": 12.671006,
+      "p95": 14.2964538,
+      "p99": 15.80724079,
+      "max": 50.683657
+     },
+     "queries": 2000,
+     "duration": 25.960909986999468,
+     "passes": [
+      {
+       "qps": 77.03890198770176,
+       "avg": 12.938648252499998,
+       "p50": 12.671006,
+       "p99": 15.80724079,
+       "queries": 2000,
+       "duration": 25.960909986999468
+      }
+     ]
+    }
+   ],
+   "plan": "{\"query_types\": [\"KnnScoreDocQuery\"]}",
+   "memory_peak": 10627272704
+  },
+  {
+   "key": "eq-10/10",
+   "filter": "eq-10",
+   "k": 10,
+   "exact": false,
+   "view": "latency",
+   "clients": 1,
+   "status": "ok",
+   "block": "{\"filter\": {\"term\": {\"cat10\": \"$v\"}}, \"num_candidates\": \"{num_candidates}\", \"rescore_oversample\": \"{oversample}\"}",
+   "startup": 11.718662291998044,
+   "points": [
+    {
+     "ladder_index": 0,
+     "knobs": {
+      "num_candidates": 40,
+      "oversample": 4.0
+     },
+     "recall": 0.9225500000000002,
+     "recall_strict": 0.9225000000000001,
+     "tail": 0.001,
+     "short_results": 0,
+     "qps": 300.1167530847892,
+     "latency_ms": {
+      "n": 2000,
+      "min": 2.835764,
+      "avg": 3.325361927,
+      "p50": 3.314902,
+      "p95": 3.60794955,
+      "p99": 3.7277689,
+      "max": 14.734942
+     },
+     "queries": 2000,
+     "duration": 6.664073163003195,
+     "passes": [
+      {
+       "qps": 300.1167530847892,
+       "avg": 3.325361927,
+       "p50": 3.314902,
+       "p99": 3.7277689,
+       "queries": 2000,
+       "duration": 6.664073163003195
+      }
+     ]
+    },
+    {
+     "ladder_index": 1,
+     "knobs": {
+      "num_candidates": 64,
+      "oversample": 4.0
+     },
+     "recall": 0.9377000000000002,
+     "recall_strict": 0.9376500000000001,
+     "tail": 0.0,
+     "short_results": 0,
+     "qps": 290.88514304413326,
+     "latency_ms": {
+      "n": 2000,
+      "min": 2.780676,
+      "avg": 3.431301039,
+      "p50": 3.4235759999999997,
+      "p95": 3.74826355,
+      "p99": 3.88626525,
+      "max": 4.073808
+     },
+     "queries": 2000,
+     "duration": 6.875566001996049,
+     "passes": [
+      {
+       "qps": 290.88514304413326,
+       "avg": 3.431301039,
+       "p50": 3.4235759999999997,
+       "p99": 3.88626525,
+       "queries": 2000,
+       "duration": 6.875566001996049
+      }
+     ]
+    },
+    {
+     "ladder_index": 2,
+     "knobs": {
+      "num_candidates": 80,
+      "oversample": 4.0
+     },
+     "recall": 0.9439000000000001,
+     "recall_strict": 0.9438500000000002,
+     "tail": 0.0,
+     "short_results": 0,
+     "qps": 284.7694492400726,
+     "latency_ms": {
+      "n": 2000,
+      "min": 2.827665,
+      "avg": 3.5050539595,
+      "p50": 3.4832925,
+      "p95": 3.8056907499999997,
+      "p99": 3.94556336,
+      "max": 21.24744
+     },
+     "queries": 2000,
+     "duration": 7.023225297998579,
+     "passes": [
+      {
+       "qps": 284.7694492400726,
+       "avg": 3.5050539595,
+       "p50": 3.4832925,
+       "p99": 3.94556336,
+       "queries": 2000,
+       "duration": 7.023225297998579
+      }
+     ]
+    },
+    {
+     "ladder_index": 3,
+     "knobs": {
+      "num_candidates": 128,
+      "oversample": 4.0
+     },
+     "recall": 0.9525500000000001,
+     "recall_strict": 0.9525,
+     "tail": 0.0,
+     "short_results": 0,
+     "qps": 276.804920587871,
+     "latency_ms": {
+      "n": 2000,
+      "min": 2.991902,
+      "avg": 3.606047494,
+      "p50": 3.5990960000000003,
+      "p95": 3.9661473,
+      "p99": 4.0860592,
+      "max": 4.254465
+     },
+     "queries": 2000,
+     "duration": 7.2253050840008655,
+     "passes": [
+      {
+       "qps": 276.804920587871,
+       "avg": 3.606047494,
+       "p50": 3.5990960000000003,
+       "p99": 4.0860592,
+       "queries": 2000,
+       "duration": 7.2253050840008655
+      }
+     ]
+    },
+    {
+     "ladder_index": 4,
+     "knobs": {
+      "num_candidates": 192,
+      "oversample": 4.0
+     },
+     "recall": 0.9596000000000001,
+     "recall_strict": 0.9595500000000002,
+     "tail": 0.0,
+     "short_results": 0,
+     "qps": 265.2346272154914,
+     "latency_ms": {
+      "n": 2000,
+      "min": 3.020709,
+      "avg": 3.763691659,
+      "p50": 3.7410885,
+      "p95": 4.1307522,
+      "p99": 4.28779558,
+      "max": 21.116786
+     },
+     "queries": 2000,
+     "duration": 7.540493566004443,
+     "passes": [
+      {
+       "qps": 265.2346272154914,
+       "avg": 3.763691659,
+       "p50": 3.7410885,
+       "p99": 4.28779558,
+       "queries": 2000,
+       "duration": 7.540493566004443
+      }
+     ]
+    },
+    {
+     "ladder_index": 5,
+     "knobs": {
+      "num_candidates": 256,
+      "oversample": 4.0
+     },
+     "recall": 0.9640000000000001,
+     "recall_strict": 0.9639500000000002,
+     "tail": 0.0,
+     "short_results": 0,
+     "qps": 258.2680262348264,
+     "latency_ms": {
+      "n": 2000,
+      "min": 3.08933,
+      "avg": 3.865405954,
+      "p50": 3.868127,
+      "p95": 4.30154705,
+      "p99": 4.45870578,
+      "max": 5.219402
+     },
+     "queries": 2000,
+     "duration": 7.743893153005047,
+     "passes": [
+      {
+       "qps": 258.2680262348264,
+       "avg": 3.865405954,
+       "p50": 3.868127,
+       "p99": 4.45870578,
+       "queries": 2000,
+       "duration": 7.743893153005047
+      }
+     ]
+    },
+    {
+     "ladder_index": 6,
+     "knobs": {
+      "num_candidates": 384,
+      "oversample": 4.0
+     },
+     "recall": 0.9697,
+     "recall_strict": 0.9696500000000001,
+     "tail": 0.0,
+     "short_results": 0,
+     "qps": 246.58419542278156,
+     "latency_ms": {
+      "n": 2000,
+      "min": 3.153533,
+      "avg": 4.048602338999999,
+      "p50": 4.0300725,
+      "p95": 4.5577873,
+      "p99": 4.76665006,
+      "max": 5.070373
+     },
+     "queries": 2000,
+     "duration": 8.110819902998628,
+     "passes": [
+      {
+       "qps": 246.58419542278156,
+       "avg": 4.048602338999999,
+       "p50": 4.0300725,
+       "p99": 4.76665006,
+       "queries": 2000,
+       "duration": 8.110819902998628
+      }
+     ]
+    }
+   ],
+   "plan": "{\"query_types\": [\"KnnScoreDocQuery\"]}",
+   "memory_peak": 10627866624
+  },
+  {
+   "key": "eq-10/100",
+   "filter": "eq-10",
+   "k": 100,
+   "exact": false,
+   "view": "latency",
+   "clients": 1,
+   "status": "ok",
+   "block": "{\"filter\": {\"term\": {\"cat10\": \"$v\"}}, \"num_candidates\": \"{num_candidates}\", \"rescore_oversample\": \"{oversample}\"}",
+   "startup": 11.718662291998044,
+   "points": [
+    {
+     "ladder_index": 0,
+     "knobs": {
+      "num_candidates": 400,
+      "oversample": 4.0
+     },
+     "recall": 0.9527950000000001,
+     "recall_strict": 0.9527550000000001,
+     "tail": 0.0,
+     "short_results": 0,
+     "qps": 220.711876967794,
+     "latency_ms": {
+      "n": 2000,
+      "min": 3.583586,
+      "avg": 4.520645245,
+      "p50": 4.499492500000001,
+      "p95": 5.03237735,
+      "p99": 5.26917624,
+      "max": 19.813561
+     },
+     "queries": 2000,
+     "duration": 9.061587566000526,
+     "passes": [
+      {
+       "qps": 220.711876967794,
+       "avg": 4.520645245,
+       "p50": 4.499492500000001,
+       "p99": 5.26917624,
+       "queries": 2000,
+       "duration": 9.061587566000526
+      }
+     ]
+    },
+    {
+     "ladder_index": 1,
+     "knobs": {
+      "num_candidates": 640,
+      "oversample": 4.0
+     },
+     "recall": 0.960755,
+     "recall_strict": 0.960715,
+     "tail": 0.0,
+     "short_results": 0,
+     "qps": 202.84817950292555,
+     "latency_ms": {
+      "n": 2000,
+      "min": 3.900097,
+      "avg": 4.9195083875,
+      "p50": 4.8901555,
+      "p95": 5.57018485,
+      "p99": 5.85697999,
+      "max": 18.619926
+     },
+     "queries": 2000,
+     "duration": 9.859590580999793,
+     "passes": [
+      {
+       "qps": 202.84817950292555,
+       "avg": 4.9195083875,
+       "p50": 4.8901555,
+       "p99": 5.85697999,
+       "queries": 2000,
+       "duration": 9.859590580999793
+      }
+     ]
+    },
+    {
+     "ladder_index": 2,
+     "knobs": {
+      "num_candidates": 1024,
+      "oversample": 4.0
+     },
+     "recall": 0.9671700000000001,
+     "recall_strict": 0.9671300000000002,
+     "tail": 0.0,
+     "short_results": 0,
+     "qps": 192.08859133203146,
+     "latency_ms": {
+      "n": 2000,
+      "min": 3.989049,
+      "avg": 5.1957146765,
+      "p50": 5.1925194999999995,
+      "p95": 5.9228080499999995,
+      "p99": 6.16638453,
+      "max": 6.73358
+     },
+     "queries": 2000,
+     "duration": 10.411862496002868,
+     "passes": [
+      {
+       "qps": 192.08859133203146,
+       "avg": 5.1957146765,
+       "p50": 5.1925194999999995,
+       "p99": 6.16638453,
+       "queries": 2000,
+       "duration": 10.411862496002868
+      }
+     ]
+    },
+    {
+     "ladder_index": 3,
+     "knobs": {
+      "num_candidates": 1280,
+      "oversample": 4.0
+     },
+     "recall": 0.9698300000000001,
+     "recall_strict": 0.9697899999999999,
+     "tail": 0.0,
+     "short_results": 0,
+     "qps": 185.7433221120724,
+     "latency_ms": {
+      "n": 2000,
+      "min": 3.987962,
+      "avg": 5.373587663,
+      "p50": 5.354646,
+      "p95": 6.2039791,
+      "p99": 6.51611332,
+      "max": 14.499034
+     },
+     "queries": 2000,
+     "duration": 10.767547265000758,
+     "passes": [
+      {
+       "qps": 185.7433221120724,
+       "avg": 5.373587663,
+       "p50": 5.354646,
+       "p99": 6.51611332,
+       "queries": 2000,
+       "duration": 10.767547265000758
+      }
+     ]
+    },
+    {
+     "ladder_index": 4,
+     "knobs": {
+      "num_candidates": 2048,
+      "oversample": 4.0
+     },
+     "recall": 0.9746050000000002,
+     "recall_strict": 0.974565,
+     "tail": 0.0,
+     "short_results": 0,
+     "qps": 172.81480522574424,
+     "latency_ms": {
+      "n": 2000,
+      "min": 4.336869,
+      "avg": 5.7762612870000005,
+      "p50": 5.7769715,
+      "p95": 6.7370263999999995,
+      "p99": 7.07990339,
+      "max": 17.404341
+     },
+     "queries": 2000,
+     "duration": 11.573082511000393,
+     "passes": [
+      {
+       "qps": 172.81480522574424,
+       "avg": 5.7762612870000005,
+       "p50": 5.7769715,
+       "p99": 7.07990339,
+       "queries": 2000,
+       "duration": 11.573082511000393
+      }
+     ]
+    }
+   ],
+   "plan": "{\"query_types\": [\"KnnScoreDocQuery\"]}",
+   "memory_peak": 10628587520
+  },
+  {
+   "key": "eq-10/1000",
+   "filter": "eq-10",
+   "k": 1000,
+   "exact": false,
+   "view": "latency",
+   "clients": 1,
+   "status": "ok",
+   "block": "{\"filter\": {\"term\": {\"cat10\": \"$v\"}}, \"num_candidates\": \"{num_candidates}\", \"rescore_oversample\": \"{oversample}\"}",
+   "startup": 11.718662291998044,
+   "points": [
+    {
+     "ladder_index": 0,
+     "knobs": {
+      "num_candidates": 4000,
+      "oversample": 4.0
+     },
+     "recall": 0.9542215,
+     "recall_strict": 0.9542215,
+     "tail": 0.0,
+     "short_results": 0,
+     "qps": 84.03927028404004,
+     "latency_ms": {
+      "n": 2000,
+      "min": 9.908041,
+      "avg": 11.859856444500002,
+      "p50": 11.6584425,
+      "p95": 12.943167449999999,
+      "p99": 14.216592449999998,
+      "max": 44.536016
+     },
+     "queries": 2000,
+     "duration": 23.7983979779965,
+     "passes": [
+      {
+       "qps": 84.03927028404004,
+       "avg": 11.859856444500002,
+       "p50": 11.6584425,
+       "p99": 14.216592449999998,
+       "queries": 2000,
+       "duration": 23.7983979779965
+      }
+     ]
+    },
+    {
+     "ladder_index": 1,
+     "knobs": {
+      "num_candidates": 6000,
+      "oversample": 4.0
+     },
+     "recall": 0.999997,
+     "recall_strict": 0.999997,
+     "tail": 0.0,
+     "short_results": 0,
+     "qps": 75.37459967786211,
+     "latency_ms": {
+      "n": 2000,
+      "min": 12.02801,
+      "avg": 13.227897878,
+      "p50": 12.6949565,
+      "p95": 14.223228350000001,
+      "p99": 14.45470879,
+      "max": 48.904482
+     },
+     "queries": 2000,
+     "duration": 26.534137607995945,
+     "passes": [
+      {
+       "qps": 75.37459967786211,
+       "avg": 13.227897878,
+       "p50": 12.6949565,
+       "p99": 14.45470879,
+       "queries": 2000,
+       "duration": 26.534137607995945
+      }
+     ]
+    }
+   ],
+   "plan": "{\"query_types\": [\"KnnScoreDocQuery\"]}",
+   "memory_peak": 10628784128
+  },
+  {
+   "key": "eq-1/10",
+   "filter": "eq-1",
+   "k": 10,
+   "exact": false,
+   "view": "latency",
+   "clients": 1,
+   "status": "ok",
+   "block": "{\"filter\": {\"term\": {\"cat100\": \"$v\"}}, \"num_candidates\": \"{num_candidates}\", \"rescore_oversample\": \"{oversample}\"}",
+   "startup": 11.718662291998044,
+   "points": [
+    {
+     "ladder_index": 0,
+     "knobs": {
+      "num_candidates": 192,
+      "oversample": 4.0
+     },
+     "recall": 0.7377,
+     "recall_strict": 0.7376,
+     "tail": 0.063,
+     "short_results": 0,
+     "qps": 265.41097302688206,
+     "latency_ms": {
+      "n": 2000,
+      "min": 3.163749,
+      "avg": 3.7610322555000004,
+      "p50": 3.7572945,
+      "p95": 4.0508391,
+      "p99": 4.2180683199999995,
+      "max": 12.411571
+     },
+     "queries": 2000,
+     "duration": 7.535483469997416,
+     "passes": [
+      {
+       "qps": 265.41097302688206,
+       "avg": 3.7610322555000004,
+       "p50": 3.7572945,
+       "p99": 4.2180683199999995,
+       "queries": 2000,
+       "duration": 7.535483469997416
+      }
+     ]
+    },
+    {
+     "ladder_index": 1,
+     "knobs": {
+      "num_candidates": 256,
+      "oversample": 4.0
+     },
+     "recall": 1.0,
+     "recall_strict": 0.99995,
+     "tail": 0.0,
+     "short_results": 0,
+     "qps": 283.29471637288316,
+     "latency_ms": {
+      "n": 2000,
+      "min": 2.954645,
+      "avg": 3.5230748295,
+      "p50": 3.527941,
+      "p95": 3.78522245,
+      "p99": 3.88176254,
+      "max": 4.009552
+     },
+     "queries": 2000,
+     "duration": 7.059785744000692,
+     "passes": [
+      {
+       "qps": 283.29471637288316,
+       "avg": 3.5230748295,
+       "p50": 3.527941,
+       "p99": 3.88176254,
+       "queries": 2000,
+       "duration": 7.059785744000692
+      }
+     ]
+    }
+   ],
+   "plan": "{\"query_types\": [\"KnnScoreDocQuery\"]}",
+   "memory_peak": 10629144576
+  },
+  {
+   "key": "eq-1/100",
+   "filter": "eq-1",
+   "k": 100,
+   "exact": false,
+   "view": "latency",
+   "clients": 1,
+   "status": "ok",
+   "block": "{\"filter\": {\"term\": {\"cat100\": \"$v\"}}, \"num_candidates\": \"{num_candidates}\", \"rescore_oversample\": \"{oversample}\"}",
+   "startup": 11.718662291998044,
+   "points": [
+    {
+     "ladder_index": 0,
+     "knobs": {
+      "num_candidates": 400,
+      "oversample": 4.0
+     },
+     "recall": 1.0,
+     "recall_strict": 0.999995,
+     "tail": 0.0,
+     "short_results": 0,
+     "qps": 249.4775334842152,
+     "latency_ms": {
+      "n": 2000,
+      "min": 3.458812,
+      "avg": 3.9977158965000004,
+      "p50": 3.9888075,
+      "p95": 4.2689693,
+      "p99": 4.38142979,
+      "max": 24.009799
+     },
+     "queries": 2000,
+     "duration": 8.016753941999923,
+     "passes": [
+      {
+       "qps": 249.4775334842152,
+       "avg": 3.9977158965000004,
+       "p50": 3.9888075,
+       "p99": 4.38142979,
+       "queries": 2000,
+       "duration": 8.016753941999923
+      }
+     ]
+    }
+   ],
+   "plan": "{\"query_types\": [\"KnnScoreDocQuery\"]}",
+   "memory_peak": 10629144576
+  },
+  {
+   "key": "eq-0.1/10",
+   "filter": "eq-0.1",
+   "k": 10,
+   "exact": false,
+   "view": "latency",
+   "clients": 1,
+   "status": "ok",
+   "block": "{\"filter\": {\"term\": {\"cat1000\": \"$v\"}}, \"num_candidates\": \"{num_candidates}\", \"rescore_oversample\": \"{oversample}\"}",
+   "startup": 11.718662291998044,
+   "points": [
+    {
+     "ladder_index": 0,
+     "knobs": {
+      "num_candidates": 40,
+      "oversample": 4.0
+     },
+     "recall": 1.0,
+     "recall_strict": 1.0,
+     "tail": 0.0,
+     "short_results": 0,
+     "qps": 301.8131900789455,
+     "latency_ms": {
+      "n": 2000,
+      "min": 2.705642,
+      "avg": 3.306508481,
+      "p50": 3.3228695000000004,
+      "p95": 3.5715230499999997,
+      "p99": 3.68873024,
+      "max": 3.872738
+     },
+     "queries": 2000,
+     "duration": 6.626615620996745,
+     "passes": [
+      {
+       "qps": 301.8131900789455,
+       "avg": 3.306508481,
+       "p50": 3.3228695000000004,
+       "p99": 3.68873024,
+       "queries": 2000,
+       "duration": 6.626615620996745
+      }
+     ]
+    }
+   ],
+   "plan": "{\"query_types\": [\"KnnScoreDocQuery\"]}",
+   "memory_peak": 10629496832
+  },
+  {
+   "key": "range-10/10",
+   "filter": "range-10",
+   "k": 10,
+   "exact": false,
+   "view": "latency",
+   "clients": 1,
+   "status": "ok",
+   "block": "{\"filter\": {\"range\": {\"num\": {\"gte\": \"$lo\", \"lte\": \"$hi\"}}}, \"num_candidates\": \"{num_candidates}\", \"rescore_oversample\": \"{oversample}\"}",
+   "startup": 11.718662291998044,
+   "points": [
+    {
+     "ladder_index": 0,
+     "knobs": {
+      "num_candidates": 40,
+      "oversample": 4.0
+     },
+     "recall": 0.9251500000000001,
+     "recall_strict": 0.9251500000000001,
+     "tail": 0.0025,
+     "short_results": 0,
+     "qps": 300.1228904945869,
+     "latency_ms": {
+      "n": 2000,
+      "min": 2.705089,
+      "avg": 3.3255238609999997,
+      "p50": 3.319562,
+      "p95": 3.61408715,
+      "p99": 3.78352732,
+      "max": 19.924275
+     },
+     "queries": 2000,
+     "duration": 6.663936885001021,
+     "passes": [
+      {
+       "qps": 300.1228904945869,
+       "avg": 3.3255238609999997,
+       "p50": 3.319562,
+       "p99": 3.78352732,
+       "queries": 2000,
+       "duration": 6.663936885001021
+      }
+     ]
+    },
+    {
+     "ladder_index": 1,
+     "knobs": {
+      "num_candidates": 64,
+      "oversample": 4.0
+     },
+     "recall": 0.94125,
+     "recall_strict": 0.94125,
+     "tail": 0.0015,
+     "short_results": 0,
+     "qps": 299.3069451307544,
+     "latency_ms": {
+      "n": 2000,
+      "min": 2.643454,
+      "avg": 3.3346713975,
+      "p50": 3.326264,
+      "p95": 3.70786775,
+      "p99": 3.84221659,
+      "max": 4.620616
+     },
+     "queries": 2000,
+     "duration": 6.6821035480024875,
+     "passes": [
+      {
+       "qps": 299.3069451307544,
+       "avg": 3.3346713975,
+       "p50": 3.326264,
+       "p99": 3.84221659,
+       "queries": 2000,
+       "duration": 6.6821035480024875
+      }
+     ]
+    },
+    {
+     "ladder_index": 2,
+     "knobs": {
+      "num_candidates": 80,
+      "oversample": 4.0
+     },
+     "recall": 0.94725,
+     "recall_strict": 0.94725,
+     "tail": 0.001,
+     "short_results": 0,
+     "qps": 281.529551432542,
+     "latency_ms": {
+      "n": 2000,
+      "min": 3.022705,
+      "avg": 3.5455553345,
+      "p50": 3.527304,
+      "p95": 3.84320055,
+      "p99": 3.99665642,
+      "max": 16.257135
+     },
+     "queries": 2000,
+     "duration": 7.1040499649971025,
+     "passes": [
+      {
+       "qps": 281.529551432542,
+       "avg": 3.5455553345,
+       "p50": 3.527304,
+       "p99": 3.99665642,
+       "queries": 2000,
+       "duration": 7.1040499649971025
+      }
+     ]
+    },
+    {
+     "ladder_index": 3,
+     "knobs": {
+      "num_candidates": 128,
+      "oversample": 4.0
+     },
+     "recall": 0.9568000000000002,
+     "recall_strict": 0.9568000000000002,
+     "tail": 0.0,
+     "short_results": 0,
+     "qps": 271.97669183907766,
+     "latency_ms": {
+      "n": 2000,
+      "min": 3.000834,
+      "avg": 3.6703525609999996,
+      "p50": 3.667595,
+      "p95": 4.015885,
+      "p99": 4.16121215,
+      "max": 4.755851
+     },
+     "queries": 2000,
+     "duration": 7.353571316998568,
+     "passes": [
+      {
+       "qps": 271.97669183907766,
+       "avg": 3.6703525609999996,
+       "p50": 3.667595,
+       "p99": 4.16121215,
+       "queries": 2000,
+       "duration": 7.353571316998568
+      }
+     ]
+    },
+    {
+     "ladder_index": 4,
+     "knobs": {
+      "num_candidates": 192,
+      "oversample": 4.0
+     },
+     "recall": 0.96245,
+     "recall_strict": 0.96245,
+     "tail": 0.0,
+     "short_results": 0,
+     "qps": 260.6362619820876,
+     "latency_ms": {
+      "n": 2000,
+      "min": 3.064248,
+      "avg": 3.830259615,
+      "p50": 3.811929,
+      "p95": 4.2096668500000005,
+      "p99": 4.378838920000001,
+      "max": 15.965464
+     },
+     "queries": 2000,
+     "duration": 7.6735293270030525,
+     "passes": [
+      {
+       "qps": 260.6362619820876,
+       "avg": 3.830259615,
+       "p50": 3.811929,
+       "p99": 4.378838920000001,
+       "queries": 2000,
+       "duration": 7.6735293270030525
+      }
+     ]
+    },
+    {
+     "ladder_index": 5,
+     "knobs": {
+      "num_candidates": 256,
+      "oversample": 4.0
+     },
+     "recall": 0.9672500000000002,
+     "recall_strict": 0.9672500000000002,
+     "tail": 0.0,
+     "short_results": 0,
+     "qps": 254.18337660603902,
+     "latency_ms": {
+      "n": 2000,
+      "min": 3.219049,
+      "avg": 3.9275019185,
+      "p50": 3.92725,
+      "p95": 4.377012250000001,
+      "p99": 4.5450845300000005,
+      "max": 5.241946
+     },
+     "queries": 2000,
+     "duration": 7.8683351630024845,
+     "passes": [
+      {
+       "qps": 254.18337660603902,
+       "avg": 3.9275019185,
+       "p50": 3.92725,
+       "p99": 4.5450845300000005,
+       "queries": 2000,
+       "duration": 7.8683351630024845
+      }
+     ]
+    },
+    {
+     "ladder_index": 6,
+     "knobs": {
+      "num_candidates": 384,
+      "oversample": 4.0
+     },
+     "recall": 0.97245,
+     "recall_strict": 0.97245,
+     "tail": 0.0,
+     "short_results": 0,
+     "qps": 242.37866145696563,
+     "latency_ms": {
+      "n": 2000,
+      "min": 3.175062,
+      "avg": 4.118952736,
+      "p50": 4.0783784999999995,
+      "p95": 4.6375598,
+      "p99": 4.86581814,
+      "max": 18.311541
+     },
+     "queries": 2000,
+     "duration": 8.251551469002152,
+     "passes": [
+      {
+       "qps": 242.37866145696563,
+       "avg": 4.118952736,
+       "p50": 4.0783784999999995,
+       "p99": 4.86581814,
+       "queries": 2000,
+       "duration": 8.251551469002152
+      }
+     ]
+    }
+   ],
+   "plan": "{\"query_types\": [\"KnnScoreDocQuery\"]}",
+   "memory_peak": 10629496832
+  },
+  {
+   "key": "range-10/100",
+   "filter": "range-10",
+   "k": 100,
+   "exact": false,
+   "view": "latency",
+   "clients": 1,
+   "status": "ok",
+   "block": "{\"filter\": {\"range\": {\"num\": {\"gte\": \"$lo\", \"lte\": \"$hi\"}}}, \"num_candidates\": \"{num_candidates}\", \"rescore_oversample\": \"{oversample}\"}",
+   "startup": 11.718662291998044,
+   "points": [
+    {
+     "ladder_index": 0,
+     "knobs": {
+      "num_candidates": 400,
+      "oversample": 4.0
+     },
+     "recall": 0.953775,
+     "recall_strict": 0.95375,
+     "tail": 0.0,
+     "short_results": 0,
+     "qps": 216.1788646684003,
+     "latency_ms": {
+      "n": 2000,
+      "min": 3.680103,
+      "avg": 4.615811346500001,
+      "p50": 4.5769665,
+      "p95": 5.17563275,
+      "p99": 5.43341466,
+      "max": 18.021294
+     },
+     "queries": 2000,
+     "duration": 9.251598221999302,
+     "passes": [
+      {
+       "qps": 216.1788646684003,
+       "avg": 4.615811346500001,
+       "p50": 4.5769665,
+       "p99": 5.43341466,
+       "queries": 2000,
+       "duration": 9.251598221999302
+      }
+     ]
+    },
+    {
+     "ladder_index": 1,
+     "knobs": {
+      "num_candidates": 640,
+      "oversample": 4.0
+     },
+     "recall": 0.9613700000000002,
+     "recall_strict": 0.961345,
+     "tail": 0.0,
+     "short_results": 0,
+     "qps": 200.46509762967662,
+     "latency_ms": {
+      "n": 2000,
+      "min": 3.95614,
+      "avg": 4.978148638499999,
+      "p50": 4.96674,
+      "p95": 5.620222549999999,
+      "p99": 5.87888332,
+      "max": 6.477073
+     },
+     "queries": 2000,
+     "duration": 9.976799071999267,
+     "passes": [
+      {
+       "qps": 200.46509762967662,
+       "avg": 4.978148638499999,
+       "p50": 4.96674,
+       "p99": 5.87888332,
+       "queries": 2000,
+       "duration": 9.976799071999267
+      }
+     ]
+    },
+    {
+     "ladder_index": 2,
+     "knobs": {
+      "num_candidates": 1024,
+      "oversample": 4.0
+     },
+     "recall": 0.96747,
+     "recall_strict": 0.967445,
+     "tail": 0.0,
+     "short_results": 0,
+     "qps": 189.0100685182727,
+     "latency_ms": {
+      "n": 2000,
+      "min": 4.075175,
+      "avg": 5.2805159994999995,
+      "p50": 5.262919999999999,
+      "p95": 6.0205955,
+      "p99": 6.36231041,
+      "max": 17.254013
+     },
+     "queries": 2000,
+     "duration": 10.581446880998556,
+     "passes": [
+      {
+       "qps": 189.0100685182727,
+       "avg": 5.2805159994999995,
+       "p50": 5.262919999999999,
+       "p99": 6.36231041,
+       "queries": 2000,
+       "duration": 10.581446880998556
+      }
+     ]
+    },
+    {
+     "ladder_index": 3,
+     "knobs": {
+      "num_candidates": 1280,
+      "oversample": 4.0
+     },
+     "recall": 0.970135,
+     "recall_strict": 0.97011,
+     "tail": 0.0,
+     "short_results": 0,
+     "qps": 183.48072295015527,
+     "latency_ms": {
+      "n": 2000,
+      "min": 4.065319,
+      "avg": 5.439968791999999,
+      "p50": 5.4389009999999995,
+      "p95": 6.21932135,
+      "p99": 6.55426938,
+      "max": 18.251152
+     },
+     "queries": 2000,
+     "duration": 10.90032766299555,
+     "passes": [
+      {
+       "qps": 183.48072295015527,
+       "avg": 5.439968791999999,
+       "p50": 5.4389009999999995,
+       "p99": 6.55426938,
+       "queries": 2000,
+       "duration": 10.90032766299555
+      }
+     ]
+    },
+    {
+     "ladder_index": 4,
+     "knobs": {
+      "num_candidates": 2048,
+      "oversample": 4.0
+     },
+     "recall": 0.9746300000000001,
+     "recall_strict": 0.974605,
+     "tail": 0.0,
+     "short_results": 0,
+     "qps": 170.96022328849668,
+     "latency_ms": {
+      "n": 2000,
+      "min": 4.432439,
+      "avg": 5.839283390499999,
+      "p50": 5.8526695,
+      "p95": 6.76818445,
+      "p99": 7.180093469999999,
+      "max": 18.067244
+     },
+     "queries": 2000,
+     "duration": 11.698627678000776,
+     "passes": [
+      {
+       "qps": 170.96022328849668,
+       "avg": 5.839283390499999,
+       "p50": 5.8526695,
+       "p99": 7.180093469999999,
+       "queries": 2000,
+       "duration": 11.698627678000776
+      }
+     ]
+    }
+   ],
+   "plan": "{\"query_types\": [\"KnnScoreDocQuery\"]}",
+   "memory_peak": 10629496832
+  },
+  {
+   "key": "range-10/1000",
+   "filter": "range-10",
+   "k": 1000,
+   "exact": false,
+   "view": "latency",
+   "clients": 1,
+   "status": "ok",
+   "block": "{\"filter\": {\"range\": {\"num\": {\"gte\": \"$lo\", \"lte\": \"$hi\"}}}, \"num_candidates\": \"{num_candidates}\", \"rescore_oversample\": \"{oversample}\"}",
+   "startup": 11.718662291998044,
+   "points": [
+    {
+     "ladder_index": 0,
+     "knobs": {
+      "num_candidates": 4000,
+      "oversample": 4.0
+     },
+     "recall": 0.9547425,
+     "recall_strict": 0.9547425,
+     "tail": 0.0,
+     "short_results": 0,
+     "qps": 83.61345685405749,
+     "latency_ms": {
+      "n": 2000,
+      "min": 10.163875,
+      "avg": 11.9205898555,
+      "p50": 11.71997,
+      "p95": 12.970213450000001,
+      "p99": 13.75950971,
+      "max": 46.246888
+     },
+     "queries": 2000,
+     "duration": 23.919594706996577,
+     "passes": [
+      {
+       "qps": 83.61345685405749,
+       "avg": 11.9205898555,
+       "p50": 11.71997,
+       "p99": 13.75950971,
+       "queries": 2000,
+       "duration": 23.919594706996577
+      }
+     ]
+    },
+    {
+     "ladder_index": 1,
+     "knobs": {
+      "num_candidates": 6000,
+      "oversample": 4.0
+     },
+     "recall": 0.9999985,
+     "recall_strict": 0.9999985,
+     "tail": 0.0,
+     "short_results": 0,
+     "qps": 75.25780309170064,
+     "latency_ms": {
+      "n": 2000,
+      "min": 11.989775,
+      "avg": 13.248232897500001,
+      "p50": 12.746905,
+      "p95": 14.20714455,
+      "p99": 14.737731029999999,
+      "max": 46.572221
+     },
+     "queries": 2000,
+     "duration": 26.575317347000237,
+     "passes": [
+      {
+       "qps": 75.25780309170064,
+       "avg": 13.248232897500001,
+       "p50": 12.746905,
+       "p99": 14.737731029999999,
+       "queries": 2000,
+       "duration": 26.575317347000237
+      }
+     ]
+    }
+   ],
+   "plan": "{\"query_types\": [\"KnnScoreDocQuery\"]}",
+   "memory_peak": 10629496832
+  },
+  {
+   "key": "range-1/10",
+   "filter": "range-1",
+   "k": 10,
+   "exact": false,
+   "view": "latency",
+   "clients": 1,
+   "status": "ok",
+   "block": "{\"filter\": {\"range\": {\"num\": {\"gte\": \"$lo\", \"lte\": \"$hi\"}}}, \"num_candidates\": \"{num_candidates}\", \"rescore_oversample\": \"{oversample}\"}",
+   "startup": 11.718662291998044,
+   "points": [
+    {
+     "ladder_index": 0,
+     "knobs": {
+      "num_candidates": 192,
+      "oversample": 4.0
+     },
+     "recall": 0.7311,
+     "recall_strict": 0.7311,
+     "tail": 0.0555,
+     "short_results": 0,
+     "qps": 262.3733129834182,
+     "latency_ms": {
+      "n": 2000,
+      "min": 3.197906,
+      "avg": 3.8049786705,
+      "p50": 3.8061615,
+      "p95": 4.0900715,
+      "p99": 4.208022049999999,
+      "max": 4.400407
+     },
+     "queries": 2000,
+     "duration": 7.622726478002733,
+     "passes": [
+      {
+       "qps": 262.3733129834182,
+       "avg": 3.8049786705,
+       "p50": 3.8061615,
+       "p99": 4.208022049999999,
+       "queries": 2000,
+       "duration": 7.622726478002733
+      }
+     ]
+    },
+    {
+     "ladder_index": 1,
+     "knobs": {
+      "num_candidates": 256,
+      "oversample": 4.0
+     },
+     "recall": 0.9999,
+     "recall_strict": 0.9999,
+     "tail": 0.0,
+     "short_results": 0,
+     "qps": 278.4705665222433,
+     "latency_ms": {
+      "n": 2000,
+      "min": 2.878989,
+      "avg": 3.5845953365,
+      "p50": 3.5839825000000003,
+      "p95": 3.8253674500000003,
+      "p99": 3.9233113399999997,
+      "max": 16.66315
+     },
+     "queries": 2000,
+     "duration": 7.182087590001174,
+     "passes": [
+      {
+       "qps": 278.4705665222433,
+       "avg": 3.5845953365,
+       "p50": 3.5839825000000003,
+       "p99": 3.9233113399999997,
+       "queries": 2000,
+       "duration": 7.182087590001174
+      }
+     ]
+    }
+   ],
+   "plan": "{\"query_types\": [\"KnnScoreDocQuery\"]}",
+   "memory_peak": 10629545984
+  },
+  {
+   "key": "range-1/100",
+   "filter": "range-1",
+   "k": 100,
+   "exact": false,
+   "view": "latency",
+   "clients": 1,
+   "status": "ok",
+   "block": "{\"filter\": {\"range\": {\"num\": {\"gte\": \"$lo\", \"lte\": \"$hi\"}}}, \"num_candidates\": \"{num_candidates}\", \"rescore_oversample\": \"{oversample}\"}",
+   "startup": 11.718662291998044,
+   "points": [
+    {
+     "ladder_index": 0,
+     "knobs": {
+      "num_candidates": 400,
+      "oversample": 4.0
+     },
+     "recall": 1.0,
+     "recall_strict": 1.0,
+     "tail": 0.0,
+     "short_results": 0,
+     "qps": 246.91938257812853,
+     "latency_ms": {
+      "n": 2000,
+      "min": 3.453303,
+      "avg": 4.0395191839999995,
+      "p50": 4.0453865,
+      "p95": 4.3477192,
+      "p99": 4.46555074,
+      "max": 5.010948
+     },
+     "queries": 2000,
+     "duration": 8.099809658997401,
+     "passes": [
+      {
+       "qps": 246.91938257812853,
+       "avg": 4.0395191839999995,
+       "p50": 4.0453865,
+       "p99": 4.46555074,
+       "queries": 2000,
+       "duration": 8.099809658997401
+      }
+     ]
+    }
+   ],
+   "plan": "{\"query_types\": [\"KnnScoreDocQuery\"]}",
+   "memory_peak": 10629545984
+  },
+  {
+   "key": "and-1/10",
+   "filter": "and-1",
+   "k": 10,
+   "exact": false,
+   "view": "latency",
+   "clients": 1,
+   "status": "ok",
+   "block": "{\"filter\": {\"bool\": {\"filter\": [{\"term\": {\"cat10\": \"$v\"}}, {\"range\": {\"num\": {\"gte\": \"$lo\", \"lte\": \"$hi\"}}}]}}, \"num_candidates\": \"{num_candidates}\", \"rescore_oversample\": \"{oversample}\"}",
+   "startup": 11.718662291998044,
+   "points": [
+    {
+     "ladder_index": 0,
+     "knobs": {
+      "num_candidates": 192,
+      "oversample": 4.0
+     },
+     "recall": 0.734,
+     "recall_strict": 0.734,
+     "tail": 0.0675,
+     "short_results": 0,
+     "qps": 249.29439145195798,
+     "latency_ms": {
+      "n": 2000,
+      "min": 3.231886,
+      "avg": 4.0048873045,
+      "p50": 3.9929205000000003,
+      "p95": 4.29596485,
+      "p99": 4.43330183,
+      "max": 14.806199
+     },
+     "queries": 2000,
+     "duration": 8.022643382995739,
+     "passes": [
+      {
+       "qps": 249.29439145195798,
+       "avg": 4.0048873045,
+       "p50": 3.9929205000000003,
+       "p99": 4.43330183,
+       "queries": 2000,
+       "duration": 8.022643382995739
+      }
+     ]
+    },
+    {
+     "ladder_index": 1,
+     "knobs": {
+      "num_candidates": 256,
+      "oversample": 4.0
+     },
+     "recall": 0.9999,
+     "recall_strict": 0.9999,
+     "tail": 0.0,
+     "short_results": 0,
+     "qps": 265.3687873438123,
+     "latency_ms": {
+      "n": 2000,
+      "min": 3.127261,
+      "avg": 3.7619415295,
+      "p50": 3.7734425,
+      "p95": 4.0188397,
+      "p99": 4.12795073,
+      "max": 4.332959
+     },
+     "queries": 2000,
+     "duration": 7.536681386001874,
+     "passes": [
+      {
+       "qps": 265.3687873438123,
+       "avg": 3.7619415295,
+       "p50": 3.7734425,
+       "p99": 4.12795073,
+       "queries": 2000,
+       "duration": 7.536681386001874
+      }
+     ]
+    }
+   ],
+   "plan": "{\"query_types\": [\"KnnScoreDocQuery\"]}",
+   "memory_peak": 10629545984
+  },
+  {
+   "key": "and-1/100",
+   "filter": "and-1",
+   "k": 100,
+   "exact": false,
+   "view": "latency",
+   "clients": 1,
+   "status": "ok",
+   "block": "{\"filter\": {\"bool\": {\"filter\": [{\"term\": {\"cat10\": \"$v\"}}, {\"range\": {\"num\": {\"gte\": \"$lo\", \"lte\": \"$hi\"}}}]}}, \"num_candidates\": \"{num_candidates}\", \"rescore_oversample\": \"{oversample}\"}",
+   "startup": 11.718662291998044,
+   "points": [
+    {
+     "ladder_index": 0,
+     "knobs": {
+      "num_candidates": 400,
+      "oversample": 4.0
+     },
+     "recall": 1.0,
+     "recall_strict": 0.999995,
+     "tail": 0.0,
+     "short_results": 0,
+     "qps": 235.35700930411562,
+     "latency_ms": {
+      "n": 2000,
+      "min": 3.615791,
+      "avg": 4.238524792,
+      "p50": 4.243095,
+      "p95": 4.560320450000001,
+      "p99": 4.68362102,
+      "max": 16.386508
+     },
+     "queries": 2000,
+     "duration": 8.497728645997995,
+     "passes": [
+      {
+       "qps": 235.35700930411562,
+       "avg": 4.238524792,
+       "p50": 4.243095,
+       "p99": 4.68362102,
+       "queries": 2000,
+       "duration": 8.497728645997995
+      }
+     ]
+    }
+   ],
+   "plan": "{\"query_types\": [\"KnnScoreDocQuery\"]}",
+   "memory_peak": 10629545984
+  },
+  {
+   "key": "corr/10",
+   "filter": "corr",
+   "k": 10,
+   "exact": false,
+   "view": "latency",
+   "clients": 1,
+   "status": "ok",
+   "block": "{\"filter\": {\"term\": {\"cluster\": \"$v\"}}, \"num_candidates\": \"{num_candidates}\", \"rescore_oversample\": \"{oversample}\"}",
+   "startup": 11.718662291998044,
+   "points": [
+    {
+     "ladder_index": 0,
+     "knobs": {
+      "num_candidates": 40,
+      "oversample": 4.0
+     },
+     "recall": 0.994,
+     "recall_strict": 0.994,
+     "tail": 0.0,
+     "short_results": 0,
+     "qps": 313.03691151949886,
+     "latency_ms": {
+      "n": 2000,
+      "min": 2.66227,
+      "avg": 3.187819747,
+      "p50": 3.187396,
+      "p95": 3.46310275,
+      "p99": 3.6064500600000002,
+      "max": 4.297263
+     },
+     "queries": 2000,
+     "duration": 6.389022912000655,
+     "passes": [
+      {
+       "qps": 313.03691151949886,
+       "avg": 3.187819747,
+       "p50": 3.187396,
+       "p99": 3.6064500600000002,
+       "queries": 2000,
+       "duration": 6.389022912000655
+      }
+     ]
+    },
+    {
+     "ladder_index": 1,
+     "knobs": {
+      "num_candidates": 64,
+      "oversample": 4.0
+     },
+     "recall": 0.99625,
+     "recall_strict": 0.99625,
+     "tail": 0.0,
+     "short_results": 0,
+     "qps": 304.46300416353546,
+     "latency_ms": {
+      "n": 2000,
+      "min": 2.717933,
+      "avg": 3.277708455,
+      "p50": 3.2549735,
+      "p95": 3.5647302,
+      "p99": 3.70934857,
+      "max": 17.659142
+     },
+     "queries": 2000,
+     "duration": 6.568942605998018,
+     "passes": [
+      {
+       "qps": 304.46300416353546,
+       "avg": 3.277708455,
+       "p50": 3.2549735,
+       "p99": 3.70934857,
+       "queries": 2000,
+       "duration": 6.568942605998018
+      }
+     ]
+    },
+    {
+     "ladder_index": 2,
+     "knobs": {
+      "num_candidates": 80,
+      "oversample": 4.0
+     },
+     "recall": 0.9967,
+     "recall_strict": 0.9967,
+     "tail": 0.0,
+     "short_results": 0,
+     "qps": 303.486730933493,
+     "latency_ms": {
+      "n": 2000,
+      "min": 2.515007,
+      "avg": 3.2882977975000003,
+      "p50": 3.2867925,
+      "p95": 3.57210965,
+      "p99": 3.7017288,
+      "max": 3.85225
+     },
+     "queries": 2000,
+     "duration": 6.590073951003433,
+     "passes": [
+      {
+       "qps": 303.486730933493,
+       "avg": 3.2882977975000003,
+       "p50": 3.2867925,
+       "p99": 3.7017288,
+       "queries": 2000,
+       "duration": 6.590073951003433
+      }
+     ]
+    }
+   ],
+   "plan": "{\"query_types\": [\"KnnScoreDocQuery\"]}",
+   "memory_peak": 10629980160
+  },
+  {
+   "key": "corr/100",
+   "filter": "corr",
+   "k": 100,
+   "exact": false,
+   "view": "latency",
+   "clients": 1,
+   "status": "ok",
+   "block": "{\"filter\": {\"term\": {\"cluster\": \"$v\"}}, \"num_candidates\": \"{num_candidates}\", \"rescore_oversample\": \"{oversample}\"}",
+   "startup": 11.718662291998044,
+   "points": [
+    {
+     "ladder_index": 0,
+     "knobs": {
+      "num_candidates": 400,
+      "oversample": 4.0
+     },
+     "recall": 0.9991800000000001,
+     "recall_strict": 0.999175,
+     "tail": 0.0,
+     "short_results": 0,
+     "qps": 254.5531802947854,
+     "latency_ms": {
+      "n": 2000,
+      "min": 3.299172,
+      "avg": 3.917967292,
+      "p50": 3.90482,
+      "p95": 4.28531895,
+      "p99": 4.53473176,
+      "max": 21.459021
+     },
+     "queries": 2000,
+     "duration": 7.8569043909956235,
+     "passes": [
+      {
+       "qps": 254.5531802947854,
+       "avg": 3.917967292,
+       "p50": 3.90482,
+       "p99": 4.53473176,
+       "queries": 2000,
+       "duration": 7.8569043909956235
+      }
+     ]
+    }
+   ],
+   "plan": "{\"query_types\": [\"KnnScoreDocQuery\"]}",
+   "memory_peak": 10630008832
+  },
+  {
+   "key": "corr/1000",
+   "filter": "corr",
+   "k": 1000,
+   "exact": false,
+   "view": "latency",
+   "clients": 1,
+   "status": "ok",
+   "block": "{\"filter\": {\"term\": {\"cluster\": \"$v\"}}, \"num_candidates\": \"{num_candidates}\", \"rescore_oversample\": \"{oversample}\"}",
+   "startup": 11.718662291998044,
+   "points": [
+    {
+     "ladder_index": 0,
+     "knobs": {
+      "num_candidates": 4000,
+      "oversample": 4.0
+     },
+     "recall": 0.999998,
+     "recall_strict": 0.999998,
+     "tail": 0.0,
+     "short_results": 0,
+     "qps": 107.83460929862126,
+     "latency_ms": {
+      "n": 2000,
+      "min": 7.558576,
+      "avg": 9.234943932000002,
+      "p50": 9.0441145,
+      "p95": 9.6025786,
+      "p99": 10.46572678,
+      "max": 42.185421
+     },
+     "queries": 2000,
+     "duration": 18.546921187997214,
+     "passes": [
+      {
+       "qps": 107.83460929862126,
+       "avg": 9.234943932000002,
+       "p50": 9.0441145,
+       "p99": 10.46572678,
+       "queries": 2000,
+       "duration": 18.546921187997214
+      }
+     ]
+    }
+   ],
+   "plan": "{\"query_types\": [\"KnnScoreDocQuery\"]}",
+   "memory_peak": 10630008832
+  },
+  {
+   "key": "xcorr/10",
+   "filter": "xcorr",
+   "k": 10,
+   "exact": false,
+   "view": "latency",
+   "clients": 1,
+   "status": "ok",
+   "block": "{\"filter\": {\"term\": {\"cluster\": \"$v\"}}, \"num_candidates\": \"{num_candidates}\", \"rescore_oversample\": \"{oversample}\"}",
+   "startup": 11.718662291998044,
+   "points": [
+    {
+     "ladder_index": 0,
+     "knobs": {
+      "num_candidates": 40,
+      "oversample": 4.0
+     },
+     "recall": 0.9999,
+     "recall_strict": 0.99975,
+     "tail": 0.0,
+     "short_results": 0,
+     "qps": 312.1100109334448,
+     "latency_ms": {
+      "n": 2000,
+      "min": 2.634402,
+      "avg": 3.1977287899999998,
+      "p50": 3.1922829999999998,
+      "p95": 3.5056893,
+      "p99": 3.60987852,
+      "max": 3.74128
+     },
+     "queries": 2000,
+     "duration": 6.407996956004354,
+     "passes": [
+      {
+       "qps": 312.1100109334448,
+       "avg": 3.1977287899999998,
+       "p50": 3.1922829999999998,
+       "p99": 3.60987852,
+       "queries": 2000,
+       "duration": 6.407996956004354
+      }
+     ]
+    }
+   ],
+   "plan": "{\"query_types\": [\"KnnScoreDocQuery\"]}",
+   "memory_peak": 10630008832
+  },
+  {
+   "key": "xcorr/100",
+   "filter": "xcorr",
+   "k": 100,
+   "exact": false,
+   "view": "latency",
+   "clients": 1,
+   "status": "ok",
+   "block": "{\"filter\": {\"term\": {\"cluster\": \"$v\"}}, \"num_candidates\": \"{num_candidates}\", \"rescore_oversample\": \"{oversample}\"}",
+   "startup": 11.718662291998044,
+   "points": [
+    {
+     "ladder_index": 0,
+     "knobs": {
+      "num_candidates": 400,
+      "oversample": 4.0
+     },
+     "recall": 1.0,
+     "recall_strict": 0.99999,
+     "tail": 0.0,
+     "short_results": 0,
+     "qps": 261.8350417136938,
+     "latency_ms": {
+      "n": 2000,
+      "min": 3.086259,
+      "avg": 3.8090741109999997,
+      "p50": 3.766966,
+      "p95": 4.3130321,
+      "p99": 4.52563166,
+      "max": 14.8585
+     },
+     "queries": 2000,
+     "duration": 7.638397010996414,
+     "passes": [
+      {
+       "qps": 261.8350417136938,
+       "avg": 3.8090741109999997,
+       "p50": 3.766966,
+       "p99": 4.52563166,
+       "queries": 2000,
+       "duration": 7.638397010996414
+      }
+     ]
+    }
+   ],
+   "plan": "{\"query_types\": [\"KnnScoreDocQuery\"]}",
+   "memory_peak": 10630008832
+  },
+  {
+   "key": "exact/eq-1/10",
+   "filter": "eq-1",
+   "k": 10,
+   "exact": true,
+   "view": "latency",
+   "clients": 1,
+   "status": "ok",
+   "block": "{\"filter\": {\"term\": {\"cat100\": \"$v\"}}, \"exact\": true}",
+   "startup": 11.718662291998044,
+   "points": [
+    {
+     "ladder_index": 0,
+     "knobs": {},
+     "recall": 1.0,
+     "recall_strict": 0.99995,
+     "tail": 0.0,
+     "short_results": 0,
+     "qps": 328.41471890800756,
+     "latency_ms": {
+      "n": 2000,
+      "min": 2.501337,
+      "avg": 3.0381277965,
+      "p50": 2.993589,
+      "p95": 3.38050265,
+      "p99": 3.4768613000000004,
+      "max": 3.724812
+     },
+     "queries": 2000,
+     "duration": 6.089861035005015,
+     "passes": [
+      {
+       "qps": 328.41471890800756,
+       "avg": 3.0381277965,
+       "p50": 2.993589,
+       "p99": 3.4768613000000004,
+       "queries": 2000,
+       "duration": 6.089861035005015
+      }
+     ]
+    }
+   ],
+   "plan": "{\"query_types\": [\"ScriptScoreQuery\"]}",
+   "memory_peak": 10630619136
+  },
+  {
+   "key": "lang/10",
+   "filter": "lang",
+   "k": 10,
+   "exact": false,
+   "view": "latency",
+   "clients": 1,
+   "status": "ok",
+   "block": "{\"filter\": {\"term\": {\"lang\": \"$s\"}}, \"num_candidates\": \"{num_candidates}\", \"rescore_oversample\": \"{oversample}\"}",
+   "startup": 11.718662291998044,
+   "points": [
+    {
+     "ladder_index": 0,
+     "knobs": {
+      "num_candidates": 40,
+      "oversample": 4.0
+     },
+     "recall": 0.9879000000000001,
+     "recall_strict": 0.98785,
+     "tail": 0.0005,
+     "short_results": 0,
+     "qps": 290.09464376184604,
+     "latency_ms": {
+      "n": 2000,
+      "min": 2.57129,
+      "avg": 3.4404876055,
+      "p50": 3.172442,
+      "p95": 4.870887349999999,
+      "p99": 5.1290020599999995,
+      "max": 7.188546
+     },
+     "queries": 2000,
+     "duration": 6.8943017150013475,
+     "passes": [
+      {
+       "qps": 290.09464376184604,
+       "avg": 3.4404876055,
+       "p50": 3.172442,
+       "p99": 5.1290020599999995,
+       "queries": 2000,
+       "duration": 6.8943017150013475
+      }
+     ]
+    },
+    {
+     "ladder_index": 1,
+     "knobs": {
+      "num_candidates": 64,
+      "oversample": 4.0
+     },
+     "recall": 0.9914000000000001,
+     "recall_strict": 0.9913500000000001,
+     "tail": 0.0005,
+     "short_results": 0,
+     "qps": 285.943941672963,
+     "latency_ms": {
+      "n": 2000,
+      "min": 2.689386,
+      "avg": 3.490549688,
+      "p50": 3.2150875,
+      "p95": 4.897512249999999,
+      "p99": 5.21765421,
+      "max": 19.007825
+     },
+     "queries": 2000,
+     "duration": 6.994377947994508,
+     "passes": [
+      {
+       "qps": 285.943941672963,
+       "avg": 3.490549688,
+       "p50": 3.2150875,
+       "p99": 5.21765421,
+       "queries": 2000,
+       "duration": 6.994377947994508
+      }
+     ]
+    },
+    {
+     "ladder_index": 2,
+     "knobs": {
+      "num_candidates": 80,
+      "oversample": 4.0
+     },
+     "recall": 0.9926500000000001,
+     "recall_strict": 0.9926,
+     "tail": 0.0,
+     "short_results": 0,
+     "qps": 285.99167283718685,
+     "latency_ms": {
+      "n": 2000,
+      "min": 2.695238,
+      "avg": 3.4900175145,
+      "p50": 3.2338924999999996,
+      "p95": 4.903319949999999,
+      "p99": 5.12480548,
+      "max": 6.372739
+     },
+     "queries": 2000,
+     "duration": 6.993210607004585,
+     "passes": [
+      {
+       "qps": 285.99167283718685,
+       "avg": 3.4900175145,
+       "p50": 3.2338924999999996,
+       "p99": 5.12480548,
+       "queries": 2000,
+       "duration": 6.993210607004585
+      }
+     ]
+    },
+    {
+     "ladder_index": 3,
+     "knobs": {
+      "num_candidates": 128,
+      "oversample": 4.0
+     },
+     "recall": 0.9952000000000001,
+     "recall_strict": 0.9951500000000001,
+     "tail": 0.0,
+     "short_results": 0,
+     "qps": 280.34133760774927,
+     "latency_ms": {
+      "n": 2000,
+      "min": 2.655771,
+      "avg": 3.560401563,
+      "p50": 3.28162,
+      "p95": 4.9322929,
+      "p99": 5.1664859000000005,
+      "max": 23.174776
+     },
+     "queries": 2000,
+     "duration": 7.134160153000266,
+     "passes": [
+      {
+       "qps": 280.34133760774927,
+       "avg": 3.560401563,
+       "p50": 3.28162,
+       "p99": 5.1664859000000005,
+       "queries": 2000,
+       "duration": 7.134160153000266
+      }
+     ]
+    },
+    {
+     "ladder_index": 4,
+     "knobs": {
+      "num_candidates": 192,
+      "oversample": 4.0
+     },
+     "recall": 0.99665,
+     "recall_strict": 0.9966,
+     "tail": 0.0,
+     "short_results": 0,
+     "qps": 278.20876894939505,
+     "latency_ms": {
+      "n": 2000,
+      "min": 2.595308,
+      "avg": 3.587827979,
+      "p50": 3.3431290000000002,
+      "p95": 4.9388154,
+      "p99": 5.22215092,
+      "max": 6.325681
+     },
+     "queries": 2000,
+     "duration": 7.188846015000308,
+     "passes": [
+      {
+       "qps": 278.20876894939505,
+       "avg": 3.587827979,
+       "p50": 3.3431290000000002,
+       "p99": 5.22215092,
+       "queries": 2000,
+       "duration": 7.188846015000308
+      }
+     ]
+    }
+   ],
+   "plan": "{\"query_types\": [\"KnnScoreDocQuery\"]}",
+   "memory_peak": 10631098368
+  },
+  {
+   "key": "xlang/10",
+   "filter": "xlang",
+   "k": 10,
+   "exact": false,
+   "view": "latency",
+   "clients": 1,
+   "status": "ok",
+   "block": "{\"filter\": {\"term\": {\"lang\": \"$s\"}}, \"num_candidates\": \"{num_candidates}\", \"rescore_oversample\": \"{oversample}\"}",
+   "startup": 11.718662291998044,
+   "points": [
+    {
+     "ladder_index": 0,
+     "knobs": {
+      "num_candidates": 40,
+      "oversample": 4.0
+     },
+     "recall": 0.9768500000000001,
+     "recall_strict": 0.9768500000000001,
+     "tail": 0.0005,
+     "short_results": 0,
+     "qps": 291.0442543161021,
+     "latency_ms": {
+      "n": 2000,
+      "min": 2.555438,
+      "avg": 3.4292498585000004,
+      "p50": 3.160588,
+      "p95": 4.8503985499999995,
+      "p99": 5.07888367,
+      "max": 22.551698
+     },
+     "queries": 2000,
+     "duration": 6.8718071920011425,
+     "passes": [
+      {
+       "qps": 291.0442543161021,
+       "avg": 3.4292498585000004,
+       "p50": 3.160588,
+       "p99": 5.07888367,
+       "queries": 2000,
+       "duration": 6.8718071920011425
+      }
+     ]
+    },
+    {
+     "ladder_index": 1,
+     "knobs": {
+      "num_candidates": 64,
+      "oversample": 4.0
+     },
+     "recall": 0.9834,
+     "recall_strict": 0.9834,
+     "tail": 0.0,
+     "short_results": 0,
+     "qps": 289.35459854363444,
+     "latency_ms": {
+      "n": 2000,
+      "min": 2.645522,
+      "avg": 3.4491254104999998,
+      "p50": 3.2105930000000003,
+      "p95": 4.867588899999999,
+      "p99": 5.12796831,
+      "max": 6.237923
+     },
+     "queries": 2000,
+     "duration": 6.9119343880011,
+     "passes": [
+      {
+       "qps": 289.35459854363444,
+       "avg": 3.4491254104999998,
+       "p50": 3.2105930000000003,
+       "p99": 5.12796831,
+       "queries": 2000,
+       "duration": 6.9119343880011
+      }
+     ]
+    },
+    {
+     "ladder_index": 2,
+     "knobs": {
+      "num_candidates": 96,
+      "oversample": 4.0
+     },
+     "recall": 0.988,
+     "recall_strict": 0.988,
+     "tail": 0.0,
+     "short_results": 0,
+     "qps": 285.8661953780294,
+     "latency_ms": {
+      "n": 2000,
+      "min": 2.604951,
+      "avg": 3.491273059,
+      "p50": 3.248754,
+      "p95": 4.8676968,
+      "p99": 5.106478190000001,
+      "max": 5.761359
+     },
+     "queries": 2000,
+     "duration": 6.996280191000551,
+     "passes": [
+      {
+       "qps": 285.8661953780294,
+       "avg": 3.491273059,
+       "p50": 3.248754,
+       "p99": 5.106478190000001,
+       "queries": 2000,
+       "duration": 6.996280191000551
+      }
+     ]
+    },
+    {
+     "ladder_index": 3,
+     "knobs": {
+      "num_candidates": 128,
+      "oversample": 4.0
+     },
+     "recall": 0.9901,
+     "recall_strict": 0.9901,
+     "tail": 0.0,
+     "short_results": 0,
+     "qps": 282.7861327097299,
+     "latency_ms": {
+      "n": 2000,
+      "min": 2.609362,
+      "avg": 3.5295188,
+      "p50": 3.2779439999999997,
+      "p95": 4.9125706,
+      "p99": 5.1365896,
+      "max": 17.742757
+     },
+     "queries": 2000,
+     "duration": 7.072482588999264,
+     "passes": [
+      {
+       "qps": 282.7861327097299,
+       "avg": 3.5295188,
+       "p50": 3.2779439999999997,
+       "p99": 5.1365896,
+       "queries": 2000,
+       "duration": 7.072482588999264
+      }
+     ]
+    },
+    {
+     "ladder_index": 4,
+     "knobs": {
+      "num_candidates": 192,
+      "oversample": 4.0
+     },
+     "recall": 0.9919499999999999,
+     "recall_strict": 0.9919499999999999,
+     "tail": 0.0,
+     "short_results": 0,
+     "qps": 279.9162535523295,
+     "latency_ms": {
+      "n": 2000,
+      "min": 2.676373,
+      "avg": 3.5657157315,
+      "p50": 3.3396215,
+      "p95": 4.92531375,
+      "p99": 5.1535231900000005,
+      "max": 6.268228
+     },
+     "queries": 2000,
+     "duration": 7.144994171001599,
+     "passes": [
+      {
+       "qps": 279.9162535523295,
+       "avg": 3.5657157315,
+       "p50": 3.3396215,
+       "p99": 5.1535231900000005,
+       "queries": 2000,
+       "duration": 7.144994171001599
+      }
+     ]
+    },
+    {
+     "ladder_index": 5,
+     "knobs": {
+      "num_candidates": 384,
+      "oversample": 4.0
+     },
+     "recall": 0.99575,
+     "recall_strict": 0.99575,
+     "tail": 0.0,
+     "short_results": 0,
+     "qps": 269.2714217949748,
+     "latency_ms": {
+      "n": 2000,
+      "min": 2.722355,
+      "avg": 3.7068853445,
+      "p50": 3.4532499999999997,
+      "p95": 5.08123905,
+      "p99": 5.3262148300000005,
+      "max": 18.905348
+     },
+     "queries": 2000,
+     "duration": 7.427449918999628,
+     "passes": [
+      {
+       "qps": 269.2714217949748,
+       "avg": 3.7068853445,
+       "p50": 3.4532499999999997,
+       "p99": 5.3262148300000005,
+       "queries": 2000,
+       "duration": 7.427449918999628
+      }
+     ]
+    },
+    {
+     "ladder_index": 6,
+     "knobs": {
+      "num_candidates": 512,
+      "oversample": 4.0
+     },
+     "recall": 0.99675,
+     "recall_strict": 0.99675,
+     "tail": 0.0,
+     "short_results": 0,
+     "qps": 266.19104297055,
+     "latency_ms": {
+      "n": 2000,
+      "min": 2.844167,
+      "avg": 3.749819425,
+      "p50": 3.508192,
+      "p95": 5.150242099999999,
+      "p99": 5.40833791,
+      "max": 5.876167
+     },
+     "queries": 2000,
+     "duration": 7.513400818002992,
+     "passes": [
+      {
+       "qps": 266.19104297055,
+       "avg": 3.749819425,
+       "p50": 3.508192,
+       "p99": 5.40833791,
+       "queries": 2000,
+       "duration": 7.513400818002992
+      }
+     ]
+    }
+   ],
+   "plan": "{\"query_types\": [\"KnnScoreDocQuery\"]}",
+   "memory_peak": 10631098368
+  }
+ ],
+ "load_time": 861.7231423630001,
+ "load_phases": {
+  "ingest": 816.29,
+  "index": 45.153
+ },
+ "disk_bytes": 5271750986,
+ "disk_info": {
+  "segments": 8,
+  "index_bytes": 5271637551,
+  "index": {
+   "type": "int8_hnsw",
+   "m": 16,
+   "ef_construction": 128,
+   "shards": 1,
+   "segments": 8
+  }
+ },
+ "memory_peak": {
+  "load": 26448531456,
+  "unfiltered": 10627272704,
+  "filtered": 10631098368
+ },
+ "startup": {
+  "n": 5,
+  "min": 11.718662291998044,
+  "avg": 11.905170463200193,
+  "p50": 11.900189011998009,
+  "p95": 12.099365707003745,
+  "p99": 12.119916913404595,
+  "max": 12.125054715004808
+ }
+}
