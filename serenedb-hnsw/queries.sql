@@ -15,7 +15,7 @@ SELECT id FROM {index.relation} ORDER BY emb <#> $q LIMIT $k;
 
 -- group: exact/none/*
 -- Exact: the engine's own brute force (sdb_ann_exact), every stored vector scored, split across workers.
-SET sdb_ann_exact = on;
+SET sdb_ann_force_exact = on;
 SELECT id FROM {index.relation} ORDER BY emb <#> $q LIMIT $k;
 
 -- group: eq-10/*
@@ -31,7 +31,7 @@ SET sdb_hnsw_filter_mode = '{mode}';
 SELECT id FROM {index.relation} WHERE cat100 = $v ORDER BY emb <#> $q LIMIT $k;
 
 -- group: exact/eq-1/*
-SET sdb_ann_exact = on;
+SET sdb_ann_force_exact = on;
 SELECT id FROM {index.relation} WHERE cat100 = $v ORDER BY emb <#> $q LIMIT $k;
 
 -- group: eq-0.1/*

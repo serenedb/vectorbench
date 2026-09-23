@@ -29,7 +29,7 @@ quantization is only the part that was easy.
 | results | `k` | `limit` | `LIMIT` |
 | rescore pool | `rescore_vector.oversample` | `quantization.oversampling` + `rescore` | `sdb_ann_oversample` |
 | skip rescoring | `oversample: 0` | `quantization.rescore: false` (the scalar default) | factor 0 |
-| exact | `script_score` | `exact: true` | `sdb_ann_exact` |
+| exact | `script_score` | `exact: true` | `sdb_ann_force_exact` |
 | filtered strategy | chosen internally | `acorn` | `sdb_hnsw_filter_mode`: auto, scan, walk, prune, twohop, bridge |
 | min score | `similarity` | `score_threshold` | radius form |
 | graph visit cap | `visit_percentage` | — | — |
