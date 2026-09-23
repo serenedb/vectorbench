@@ -57,32 +57,101 @@ defaults:
   # ladder has nothing left to trade: bridge is the only point that buys speed with recall the way a
   # competitor's filtered walk does. The frontier picks per row. Only the filtered blocks name {mode},
   # so unfiltered groups measure ef and rerank alone.
-  ladder: {ef: [16, 24, 32, 48, 64, 96, 128, 192, 256, 384, 512], oversample: [1.0], mode: [auto]}
+  ladder: {ef: [10, 16, 24, 32, 40, 64, 96, 128], oversample: [1.0], mode: [auto]}
+  groups:
+    "*/100":  {ladder: {ef: [32, 48, 64, 100, 160, 256, 400, 640], oversample: [1.0], mode: [auto]}}
+    "*/1000": {ladder: {ef: [160, 256, 400, 640, 1000, 1600], oversample: [1.0], mode: [auto]}}
 
-# ef is floored at k, so the k=100 and k=1000 groups need their own ladders; the anchors share them.
 datasets:
   sift-128:
-    100k: &sift_100k
-      ladder: {ef: [16, 18, 20, 22, 24, 28, 32, 40, 48, 56, 64, 80, 96, 128, 192, 256], oversample: [1.0], mode: [auto]}
+    100k:
       groups:
-        # ef may sit below k: every segment is searched with its own beam and the
-        # results are merged, so a segment holds its share of the answer, not all of
-        # it. The engine floors the beam at that share, which is what makes a beam
-        # narrower than k mean anything. Qdrant's ladder sweeps below k for the same
-        # reason (its README, "hnsw_ef and limit").
-        "*/100":  &k100  {ladder: {ef: [24, 32, 48, 64, 100, 128, 160, 200, 256, 320, 360, 400, 512, 768], oversample: [1.0], mode: [auto]}}
-        "*/1000": &k1000 {ladder: {ef: [160, 224, 320, 448, 640, 1000, 1200, 1500, 2000, 2500, 3000, 4000], oversample: [1.0], mode: [auto]}}
+        "and-1/10": {ladder: {ef: [10], oversample: [1.0], mode: [auto]}}
+        "corr/10": {ladder: {ef: [10], oversample: [1.0], mode: [auto]}}
+        "corr/100": {ladder: {ef: [16, 24, 40], oversample: [1.0], mode: [auto]}}
+        "eq-0.1/10": {ladder: {ef: [10], oversample: [1.0], mode: [auto]}}
+        "eq-1/10": {ladder: {ef: [10], oversample: [1.0], mode: [auto]}}
+        "eq-1/100": {ladder: {ef: [16, 24, 32], oversample: [1.0], mode: [auto]}}
+        "eq-10/10": {ladder: {ef: [10], oversample: [1.0], mode: [auto]}}
+        "eq-10/100": {ladder: {ef: [16, 24, 32], oversample: [1.0], mode: [auto]}}
+        "eq-10/1000": {ladder: {ef: [128, 200, 256], oversample: [1.0], mode: [auto]}}
+        "none/10": {ladder: {ef: [10, 16, 24, 40], oversample: [1.0], mode: [auto]}}
+        "none/100": {ladder: {ef: [16, 24, 32, 48, 80], oversample: [1.0], mode: [auto]}}
+        "none/1000": {ladder: {ef: [128, 200, 320], oversample: [1.0], mode: [auto]}}
+        "range-1/10": {ladder: {ef: [10], oversample: [1.0], mode: [auto]}}
+        "range-1/100": {ladder: {ef: [16, 24, 32], oversample: [1.0], mode: [auto]}}
+        "range-10/10": {ladder: {ef: [10], oversample: [1.0], mode: [auto]}}
+        "range-10/100": {ladder: {ef: [16, 24, 32], oversample: [1.0], mode: [auto]}}
+        "xcorr/10": {ladder: {ef: [10], oversample: [1.0], mode: [auto]}}
+        "xcorr/100": {ladder: {ef: [16, 24, 32, 48, 80], oversample: [1.0], mode: [auto]}}
     1m:
-      ladder: {ef: [16, 18, 20, 22, 24, 28, 32, 40, 48, 56, 64, 80, 96, 128, 192, 256, 384], oversample: [1.0], mode: [auto]}
-      groups: {"*/100": *k100, "*/1000": *k1000}
-    10m:
-      ladder: {ef: [16, 18, 20, 22, 24, 28, 32, 40, 48, 56, 64, 80, 96, 128, 192, 256, 384, 512], oversample: [1.0], mode: [auto]}
-      groups: {"*/100": *k100, "*/1000": *k1000}
+      groups:
+        "and-1/10": {ladder: {ef: [10], oversample: [1.0], mode: [auto]}}
+        "and-1/100": {ladder: {ef: [16], oversample: [1.0], mode: [auto]}}
+        "corr/10": {ladder: {ef: [10], oversample: [1.0], mode: [auto]}}
+        "corr/100": {ladder: {ef: [16, 24], oversample: [1.0], mode: [auto]}}
+        "corr/1000": {ladder: {ef: [128, 200], oversample: [1.0], mode: [auto]}}
+        "eq-0.1/10": {ladder: {ef: [10], oversample: [1.0], mode: [auto]}}
+        "eq-1/10": {ladder: {ef: [10], oversample: [1.0], mode: [auto]}}
+        "eq-1/100": {ladder: {ef: [16], oversample: [1.0], mode: [auto]}}
+        "eq-10/10": {ladder: {ef: [10, 16, 24], oversample: [1.0], mode: [auto]}}
+        "eq-10/100": {ladder: {ef: [16, 24, 32], oversample: [1.0], mode: [auto]}}
+        "eq-10/1000": {ladder: {ef: [128], oversample: [1.0], mode: [auto]}}
+        "none/10": {ladder: {ef: [10, 16, 20, 32, 48, 64], oversample: [1.0], mode: [auto]}}
+        "none/100": {ladder: {ef: [16, 24, 40, 64, 80, 128], oversample: [1.0], mode: [auto]}}
+        "none/1000": {ladder: {ef: [128, 200, 256, 400], oversample: [1.0], mode: [auto]}}
+        "range-1/10": {ladder: {ef: [10], oversample: [1.0], mode: [auto]}}
+        "range-1/100": {ladder: {ef: [16], oversample: [1.0], mode: [auto]}}
+        "range-10/10": {ladder: {ef: [10, 16, 24], oversample: [1.0], mode: [auto]}}
+        "range-10/100": {ladder: {ef: [16, 24, 32], oversample: [1.0], mode: [auto]}}
+        "range-10/1000": {ladder: {ef: [128], oversample: [1.0], mode: [auto]}}
+        "xcorr/10": {ladder: {ef: [10], oversample: [1.0], mode: [auto]}}
+        "xcorr/100": {ladder: {ef: [16], oversample: [1.0], mode: [auto]}}
+        "xcorr/1000": {ladder: {ef: [128], oversample: [1.0], mode: [auto]}}
   wiki-v3-1024:
-    100k: *sift_100k
+    100k:
+      groups:
+        "and-1/10": {ladder: {ef: [10], oversample: [1.0], mode: [auto]}}
+        "corr/10": {ladder: {ef: [10, 16, 24, 40], oversample: [1.0], mode: [auto]}}
+        "corr/100": {ladder: {ef: [16, 24, 32, 48, 64, 100], oversample: [1.0], mode: [auto]}}
+        "eq-0.1/10": {ladder: {ef: [10], oversample: [1.0], mode: [auto]}}
+        "eq-1/10": {ladder: {ef: [10], oversample: [1.0], mode: [auto]}}
+        "eq-1/100": {ladder: {ef: [16, 24, 32, 48, 80], oversample: [1.0], mode: [auto]}}
+        "eq-10/10": {ladder: {ef: [10, 16, 20], oversample: [1.0], mode: [auto]}}
+        "eq-10/100": {ladder: {ef: [16, 24, 32, 48, 64, 100], oversample: [1.0], mode: [auto]}}
+        "eq-10/1000": {ladder: {ef: [128, 200, 256, 400, 512, 800], oversample: [1.0], mode: [auto]}}
+        "lang/10": {ladder: {ef: [10, 16, 24, 32, 48, 80, 96, 160], oversample: [1.0], mode: [auto]}}
+        "none/10": {ladder: {ef: [10, 16, 24, 32, 48, 80, 128, 192], oversample: [1.0], mode: [auto]}}
+        "none/100": {ladder: {ef: [16, 24, 32, 48, 80, 128, 160, 256], oversample: [1.0], mode: [auto]}}
+        "none/1000": {ladder: {ef: [128, 200, 320, 400, 640, 1000], oversample: [1.0], mode: [auto]}}
+        "range-1/10": {ladder: {ef: [10], oversample: [1.0], mode: [auto]}}
+        "range-1/100": {ladder: {ef: [16, 24, 32, 48, 80], oversample: [1.0], mode: [auto]}}
+        "range-10/10": {ladder: {ef: [10, 16, 24], oversample: [1.0], mode: [auto]}}
+        "range-10/100": {ladder: {ef: [16, 24, 32, 48, 64, 100], oversample: [1.0], mode: [auto]}}
+        "xcorr/10": {ladder: {ef: [10], oversample: [1.0], mode: [auto]}}
+        "xlang/10": {ladder: {ef: [10, 16, 24, 40, 64, 96, 160, 256], oversample: [1.0], mode: [auto]}}
     1m:
-      ladder: {ef: [16, 18, 20, 22, 24, 28, 32, 40, 48, 56, 64, 80, 96, 128, 192, 256, 384], oversample: [1.0], mode: [auto]}
-      groups: {"*/100": *k100, "*/1000": *k1000}
-    10m:
-      ladder: {ef: [16, 18, 20, 22, 24, 28, 32, 40, 48, 56, 64, 80, 96, 128, 192, 256, 384, 512], oversample: [1.0], mode: [auto]}
-      groups: {"*/100": *k100, "*/1000": *k1000}
+      groups:
+        "and-1/10": {ladder: {ef: [10, 16, 24, 40, 64, 96, 160, 256], oversample: [1.0], mode: [auto]}}
+        "and-1/100": {ladder: {ef: [16, 24, 40, 64, 128, 200, 320, 512], oversample: [1.0], mode: [auto]}}
+        "corr/10": {ladder: {ef: [10, 16, 20], oversample: [1.0], mode: [auto]}}
+        "corr/100": {ladder: {ef: [16, 24, 32, 48], oversample: [1.0], mode: [auto]}}
+        "corr/1000": {ladder: {ef: [128, 200, 256, 400], oversample: [1.0], mode: [auto]}}
+        "eq-0.1/10": {ladder: {ef: [10], oversample: [1.0], mode: [auto]}}
+        "eq-1/10": {ladder: {ef: [10, 16, 24, 32, 48, 80, 96, 160], oversample: [1.0], mode: [auto]}}
+        "eq-1/100": {ladder: {ef: [16, 24, 40, 64, 128, 200, 320, 512], oversample: [1.0], mode: [auto]}}
+        "eq-10/10": {ladder: {ef: [10, 16, 20, 32, 48, 64], oversample: [1.0], mode: [auto]}}
+        "eq-10/100": {ladder: {ef: [16, 24, 40, 64, 80, 128], oversample: [1.0], mode: [auto]}}
+        "eq-10/1000": {ladder: {ef: [128, 200, 256, 400], oversample: [1.0], mode: [auto]}}
+        "lang/10": {ladder: {ef: [10, 16, 20, 32, 48, 64, 96], oversample: [1.0], mode: [auto]}}
+        "none/10": {ladder: {ef: [12, 20, 32, 48, 64, 96, 160], oversample: [1.0], mode: [auto]}}
+        "none/100": {ladder: {ef: [16, 24, 32, 48, 80, 128, 160, 256], oversample: [1.0], mode: [auto]}}
+        "none/1000": {ladder: {ef: [128, 200, 256, 400, 512, 800], oversample: [1.0], mode: [auto]}}
+        "range-1/10": {ladder: {ef: [10, 16, 24, 40, 64, 96, 160, 256], oversample: [1.0], mode: [auto]}}
+        "range-1/100": {ladder: {ef: [16, 24, 40, 64, 128, 200, 320, 512], oversample: [1.0], mode: [auto]}}
+        "range-10/10": {ladder: {ef: [10, 16, 24, 32, 48, 80], oversample: [1.0], mode: [auto]}}
+        "range-10/100": {ladder: {ef: [16, 24, 40, 64, 80, 128], oversample: [1.0], mode: [auto]}}
+        "range-10/1000": {ladder: {ef: [128, 200, 256, 400], oversample: [1.0], mode: [auto]}}
+        "xcorr/10": {ladder: {ef: [10], oversample: [1.0], mode: [auto]}}
+        "xcorr/100": {ladder: {ef: [16, 24, 32, 48, 80], oversample: [1.0], mode: [auto]}}
+        "xlang/10": {ladder: {ef: [10, 16, 24, 32, 48, 80, 128], oversample: [1.0], mode: [auto]}}
