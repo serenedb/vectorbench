@@ -407,10 +407,11 @@ VACUUM (REFRESH_TABLE items); VACUUM (COMPACT_TABLE items);      -- then wait un
   `compression`. `hnsw` options: `metric`, `quant` in none/sq8/sq4/tq, `m` (32), `ef_construction`
   (200), `compression`. Build-time GUCs, set before CREATE INDEX: `sdb_ivf_posting_size` (1024),
   `sdb_ivf_sample_factor` (0.2). There is no `nlist`; cluster count is about rows / posting_size.
-- Search knobs (session GUCs, in the query text): `sdb_ivf_search_nprobe` (8),
-  `sdb_ivf_max_search_fanout` (16), `sdb_hnsw_ef_search` (64; also the result ceiling, so ef >= k),
-  `sdb_rerank_factor` (4.0; exact-rescoring pool = factor * k for quantized indexes, 4,000 raw vector
-  reads per query at k=1000; 0 disables). The phase-2 rerank rework changes what this knob costs.
+- Search knobs (session GUCs, in the query text), each defaulting to -1, which lets the engine
+  choose: `sdb_ivf_search_nprobe` (auto: per segment, from its rows, `posting_size` and k),
+  `sdb_ivf_min_search_fanout` / `sdb_ivf_max_search_fanout` (floor and cap on the centroid-tree
+  descent's beam per level, which otherwise is the resolved nprobe), `sdb_hnsw_ef_search` (auto: max(`ef_construction`, k)), `sdb_ann_oversample` (auto: 1 for a
+  quantized index, so each segment's top k is rescored at full precision; 0 disables).
 - `exact` rows: `sdb_disable_top_k_optimization = true` on an unquantized index, the streaming
   brute-force path the engine's own tests use as oracle.
 - **HNSW refuses filtered search today** (`ERRCODE_FEATURE_NOT_SUPPORTED`, "use an ivf vector index

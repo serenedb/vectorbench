@@ -13,7 +13,7 @@ quantization is only the part that was easy.
 | build beam | `ef_construction` | `ef_construct` | `ef_construction` |
 | quantization | `type`: `hnsw`, `int8_hnsw`, `int4_hnsw`, `bbq_hnsw`, `bbq_disk` | `scalar` / `binary` / `product` | `quant`: `none`, `sq8`, `sq4`, `pq`, `rabitq`, `tq` |
 | quantizer range | `confidence_interval` (int8, int4) | `quantile` (scalar), default off | **none needed: per-dimension min/max** |
-| default rescore pool | `rescore_vector.oversample` (int8, int4, bbq), default 3 | — (query-time only) | `sdb_ann_oversample`, default 3 |
+| default rescore pool | `rescore_vector.oversample` (int8, int4, bbq), default 3 | — (query-time only) | `sdb_ann_oversample`, default auto: 1 for any quantized index |
 | exact-search cutoff | — | `full_scan_threshold` | cost model, plus `sdb_hnsw_filter_mode = scan` |
 | filtered-graph links | — | `payload_m` | — (rejected: post-filtering by another name) |
 | segments | `number_of_shards` | `default_segment_number`, `max_segment_size` | one per index |
