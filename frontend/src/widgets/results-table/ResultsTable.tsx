@@ -5,11 +5,10 @@
 
 import { Fragment, useMemo, type Dispatch, type ReactNode } from 'react';
 import type { DatasetModel, Grid, QueryRow, ResultModel, Section, SectionScores } from '../../entities/results';
-import { groupRows, participantColor } from '../../entities/results';
+import { groupRows } from '../../entities/results';
 import { fmtInt } from '../../shared/lib/format';
 import { VIEW_LABELS, type BenchAction, type BenchState } from '../../shared/model';
 import { Panel } from '../../shared/ui';
-import { InlineGraph } from '../curve-graph/InlineGraph';
 import { CoverageRow, HeaderRow, QueryTableRow, ScoreRow } from './Rows';
 import { GroupTableRow } from './GroupRow';
 import { TableHead } from './TableHead';
@@ -95,13 +94,11 @@ export function ResultsTable({ dataset, results, rows, grid, scores, state, disp
                       metric={grid.metric}
                       direction={grid.direction}
                       cells={state.cells}
-                      colorOf={participantColor}
                       open={gopen}
                       selected={selectedQid === g.key ? selectedPid : null}
-                      onToggle={() => dispatch({ type: 'row', id: g.key })}
+                      onToggle={() => dispatch({ type: 'graph-open', id: g.qids[0] })}
                       onCell={(pid) => dispatch({ type: 'detail', detail: { kind: 'cell', pid, qid: g.qids[0] } })}
                     />
-                    {gopen && <InlineGraph results={results} row={spec.row} grid={grid} dispatch={dispatch} />}
                   </Fragment>
                 );
               }
@@ -116,10 +113,9 @@ export function ResultsTable({ dataset, results, rows, grid, scores, state, disp
                     cells={state.cells}
                     open={open}
                     selected={selectedQid === spec.row.id ? selectedPid : null}
-                    onToggle={() => dispatch({ type: 'row', id: spec.row.id })}
+                    onToggle={() => dispatch({ type: 'graph-open', id: spec.row.id })}
                     onCell={(pid) => dispatch({ type: 'detail', detail: { kind: 'cell', pid, qid: spec.row.id } })}
                   />
-                  {open && <InlineGraph results={results} row={spec.row} grid={grid} dispatch={dispatch} />}
                 </Fragment>
               );
             }

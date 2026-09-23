@@ -475,25 +475,20 @@
    participant reaches on its own with its curve on the row's shared axes. */
 [data-product='vectorbench'] .cell.gcell {
     display: flex;
-    flex-direction: column;
-    align-items: flex-end;
-    justify-content: center;
-    gap: 1px;
-    line-height: 13px;
+    flex-direction: row;
+    align-items: baseline;
+    justify-content: flex-end;
+    gap: 6px;
+    line-height: 15px;
 }
 [data-product='vectorbench'] .cell.gcell .gv {
     font-size: 11px;
     font-weight: 600;
 }
-[data-product='vectorbench'] .cell.gcell .gsub {
-    display: flex;
-    align-items: center;
-    gap: 5px;
+[data-product='vectorbench'] .cell.gcell .greach {
     font-size: 9.5px;
     font-weight: 500;
     opacity: 0.72;
-}
-[data-product='vectorbench'] .cell.gcell .greach {
     font-variant-numeric: tabular-nums;
 }
 

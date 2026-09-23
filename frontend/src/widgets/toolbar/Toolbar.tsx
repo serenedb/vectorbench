@@ -42,7 +42,8 @@ function tierOf(dataset: DatasetModel): string {
   const tiers = new Set(
     dataset.results.map((r) => {
       const h = r.raw.hardware;
-      return h ? `${h.cpus} CPUs · ${fmtBytes(h.memory_bytes)} · ${h.storage}` : 'unknown tier';
+      if (!h) return 'unknown tier';
+      return [`${h.cpus} CPUs`, h.memory_bytes ? fmtBytes(h.memory_bytes) : null, h.storage || null].filter(Boolean).join(' · ');
     }),
   );
   return tiers.size === 1 ? [...tiers][0] : 'mixed tiers (see column tooltips)';

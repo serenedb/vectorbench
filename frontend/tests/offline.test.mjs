@@ -48,21 +48,12 @@ test('committed HTML renders, graphs and details work over file:// without netwo
     const secondRow = rowIds[1];
     assert.ok(text.includes(firstRow));
 
-    // a row click opens the inline graph with one line per participant and the dashed row line
     await page.locator(`[data-act="row"][data-id="${firstRow}"]`).click();
-    const graph = page.locator('[data-role="inline-graph"]');
-    await graph.waitFor();
-    assert.ok((await graph.locator('svg.curve-graph polyline').count()) >= 1, 'at least one curve');
-    assert.ok((await graph.locator('svg.curve-graph circle').count()) >= 2, 'measured points');
-    assert.ok((await graph.locator('svg.curve-graph rect').count()) >= 1, 'a crossing marker');
-    assert.equal(await page.locator(`[data-act="row"][data-id="${firstRow}"]`).getAttribute('class'), 'rowlab open');
-    // the URL remembers the open row
-    assert.ok(page.url().includes('?s='));
-
-    // full screen: another row can be toggled in
-    await graph.locator('[data-act="graph-open"]').click();
     const full = page.locator('[data-role="full-graph"]');
     await full.waitFor();
+    assert.ok((await full.locator('svg.curve-graph polyline').count()) >= 1, 'at least one curve');
+    assert.ok((await full.locator('svg.curve-graph circle').count()) >= 2, 'measured points');
+    assert.ok(page.url().includes('?s='));
     await full.locator('[data-act="graph-toggle"]').first().check();
     assert.ok((await full.locator('svg.curve-graph line[style*="dasharray"], svg.curve-graph line').count()) >= 2);
     await page.keyboard.press('Escape');

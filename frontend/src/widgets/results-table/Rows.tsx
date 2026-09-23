@@ -138,9 +138,9 @@ export function QueryTableRow({
   const tags = [row.filter === 'none' ? null : row.filter, `k=${row.k}`, row.exact ? 'exact' : `recall ${fmtRecall(row.recall)}`].filter(Boolean).join(' · ');
   return (
     <div className="trow" style={{ gridTemplateColumns: gridCols }}>
-      <button type="button" className={'rowlab' + (open ? ' open' : '')} data-act="row" data-id={row.id} title="click: the curves behind this row, with the crossing at its recall" onClick={onToggle}>
+      <button type="button" className={'rowlab' + (open ? ' open' : '')} data-act="row" data-id={row.id} title="click: the curves behind this row, full screen" onClick={onToggle}>
         {row.id}
-        <span className="mk">{open ? '▾' : ''}</span>
+        <span className="mk" />
         <span className="tg">{tags}</span>
       </button>
       {results.map((r) => {

@@ -9,32 +9,12 @@
    next to it. */
 
 import type { ReactNode } from 'react';
-import type { GroupRowModel, ParticipantCurve, Point, ResultModel } from '../../entities/results';
+import type { GroupRowModel, ParticipantCurve, ResultModel } from '../../entities/results';
 import { ratioTo } from '../../entities/results';
 import { ratioBg } from '../../shared/lib/color';
 import { fmtMetric, fmtRatio, fmtRecall, metricUnit } from '../../shared/lib/format';
 import type { CellMode } from '../../shared/model';
 import type { Direction, Metric } from '../../entities/results';
-
-const W = 46;
-const H = 14;
-
-/** The participant's frontier on axes the whole row shares, so two cells compare by eye. */
-function MiniCurve({ front, xLo, xHi, yLo, yHi, color }: { front: readonly Point[]; xLo: number; xHi: number; yLo: number; yHi: number; color: string }): ReactNode {
-  if (front.length < 2 || xHi <= xLo || yHi <= yLo) return <svg width={W} height={H} aria-hidden="true" />;
-  const lx = Math.log10(yLo);
-  const lh = Math.log10(yHi) - lx;
-  const X = (r: number) => ((Math.min(Math.max(r, xLo), xHi) - xLo) / (xHi - xLo)) * (W - 2) + 1;
-  const Y = (v: number) => H - 1 - ((Math.log10(Math.min(Math.max(v, yLo), yHi)) - lx) / lh) * (H - 2);
-  const d = front.map((p, i) => `${i ? 'L' : 'M'}${X(p.recall).toFixed(1)},${Y(p.value).toFixed(1)}`).join('');
-  const tip = front[front.length - 1];
-  return (
-    <svg width={W} height={H} aria-hidden="true" style={{ display: 'block' }}>
-      <path d={d} fill="none" stroke={color} strokeWidth={1.25} strokeLinejoin="round" />
-      <circle cx={X(tip.recall)} cy={Y(tip.value)} r={1.6} fill={color} />
-    </svg>
-  );
-}
 
 /* A measured recall, three decimals. `fmtRecall` is for the bars a family
    declares (0.90, 0.95, 0.99) and prints the raw float for anything else,
@@ -54,7 +34,6 @@ export function GroupTableRow({
   metric,
   direction,
   cells,
-  colorOf,
   open,
   selected,
   onToggle,
@@ -66,19 +45,11 @@ export function GroupTableRow({
   metric: Metric;
   direction: Direction;
   cells: CellMode;
-  colorOf: (pid: string) => string;
   open: boolean;
   selected: string | null;
   onToggle: () => void;
   onCell: (pid: string) => void;
 }): ReactNode {
-  const live = row.curves.filter((c) => c.front.length > 0);
-  const xLo = live.length ? Math.min(...live.map((c) => c.front[0].recall)) : 0;
-  const xHi = live.length ? Math.max(...live.map((c) => c.front[c.front.length - 1].recall)) : 1;
-  const vals = live.flatMap((c) => c.front.map((p) => p.value)).filter((v) => v > 0);
-  const yLo = vals.length ? Math.min(...vals) : 1;
-  const yHi = vals.length ? Math.max(...vals) : 1;
-
   const tags = [
     row.filter === 'none' ? null : row.filter,
     `k=${row.k}`,
@@ -133,14 +104,11 @@ export function GroupTableRow({
             onClick={() => onCell(r.id)}
           >
             <span className="gv">{row.qualityGap ? 'reaches ' + reachText(c) : v === null ? '—' : cells === 'relative' ? fmtRatio(ratio) : fmtMetric(metric, v)}</span>
-            <span className="gsub">
-              {!row.qualityGap && (
-                <span className="greach" title="highest recall this participant's curve reaches">
-                  ↗{reachText(c)}
-                </span>
-              )}
-              <MiniCurve front={c.front} xLo={xLo} xHi={xHi} yLo={yLo} yHi={yHi} color={colorOf(r.id)} />
-            </span>
+            {!row.qualityGap && (
+              <span className="greach" title="highest recall this participant's curve reaches">
+                ↗{reachText(c)}
+              </span>
+            )}
           </div>
         );
       })}
