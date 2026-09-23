@@ -24,6 +24,47 @@ def os_name() -> str:
     return platform.platform()
 
 
+def memory_cap_bytes(cap: str | None) -> int | None:
+    if not cap:
+        return None
+    units = {"k": 1024, "m": 1024**2, "g": 1024**3, "t": 1024**4}
+    text = cap.strip().lower().rstrip("ib")
+    mult = units.get(text[-1:], 1)
+    if mult != 1:
+        text = text[:-1]
+    try:
+        return int(float(text) * mult)
+    except ValueError:
+        return None
+
+
+def total_memory_bytes() -> int | None:
+    try:
+        for line in Path("/proc/meminfo").read_text().splitlines():
+            if line.startswith("MemTotal"):
+                return int(line.split()[1]) * 1024
+    except OSError:
+        pass
+    return None
+
+
+def storage_kind(path: Path) -> str:
+    try:
+        dev = os.stat(path).st_dev
+        major, minor = os.major(dev), os.minor(dev)
+        link = Path(f"/sys/dev/block/{major}:{minor}").resolve()
+        name = link.name
+        if not (link / "queue").is_dir() and link.parent.name.startswith(("sd", "nvme", "vd", "hd")):
+            name = link.parent.name
+            link = link.parent
+        if name.startswith("nvme"):
+            return "nvme"
+        rot = (link / "queue" / "rotational").read_text().strip()
+        return "hdd" if rot == "1" else "ssd"
+    except (OSError, ValueError):
+        return "unknown"
+
+
 def host_description() -> str:
     cpus = os.cpu_count() or 0
     model = ""

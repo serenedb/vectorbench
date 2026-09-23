@@ -19,7 +19,7 @@ from .engine import LoadTimeout, Participant
 from .families import Family, Group
 from .prepare import dataset_dir, load_manifest
 from .queries import knob_names, ladder_for, ladder_points, load_blocks, resolve_block, resolve_settings, substitute_index, substitute_knobs
-from .results import ResultFile, host_description, now_date, os_name
+from .results import ResultFile, host_description, memory_cap_bytes, now_date, os_name, storage_kind, total_memory_bytes
 from .workers import PassSpec, WorkerPool
 
 log = logging.getLogger(__name__)
@@ -28,7 +28,7 @@ VIEWS = {"throughput": None, "latency": 1}  # clients: None = tier cpus
 WARMUP_PER_CLIENT = 100
 PASS_DEADLINE_S = 60.0
 PASS_MIN_QUERIES = 2000
-PASSES = 3
+PASSES = 1
 TOTAL_BUDGET_S = 60.0
 DEGENERATE_FACTOR = 10
 
@@ -182,19 +182,6 @@ class Runner:
         self.index_settings = {**resolve_settings(participant.settings, family, size)["index"], "dims": family.dims, "metric": family.metric}
         self.env = participant.env(family, size, opts.data_dir, opts.cpuset, opts.memory, self.index_settings)
 
-    def recall_ceiling(self, key: str) -> float | None:
-        """The highest recall any row of this group asks for.
-
-        A wider beam costs more and returns at least as much, so the first rung that reaches this
-        is the best qps at every target the group carries, and every rung above it is strictly
-        worse. Measuring those is the bulk of a run: on wiki-1m most filtered groups reach 1.0 by
-        the third rung of sixteen. `None` means no row has a numeric target (an exact group), so
-        the ladder runs in full.
-        """
-        wanted = [q.recall for q in self.family.queries_for(self.size)
-                  if q.group_key == key and isinstance(q.recall, (int, float))]
-        return max(wanted) if wanted else None
-
     # ----------------------------------------------------------------- plan
     def selected_groups(self) -> list[Group]:
         groups = self.family.groups(self.size)
@@ -235,8 +222,9 @@ class Runner:
             "hardware": {
                 "cpus": len(self.engine_cpus) if self.engine_cpus else (os.cpu_count() or 0),
                 "cpuset": self.opts.cpuset,
-                "memory": self.opts.memory,
+                "memory_bytes": memory_cap_bytes(self.opts.memory) or total_memory_bytes(),
                 "host": host_description(),
+                "storage": storage_kind(self.opts.data_dir),
             },
             "tool_version": __version__,
             "index": {"params": self.index_settings},
@@ -311,13 +299,13 @@ class Runner:
             rf.upsert_group({**base, "status": "error", "reason": f"block uses knobs {sorted(missing)} that the ladder does not define"})
             return
         # A stop and a start, while the startup sample is still being collected.
-        if len(startups) < self.opts.startup_samples:
+        restarted = len(startups) < self.opts.startup_samples
+        if restarted:
             log.info("[%s %s] restart", view, g.key)
             self.p.stop(self.env)
             startups.append(self.p.start(self.env))
         startup = startups[-1] if startups else 0.0
         gt = self.gt.case(g.filter)
-        ceiling = None if g.exact else self.recall_ceiling(g.key)
         args = self.gt.per_query_args(g.filter, self.qsel)
         pool = WorkerPool(clients, self.p.dir / "client.py", self.p.connection(self.family, self.dataset, self.index_settings), self.dsdir / "queries.parquet", self.family.dims, self.client_cpus, qsel=self.qsel)
         group_rec: dict[str, Any] = {**base, "status": "ok", "block": block, "startup": startup, "points": []}
@@ -333,7 +321,7 @@ class Runner:
                         bad = check_plan(plan, g, self.p.settings.get("plan_rules") or {})
                         if bad:
                             raise PlanCheckError(bad)
-                if li == 0 and self.opts.settle_s > 0:
+                if li == 0 and restarted and self.opts.settle_s > 0:
                     # Discarded: this is the engine reaching steady state after the restart, not a
                     # measurement of anything.
                     pool.run_pass(PassSpec(deadline_s=self.opts.settle_s,
@@ -348,7 +336,8 @@ class Runner:
                 first_ids: dict[int, list[int]] | None = None
                 t_budget = time.perf_counter()
                 for pi in range(self.opts.passes):
-                    spec = PassSpec(deadline_s=self.opts.deadline_s, min_queries=min(self.opts.min_queries, self.nq), collect_ids=(pi == 0), k=g.k)
+                    want = self.nq if view == "throughput" else min(self.opts.min_queries, self.nq)
+                    spec = PassSpec(deadline_s=self.opts.deadline_s, min_queries=want, collect_ids=(pi == 0), k=g.k)
                     res = pool.run_pass(spec)
                     if pi == 0:
                         first_ids = res["ids"]
@@ -378,13 +367,6 @@ class Runner:
                 log.info("[%s %s] %s recall=%.4f qps=%.1f p50=%.2fms p99=%.2fms (%d queries, %d passes)",
                          view, g.key, knobs or "exact", rec["recall"] or 0.0, best["qps"] or 0.0, best["p50"] or 0.0, best["p99"] or 0.0, best["queries"], len(passes))
                 rf.upsert_group(group_rec)
-                # Every rung above this one is a wider beam: at least as much recall for strictly
-                # less throughput. Once the group's highest target is met, they cannot win a row
-                # and measuring them is the bulk of the run.
-                if ceiling is not None and (rec["recall"] or 0.0) >= ceiling:
-                    log.info("[%s %s] target %.2f met at rung %d of %d; the rest can only be slower",
-                             view, g.key, ceiling, li + 1, len(points))
-                    break
             group_rec["memory_peak"] = self.p.memory_peak(self.env)
             rf.upsert_group(group_rec)
         except PlanCheckError as e:

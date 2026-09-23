@@ -184,7 +184,7 @@ def build_parser() -> argparse.ArgumentParser:
     s.add_argument("--clients", type=int, default=32, help="clients in the throughput view (the tier's CPU count)")
     s.add_argument("--label", help="results suffix for side-by-side builds of one participant")
     s.add_argument("--warmup", type=int, default=100)
-    s.add_argument("--passes", type=int, default=3)
+    s.add_argument("--passes", type=int, default=1)
     s.add_argument("--deadline", type=float, default=60.0, help="seconds per pass")
     s.add_argument("--min-queries", type=int, default=2000)
     s.add_argument("--budget", type=float, default=60.0, help="seconds per point across passes")
