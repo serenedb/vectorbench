@@ -69,8 +69,8 @@ datasets:
         "eq-10/10": {ladder: {hnsw_ef: [10, 16, 24], oversample: [1.0]}}
         "eq-10/100": {ladder: {hnsw_ef: [16, 24, 32], oversample: [1.0]}}
         "eq-10/1000": {ladder: {hnsw_ef: [128], oversample: [1.0]}}
-        "none/10": {ladder: {hnsw_ef: [10, 16, 20, 32, 48, 64], oversample: [1.0]}}
-        "none/100": {ladder: {hnsw_ef: [16, 24, 40, 64, 80, 128], oversample: [1.0]}}
+        "none/10": {ladder: {hnsw_ef: [10, 12, 14, 16, 20, 32, 48, 64], oversample: [1.0]}}
+        "none/100": {ladder: {hnsw_ef: [16, 24, 28, 32, 36, 40, 64, 80, 128], oversample: [1.0]}}
         "none/1000": {ladder: {hnsw_ef: [128, 200, 256, 400], oversample: [1.0]}}
         "range-1/10": {ladder: {hnsw_ef: [10], oversample: [1.0]}}
         "range-1/100": {ladder: {hnsw_ef: [16], oversample: [1.0]}}
@@ -105,25 +105,25 @@ datasets:
     1m:
       groups:
         "and-1/10": {ladder: {hnsw_ef: [10, 16, 24, 40, 64, 96, 160, 256], oversample: [1.0]}}
-        "and-1/100": {ladder: {hnsw_ef: [16, 24, 40, 64, 128, 200, 320, 512], oversample: [1.0]}}
+        "and-1/100": {ladder: {hnsw_ef: [16, 24, 40, 64, 80, 96, 128, 200, 320, 512], oversample: [1.0]}}
         "corr/10": {ladder: {hnsw_ef: [10, 16, 20], oversample: [1.0]}}
-        "corr/100": {ladder: {hnsw_ef: [16, 24, 32, 48], oversample: [1.0]}}
-        "corr/1000": {ladder: {hnsw_ef: [128, 200, 256, 400], oversample: [1.0]}}
+        "corr/100": {ladder: {hnsw_ef: [16, 20, 24, 26, 28, 32, 48], oversample: [1.0]}}
+        "corr/1000": {ladder: {hnsw_ef: [128, 160, 200, 212, 224, 256, 400], oversample: [1.0]}}
         "eq-0.1/10": {ladder: {hnsw_ef: [10], oversample: [1.0]}}
-        "eq-1/10": {ladder: {hnsw_ef: [10, 16, 24, 32, 48, 80, 96, 160], oversample: [1.0]}}
+        "eq-1/10": {ladder: {hnsw_ef: [10, 16, 24, 32, 48, 80, 96, 160, 256, 400], oversample: [1.0]}}
         "eq-1/100": {ladder: {hnsw_ef: [16, 24, 40, 64, 128, 200, 320, 512], oversample: [1.0]}}
-        "eq-10/10": {ladder: {hnsw_ef: [10, 16, 20, 32, 48, 64], oversample: [1.0]}}
-        "eq-10/100": {ladder: {hnsw_ef: [16, 24, 40, 64, 80, 128], oversample: [1.0]}}
-        "eq-10/1000": {ladder: {hnsw_ef: [128, 200, 256, 400], oversample: [1.0]}}
+        "eq-10/10": {ladder: {hnsw_ef: [10, 12, 14, 16, 20, 32, 48, 64], oversample: [1.0]}}
+        "eq-10/100": {ladder: {hnsw_ef: [16, 24, 28, 32, 36, 40, 64, 80, 128], oversample: [1.0]}}
+        "eq-10/1000": {ladder: {hnsw_ef: [128, 144, 160, 176, 184, 192, 200, 256, 400], oversample: [1.0]}}
         "lang/10": {ladder: {hnsw_ef: [10, 16, 20, 32, 48, 64, 96], oversample: [1.0]}}
-        "none/10": {ladder: {hnsw_ef: [12, 20, 32, 48, 64, 96, 160], oversample: [1.0]}}
-        "none/100": {ladder: {hnsw_ef: [16, 24, 32, 48, 80, 128, 160, 256], oversample: [1.0]}}
-        "none/1000": {ladder: {hnsw_ef: [128, 200, 256, 400, 512, 800], oversample: [1.0]}}
+        "none/10": {ladder: {hnsw_ef: [12, 14, 16, 18, 20, 24, 28, 32, 48, 64, 96, 160], oversample: [1.0]}}
+        "none/100": {ladder: {hnsw_ef: [16, 24, 32, 36, 40, 44, 48, 56, 64, 80, 128, 160, 256], oversample: [1.0]}}
+        "none/1000": {ladder: {hnsw_ef: [128, 144, 160, 176, 184, 192, 200, 224, 256, 400, 512, 800], oversample: [1.0]}}
         "range-1/10": {ladder: {hnsw_ef: [10, 16, 24, 40, 64, 96, 160, 256], oversample: [1.0]}}
         "range-1/100": {ladder: {hnsw_ef: [16, 24, 40, 64, 128, 200, 320, 512], oversample: [1.0]}}
-        "range-10/10": {ladder: {hnsw_ef: [10, 16, 24, 32, 48, 80], oversample: [1.0]}}
-        "range-10/100": {ladder: {hnsw_ef: [16, 24, 40, 64, 80, 128], oversample: [1.0]}}
-        "range-10/1000": {ladder: {hnsw_ef: [128, 200, 256, 400], oversample: [1.0]}}
+        "range-10/10": {ladder: {hnsw_ef: [10, 12, 14, 16, 24, 32, 48, 80], oversample: [1.0]}}
+        "range-10/100": {ladder: {hnsw_ef: [16, 24, 28, 32, 36, 40, 64, 80, 128], oversample: [1.0]}}
+        "range-10/1000": {ladder: {hnsw_ef: [128, 144, 160, 176, 184, 192, 200, 256, 400], oversample: [1.0]}}
         "xcorr/10": {ladder: {hnsw_ef: [10], oversample: [1.0]}}
-        "xcorr/100": {ladder: {hnsw_ef: [16, 24, 32, 48, 80], oversample: [1.0]}}
-        "xlang/10": {ladder: {hnsw_ef: [10, 16, 24, 32, 48, 80, 128], oversample: [1.0]}}
+        "xcorr/100": {ladder: {hnsw_ef: [16, 24, 32, 36, 40, 48, 80], oversample: [1.0]}}
+        "xlang/10": {ladder: {hnsw_ef: [10, 16, 18, 20, 22, 24, 32, 48, 80, 128], oversample: [1.0]}}
