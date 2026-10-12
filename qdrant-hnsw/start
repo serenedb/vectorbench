@@ -14,13 +14,19 @@ set -euo pipefail
 
 # Host networking like every other participant (no userland proxy on the query path); Qdrant listens
 # on the configured ports on loopback.
-# Resume the existing container if there is one (its storage is the bind mount either way).
+# Resume the existing container if it mounts this storage; one left by another dataset is replaced.
+mkdir -p "$VECTORBENCH_ENGINE_DIR"
+engine_dir=$(realpath "$VECTORBENCH_ENGINE_DIR")
 state=$(docker inspect -f '{{.State.Status}}' "$VB_CONTAINER" 2>/dev/null || true)
-case "$state" in
-    running) exit 0 ;;
-    "")      ;;
-    *)       docker start "$VB_CONTAINER" >/dev/null; exit 0 ;;
-esac
+if [[ -n "$state" ]]; then
+    mounted=$(docker inspect -f '{{range .Mounts}}{{if eq .Destination "/qdrant/storage"}}{{.Source}}{{end}}{{end}}' "$VB_CONTAINER")
+    if [[ "$mounted" == "$engine_dir" ]]; then
+        [[ "$state" == running ]] || docker start "$VB_CONTAINER" >/dev/null
+        exit 0
+    fi
+    docker stop --time 300 "$VB_CONTAINER" >/dev/null
+    docker rm "$VB_CONTAINER" >/dev/null
+fi
 
 limits=()
 [[ -n "$VECTORBENCH_CPUSET" ]] && limits+=(--cpuset-cpus "$VECTORBENCH_CPUSET")
@@ -32,12 +38,11 @@ limits=()
 async_scorer=false
 case "${VB_INDEX_ASYNC_SCORER,,}" in 1|true|yes|on) async_scorer=true ;; esac
 
-mkdir -p "$VECTORBENCH_ENGINE_DIR"
 docker run -d --name "$VB_CONTAINER" \
     "${limits[@]}" \
     --security-opt seccomp=unconfined \
     --network host \
-    -v "${VECTORBENCH_ENGINE_DIR}:/qdrant/storage" \
+    -v "${engine_dir}:/qdrant/storage" \
     -e QDRANT__SERVICE__HOST=127.0.0.1 \
     -e QDRANT__SERVICE__HTTP_PORT="${VB_PORT}" \
     -e QDRANT__SERVICE__GRPC_PORT="${VB_GRPC_PORT}" \
