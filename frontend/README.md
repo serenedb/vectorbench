@@ -100,8 +100,8 @@ The host supplies `ThemeProvider` and its React Router context. Inside that
 context, header links use the host router; standalone links use ordinary
 anchors and absolute service URLs. Styles are scoped under
 `[data-product='vectorbench']`; `path` is `/vectorbench` and `serviceId` is
-`vectorbench` (not yet in the kit's service registry — the header falls back to
-the product name until it is).
+`vectorbench`, listed in the kit's service registry, which is where the header
+and the switcher take its name from.
 
 SereneDB Playground carries this repository as the `products/vectorbench`
 submodule, compiles `frontend/` into its single web build, and serves this

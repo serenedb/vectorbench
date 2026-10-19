@@ -31,8 +31,8 @@ export function BenchHeader() {
     <Panel className="vb-head">
       <div style={{ padding: '8px 14px', display: 'flex', alignItems: 'center', gap: 10 }}>
         {routerLink({
-          // The product's own path until the kit's registry lists it, not the
-          // playground's front page.
+          // Under a kit that predates the registry entry, still the product's
+          // own path rather than the playground's front page.
           href: internal ? (service?.path ?? PRODUCT_PATH) : window.location.pathname,
           className: 'vb-brand',
           children: (
