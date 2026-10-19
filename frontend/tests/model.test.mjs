@@ -13,6 +13,7 @@ import { orderResults, ratioTo, sectionScores } from '../src/entities/results/mo
 import { allChipTags, chipTag, visibleRows } from '../src/entities/results/model/rows.ts';
 import { INITIAL_STATE } from '../src/shared/model/state.ts';
 import { restoreUrlState, shortState } from '../src/shared/model/url-codec.ts';
+import { readingSize, screenRows, tickedRows } from '../src/pages/bench/model/selection.ts';
 
 const page = await generateSample();
 const bench = buildBenchmark(page);
@@ -201,7 +202,7 @@ test('URL codec round-trips the selectors and chips', () => {
     datasets: bench.datasets.map((d) => d.id),
     defaultDataset: bench.defaultDataset,
     tagsFor: (id) => allChipTags(dataset(id)),
-    rowsFor: (id) => new Set(dataset(id).family.queries.map((q) => q.id)),
+    rowsFor: (id) => new Set(dataset(id).family.queries.flatMap((q) => [q.id, q.key])),
     participants: bench.participants.map((p) => p.id),
   };
   assert.deepEqual(shortState(INITIAL_STATE, env, 'light'), { v: 1 });
@@ -211,16 +212,15 @@ test('URL codec round-trips the selectors and chips', () => {
     view: 'latency',
     latencyMetric: 'p99',
     cells: 'absolute',
+    rowMode: 'bars',
     chips: new Set(['k:10', 'filter:eq']),
     sortSection: 'filtered',
-    openRow: 'V14',
     graphRows: ['V14', 'V35'],
-    max: true,
     hidden: new Set(['serenedb-hnsw', 'pgvector-hnsw']),
   };
   const packed = shortState(state, env, 'dark');
-  assert.deepEqual(packed, { v: 1, d: 'wiki-v3-1024-100k', t: 'latency', m: 'p99', c: 'absolute', q: 'filter:eq,k:10', h: 'pgvector-hnsw,serenedb-hnsw', s: 'filtered', r: 'V14', g: 'V14,V35', th: 'dark', x: 1 });
-  assert.deepEqual(Object.keys(packed), ['v', 'd', 't', 'm', 'c', 'q', 'h', 's', 'r', 'g', 'th', 'x'], 'key order is the wire format');
+  assert.deepEqual(packed, { v: 1, d: 'wiki-v3-1024-100k', t: 'latency', m: 'p99', c: 'absolute', rm: 'bars', q: 'filter:eq,k:10', h: 'pgvector-hnsw,serenedb-hnsw', s: 'filtered', g: 'V14,V35', th: 'dark' });
+  assert.deepEqual(Object.keys(packed), ['v', 'd', 't', 'm', 'c', 'rm', 'q', 'h', 's', 'g', 'th'], 'key order is the wire format');
   const b64 = Buffer.from(JSON.stringify(packed)).toString('base64url');
   const { patch, theme } = restoreUrlState('?s=' + b64, env, INITIAL_STATE);
   assert.equal(theme, 'dark');
@@ -228,19 +228,73 @@ test('URL codec round-trips the selectors and chips', () => {
   assert.equal(patch.view, 'latency');
   assert.equal(patch.latencyMetric, 'p99');
   assert.equal(patch.cells, 'absolute');
+  assert.equal(patch.rowMode, 'bars');
   assert.deepEqual([...patch.chips].sort(), ['filter:eq', 'k:10']);
   assert.equal(patch.sortSection, 'filtered');
-  assert.equal(patch.openRow, 'V14');
   assert.deepEqual(patch.graphRows, ['V14', 'V35']);
-  assert.equal(patch.max, true);
-  // readable overrides win, unknown values fall back, unknown chips and rows are dropped
   assert.deepEqual([...patch.hidden].sort(), ['pgvector-hnsw', 'serenedb-hnsw']);
-  const o = restoreUrlState('?s=' + b64 + '&view=throughput&chips=k:10,bogus:1&row=V99&dataset=nope&expanded=0&hidden=nobody,qdrant-hnsw', env, INITIAL_STATE);
-  assert.equal(o.patch.max, false);
+  // readable overrides win, unknown values fall back, unknown chips and rows are dropped
+  const o = restoreUrlState('?s=' + b64 + '&view=throughput&rows=sideways&chips=k:10,bogus:1&graph=V14,V99&dataset=nope&hidden=nobody,qdrant-hnsw', env, INITIAL_STATE);
   assert.deepEqual([...o.patch.hidden], ['qdrant-hnsw'], 'unknown participants are dropped');
   assert.equal(o.patch.view, 'throughput');
+  assert.equal(o.patch.rowMode, 'groups');
   assert.deepEqual([...o.patch.chips], ['k:10']);
-  assert.equal(o.patch.openRow, null);
+  assert.deepEqual(o.patch.graphRows, ['V14']);
   assert.equal(o.patch.dataset, undefined);
   assert.equal(o.patch.dataset ?? env.defaultDataset, 'sift-128-100k');
+
+  // Nothing picked yet writes nothing; everything unticked is written, and read back.
+  assert.deepEqual(shortState({ ...INITIAL_STATE, graphRows: [] }, env, 'light'), { v: 1, g: '-' });
+  assert.deepEqual(restoreUrlState('?graph=-', env, INITIAL_STATE).patch.graphRows, []);
+  assert.equal(restoreUrlState('?graph=', env, INITIAL_STATE).patch.graphRows, null);
+  // Group keys are row ids too, and the row a link opened under the table
+  // before the graph moved beside it stays ticked.
+  const key = row(dataset('sift-128-100k'), 'V14').key;
+  assert.deepEqual(restoreUrlState(`?graph=${encodeURIComponent(key)}&row=V02`, env, INITIAL_STATE).patch.graphRows, [key, 'V02']);
+  assert.deepEqual(restoreUrlState('?row=V02&expanded=1', env, INITIAL_STATE).patch.graphRows, ['V02']);
+});
+
+test('the ticked rows, read in either reading', () => {
+  const ds = dataset('sift-128-100k');
+  const groupsOnScreen = screenRows(ds.queries, 'groups');
+  const barsOnScreen = screenRows(ds.queries, 'bars');
+  assert.equal(groupsOnScreen.length, readingSize(ds, 'groups'));
+  assert.equal(barsOnScreen.length, readingSize(ds, 'bars'));
+  assert.ok(groupsOnScreen.length < barsOnScreen.length, 'a group folds its bars');
+  // sections first: the table lists NO FILTER above FILTERED
+  const sectionOf = (id) => ds.queries.find((q) => q.id === id).section;
+  const firstFiltered = barsOnScreen.findIndex((id) => sectionOf(id) === 'filtered');
+  assert.ok(barsOnScreen.slice(firstFiltered).every((id) => sectionOf(id) === 'filtered'));
+
+  // one block per filter case, its rows by k: a case's extra bars listed at the
+  // end of the family join its block
+  const caseOf = (id) => ds.queries.find((q) => q.id === id);
+  const seen = new Set();
+  let prev = null;
+  for (const id of barsOnScreen) {
+    const q = caseOf(id);
+    const block = q.section + '|' + q.filter;
+    if (block !== prev?.block) {
+      assert.ok(!seen.has(block), `${block} is one block`);
+      seen.add(block);
+    } else {
+      assert.ok(q.k >= prev.k, `${id}: k never falls inside a block`);
+    }
+    prev = { block, k: q.k };
+  }
+
+  // nothing picked yet: the first row on screen
+  assert.deepEqual(tickedRows(null, 'groups', ds, groupsOnScreen), [groupsOnScreen[0]]);
+  assert.deepEqual(tickedRows(null, 'bars', ds, []), []);
+  // a bar stands for its group, a group for its bars
+  const v14 = row(ds, 'V14');
+  const bars = ds.queries.filter((q) => q.key === v14.key).map((q) => q.id);
+  assert.deepEqual(tickedRows(['V14'], 'groups', ds, groupsOnScreen), [v14.key]);
+  assert.deepEqual(tickedRows([v14.key], 'bars', ds, barsOnScreen), bars);
+  assert.deepEqual(tickedRows([...bars, v14.key], 'groups', ds, groupsOnScreen), [v14.key], 'one group, however it was ticked');
+  assert.deepEqual(tickedRows(['nope'], 'bars', ds, barsOnScreen), []);
+  // rows the chips hide stay ticked: unticking happens in the table
+  const onlyK10 = screenRows(visibleRows(ds.queries, new Set([chipTag('k', '10')])), 'bars');
+  const hiddenRow = barsOnScreen.find((id) => !onlyK10.includes(id));
+  assert.deepEqual(tickedRows([hiddenRow], 'bars', ds, onlyK10), [hiddenRow]);
 });

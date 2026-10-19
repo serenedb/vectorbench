@@ -26,9 +26,12 @@ export function TableHead({ results, gridCols }: { results: readonly ResultModel
           .filter(Boolean)
           .join('\n');
         return (
-          <div key={r.id} className="pcol" data-pid={r.id} title={tip}>
-            <span className="swatch" style={{ background: participantColor(r.id) }} />
-            {r.name}
+          <div key={r.id} className="pcol" data-pid={r.id} title={r.name + '\n' + tip}>
+            {/* Two lines at most: a narrow column breaks the name between its words. */}
+            <span className="pname">
+              <span className="swatch" style={{ background: participantColor(r.id) }} />
+              {r.name}
+            </span>
           </div>
         );
       })}

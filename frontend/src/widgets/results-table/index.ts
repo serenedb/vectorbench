@@ -1,1 +1,1 @@
-export { ResultsTable, type ResultsTableProps } from './ResultsTable';
+export { ResultsTable, tableWidth, type ResultsTableProps } from './ResultsTable';

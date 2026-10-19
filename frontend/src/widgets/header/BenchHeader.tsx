@@ -1,13 +1,14 @@
-/* VectorBench identity, source link, service switcher and the shared theme
- * toggle — searchbench's header with this product's names. Router context
- * selects SPA links in the playground; standalone uses anchors. */
+/* The window's title bar: VectorBench identity, source link, service
+ * switcher and the shared theme toggle — searchbench's header with this
+ * product's names, drawn as the top strip of the one window rather than a card
+ * of its own. Router context selects SPA links in the playground; standalone
+ * uses anchors. */
 
 import { Link, useInRouterContext } from 'react-router-dom';
 import { findService, GithubIcon, ServiceSwitcher, SereneLogo, useTheme } from '@serenedb/ui';
 import type { LinkRenderer, Theme } from '@serenedb/ui';
 import { takeRuns, type BenchRunOption } from '../../entities/results/model/source';
 import { PRODUCT_NAME, PRODUCT_PATH, SERVICE_ID, SOURCE_URL } from '../../shared/config';
-import { Panel } from '../../shared/ui';
 
 const THEMES: readonly Theme[] = ['light', 'dark'];
 
@@ -42,8 +43,8 @@ export function BenchHeader() {
   const runs = takeRuns();
 
   return (
-    <Panel className="vb-head">
-      <div style={{ padding: '8px 14px', display: 'flex', alignItems: 'center', gap: 10 }}>
+    <div className="vb-titlebar">
+      <div style={{ padding: '7px 12px', display: 'flex', alignItems: 'center', gap: 10 }}>
         {routerLink({
           // Under a kit that predates the registry entry, still the product's
           // own path rather than the playground's front page.
@@ -157,6 +158,6 @@ export function BenchHeader() {
           ))}
         </div>
       </div>
-    </Panel>
+    </div>
   );
 }

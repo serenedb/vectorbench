@@ -1,13 +1,18 @@
 /* ---------------------------------------------------------------------------
    vectorbench — the page's own stylesheet, scoped under [data-product='vectorbench'].
 
-   The palette, the panel, the segmented control, the chips, the sidebar rows
-   and the table classes are searchbench's (frontend/src/app/searchbench.css),
-   byte for byte where the two pages draw the same thing, so the two benchmarks
-   look like one family in the playground. Light is the base and dark sits
-   under `.dark` on <html>, which the platform ThemeProvider owns. Everything
-   after the table section is VectorBench's own: failed cells, the graph, the
-   modals.
+   The palette, the panel, the segmented control, the chips, the dataset and
+   participant rows and the table classes are searchbench's
+   (frontend/src/app/searchbench.css), byte for byte where the two pages draw
+   the same thing, so the two benchmarks look like one family in the
+   playground. Light is the base and dark sits under `.dark` on <html>, which
+   the platform ThemeProvider owns.
+
+   The layout is VectorBench's own: one window rather than a page of cards —
+   the dithered card drawn once, around everything, with a title bar, a
+   toolbar, the table and the graph side by side under a rule that drags, and a
+   status bar, all of it hairline-divided inside. So are the menus, the
+   checkboxes, failed cells, the graph and the modals.
 --------------------------------------------------------------------------- */
 
 [data-product='vectorbench'] .vb-app {
@@ -29,6 +34,9 @@
 
     --shadow-mix: 35%;
     --pad-y: 4px;
+    /* The table's header row and the graph's head beside it: two lines of a
+       participant's name. */
+    --th: 36px;
     --dither: url('data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%224%22 height=%225%22 viewBox=%220 0 4 5%22%3E%3Crect x=%22.75%22 y=%22.75%22 width=%22.8%22 height=%221.5%22 fill=%22black%22/%3E%3Crect x=%222.65%22 y=%223%22 width=%22.8%22 height=%221.5%22 fill=%22black%22/%3E%3C/svg%3E');
     --mono: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, monospace;
 }
@@ -66,15 +74,14 @@
     tab-size: 8;
     display: flex;
     flex-direction: column;
-    gap: 11px;
     width: 100%;
     height: 100dvh;
-    padding: 14px;
+    padding: 12px;
     font-size: 13px;
     overflow: hidden;
-    /* searchbench's number, for searchbench's reason: the 300px sidebar and
-       the table beside it are laid out at this width, and below it the page
-       scrolls sideways instead of squeezing the table to a sliver. */
+    /* searchbench's number: the toolbar and both panes are laid out at this
+       width, and below it the page scrolls sideways instead of squeezing the
+       table and the graph to slivers. */
     min-width: 1280px;
 }
 
@@ -158,8 +165,9 @@
     border: 0.5px solid var(--line);
     background: var(--card);
 }
-[data-product='vectorbench'] .panel.vb-head {
-    z-index: 2;
+/* The one card: the application window. */
+[data-product='vectorbench'] .panel.vb-window > .bd {
+    min-height: 0;
 }
 [data-product='vectorbench'] .bd.fill {
     flex: 1;
@@ -203,7 +211,7 @@
     font-size: 10px;
     color: var(--mut);
 }
-[data-product='vectorbench'] .ph .link {
+[data-product='vectorbench'] .link {
     border: 0;
     background: transparent;
     padding: 0;
@@ -284,17 +292,29 @@
     color: #fff;
 }
 
-/* ---- sidebar rows --------------------------------------------------------- */
+/* ---- menu rows --------------------------------------------------------------- */
 [data-product='vectorbench'] .dsrow {
     display: flex;
     align-items: center;
-    gap: 6px;
-    padding: 4px 6px;
-    border: 0.5px solid transparent;
+    gap: 7px;
+    padding: 5px 7px;
+    border: 0;
     background: transparent;
     cursor: pointer;
     text-align: left;
     width: 100%;
+}
+[data-product='vectorbench'] .dsrow:hover {
+    background: var(--inset);
+}
+[data-product='vectorbench'] .dsrow.on {
+    background: color-mix(in srgb, var(--accent) 10%, transparent);
+}
+[data-product='vectorbench'] .dsrow .dsmark {
+    width: 10px;
+    color: var(--accent);
+    font-size: 11px;
+    font-weight: 700;
 }
 [data-product='vectorbench'] .prow {
     display: flex;
@@ -334,6 +354,9 @@
     font-family: var(--mono);
     font-size: 11px;
 }
+[data-product='vectorbench'] .vb-window .banner {
+    border-width: 0 0 0.5px;
+}
 
 /* ---- table ---------------------------------------------------------------- */
 [data-product='vectorbench'] .tscroll {
@@ -355,6 +378,9 @@
     position: sticky;
     left: 0;
     z-index: 6;
+    display: flex;
+    align-items: center;
+    height: var(--th);
     background: var(--head);
     border-bottom: 0.5px solid var(--line);
     border-right: 0.5px solid var(--line);
@@ -366,21 +392,29 @@
     color: var(--mut);
 }
 [data-product='vectorbench'] .pcol {
+    height: var(--th);
     border-bottom: 0.5px solid var(--line);
     border-right: 0.5px solid var(--line);
-    padding: 5px 8px;
+    padding: 4px 7px;
     text-align: right;
     font-size: 11px;
     font-weight: 700;
     color: var(--fg);
-    line-height: 16px;
-    white-space: nowrap;
+    line-height: 13px;
     overflow: hidden;
-    text-overflow: ellipsis;
     display: flex;
     align-items: center;
     justify-content: flex-end;
-    gap: 6px;
+}
+[data-product='vectorbench'] .pcol .pname {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    overflow: hidden;
+}
+[data-product='vectorbench'] .pcol .swatch {
+    margin-right: 5px;
+    vertical-align: 0;
 }
 [data-product='vectorbench'] .trow {
     display: grid;
@@ -429,6 +463,30 @@
 [data-product='vectorbench'] .rowlab.open {
     color: var(--accent);
 }
+/* A double-click draws one row alone; it must not select the label's text. */
+[data-product='vectorbench'] .rowlab {
+    user-select: none;
+}
+[data-product='vectorbench'] .rowlab:focus-visible {
+    outline: 1.5px solid var(--accent);
+    outline-offset: -1.5px;
+}
+/* The first row of a filter case's block: a firmer rule above it, so the
+   rows under it, which name only their k, read as the same case's. */
+[data-product='vectorbench'] .trow.lead > .rowlab {
+    border-top: 0.5px solid color-mix(in srgb, var(--fg) 30%, transparent);
+}
+[data-product='vectorbench'] .trow.lead > .cell {
+    border-top: 0.5px solid rgba(0, 0, 0, 0.32);
+}
+/* A ticked row: its curves are on the graph. */
+[data-product='vectorbench'] .rowlab.pick.on {
+    background: color-mix(in srgb, var(--accent) 9%, var(--card));
+}
+/* A row scrolled into view lands below the sticky header, not under it. */
+[data-product='vectorbench'] .trow {
+    scroll-margin-top: calc(var(--th) + 2px);
+}
 [data-product='vectorbench'] .rowlab .mk {
     display: inline-block;
     width: 11px;
@@ -446,8 +504,8 @@
     font-weight: 500;
     margin-left: 4px;
 }
-/* The mark on a label that opens something: the row's curves, or a GENERAL
-   row's detail. Accent so it reads as a link before the hover says so. */
+/* The mark on a label that opens a detail: a GENERAL row or a memory row.
+   Accent so it reads as a link before the hover says so. */
 [data-product='vectorbench'] .rowlab .go {
     display: inline-block;
     margin-left: 5px;
@@ -457,13 +515,17 @@
 [data-product='vectorbench'] .cell {
     border-bottom: 0.5px solid rgba(0, 0, 0, 0.1);
     border-right: 0.5px solid rgba(0, 0, 0, 0.14);
-    padding: var(--pad-y) 7px;
+    padding: var(--pad-y) 6px;
     text-align: right;
     font-size: 11px;
     font-weight: 600;
     line-height: 16px;
     font-variant-numeric: tabular-nums;
     white-space: nowrap;
+    /* a word too long for a narrow column ("bracket too wide") ends in an
+       ellipsis; the cell's title has it whole */
+    overflow: hidden;
+    text-overflow: ellipsis;
     color: #06223f;
 }
 [data-product='vectorbench'] .cell.q {
@@ -489,7 +551,7 @@
     flex-direction: row;
     align-items: baseline;
     justify-content: flex-end;
-    gap: 6px;
+    gap: 12px;
     line-height: 15px;
 }
 [data-product='vectorbench'] .cell.gcell .gv {
@@ -503,19 +565,7 @@
     font-variant-numeric: tabular-nums;
 }
 
-[data-product='vectorbench'] .legend {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    flex-wrap: wrap;
-    padding: 6px 12px;
-    border-top: 0.5px solid var(--line);
-    background: var(--head);
-    flex-shrink: 0;
-    font-size: 10.5px;
-    color: var(--mut);
-}
-[data-product='vectorbench'] .legend .sw,
+[data-product='vectorbench'] .vb-status .sw,
 [data-product='vectorbench'] .swatch {
     width: 9px;
     height: 9px;
@@ -523,26 +573,7 @@
     display: inline-block;
 }
 
-/* ---- the inline graph under a row ----------------------------------------- */
-[data-product='vectorbench'] .graphwrap {
-    position: sticky;
-    left: 0;
-    width: 100%;
-    background: var(--card);
-    border-bottom: 0.5px solid var(--line);
-    padding: 8px 12px 6px;
-}
-[data-product='vectorbench'] .graphwrap .gh {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-size: 11px;
-    color: var(--mut);
-    margin-bottom: 4px;
-}
-[data-product='vectorbench'] .graphwrap .gh b {
-    color: var(--fg);
-}
+/* ---- the graph pane ------------------------------------------------------------ */
 [data-product='vectorbench'] svg.curve-graph {
     display: block;
     overflow: visible;
@@ -665,34 +696,6 @@
     font-variant-numeric: tabular-nums;
     color: var(--mut);
 }
-[data-product='vectorbench'] .rlist {
-    display: flex;
-    flex-direction: column;
-    gap: 1px;
-    font-size: 11px;
-}
-[data-product='vectorbench'] .rlist label {
-    display: flex;
-    gap: 6px;
-    align-items: center;
-    padding: 2px 4px;
-    cursor: pointer;
-    white-space: nowrap;
-}
-[data-product='vectorbench'] .rlist label:hover {
-    background: var(--inset);
-}
-[data-product='vectorbench'] .rlist .rs {
-    font-size: 9.5px;
-    font-weight: 700;
-    letter-spacing: 0.07em;
-    text-transform: uppercase;
-    color: var(--mut);
-    margin: 8px 0 2px;
-}
-[data-product='vectorbench'] .rlist .rs:first-child {
-    margin-top: 0;
-}
 [data-product='vectorbench'] .err {
     flex: 1;
     display: flex;
@@ -710,4 +713,392 @@
     font-size: 12px;
     color: var(--fg);
     white-space: pre-wrap;
+}
+
+/* ---- the window: title bar, toolbar, status bar ------------------------------- */
+/* The chrome around the data is not text to select, as in any desktop app;
+   the cells and the details are. */
+[data-product='vectorbench'] .vb-titlebar,
+[data-product='vectorbench'] .vb-toolbar,
+[data-product='vectorbench'] .panehead,
+[data-product='vectorbench'] .vb-status,
+[data-product='vectorbench'] .thead,
+[data-product='vectorbench'] .ddmenu {
+    user-select: none;
+}
+[data-product='vectorbench'] .vb-titlebar {
+    flex-shrink: 0;
+    border-bottom: 0.5px solid var(--line);
+    background: var(--card);
+}
+[data-product='vectorbench'] .vb-toolbar {
+    flex-shrink: 0;
+    position: relative;
+    /* the menus open over the panes under it */
+    z-index: 3;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 10px;
+    background: var(--head);
+    border-bottom: 0.5px solid var(--line);
+}
+[data-product='vectorbench'] .vb-toolbar .seg {
+    height: 26px;
+}
+[data-product='vectorbench'] .tsep {
+    flex-shrink: 0;
+    width: 0.5px;
+    height: 18px;
+    margin: 0 3px;
+    background: var(--line);
+}
+[data-product='vectorbench'] .tnote {
+    font-size: 10.5px;
+    color: var(--mut);
+    white-space: nowrap;
+}
+[data-product='vectorbench'] .tbtn {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    height: 26px;
+    padding: 0 9px;
+    border: 0.5px solid var(--line);
+    background: var(--card);
+    color: var(--fg);
+    font-size: 11px;
+    font-weight: 700;
+    cursor: pointer;
+    white-space: nowrap;
+}
+[data-product='vectorbench'] .tbtn:hover {
+    border-color: color-mix(in srgb, var(--fg) 30%, transparent);
+}
+[data-product='vectorbench'] .tbtn[aria-expanded='true'] {
+    border-color: var(--accent);
+    box-shadow: inset 0 0 0 0.5px var(--accent);
+}
+[data-product='vectorbench'] .tbtn .caret {
+    color: var(--mut);
+    flex-shrink: 0;
+}
+[data-product='vectorbench'] .tbtn .badge {
+    min-width: 15px;
+    height: 15px;
+    padding: 0 4px;
+    background: var(--accent);
+    color: #fff;
+    font-size: 9.5px;
+    line-height: 15px;
+    text-align: center;
+}
+[data-product='vectorbench'] .tbtn .dsname {
+    font-size: 12px;
+}
+[data-product='vectorbench'] .tbtn .dsmeta {
+    font: 700 10px var(--mono);
+    color: var(--mut);
+    letter-spacing: 0.03em;
+}
+[data-product='vectorbench'] .tbtn:focus-visible,
+[data-product='vectorbench'] .seg button:focus-visible,
+[data-product='vectorbench'] .pill:focus-visible,
+[data-product='vectorbench'] .chip:focus-visible,
+[data-product='vectorbench'] .prow:focus-visible,
+[data-product='vectorbench'] .dsrow:focus-visible {
+    outline: 1.5px solid var(--accent);
+    outline-offset: 1px;
+}
+
+/* What the closed Filter menu holds that is on, each removable with a click. */
+[data-product='vectorbench'] .pills {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    justify-content: flex-end;
+    gap: 4px;
+    overflow: hidden;
+}
+[data-product='vectorbench'] .pill {
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    height: 22px;
+    padding: 0 5px 0 8px;
+    border: 0.5px solid var(--line);
+    background: var(--card);
+    color: var(--fg);
+    font-size: 10.5px;
+    font-weight: 700;
+    cursor: pointer;
+    white-space: nowrap;
+}
+[data-product='vectorbench'] .pill s {
+    color: var(--mut);
+}
+[data-product='vectorbench'] .pill .x {
+    color: var(--mut);
+    font-size: 12px;
+    line-height: 1;
+}
+[data-product='vectorbench'] .pill:hover {
+    border-color: var(--accent);
+}
+[data-product='vectorbench'] .pill:hover .x {
+    color: var(--accent);
+}
+
+/* ---- menus ------------------------------------------------------------------- */
+[data-product='vectorbench'] .dd {
+    position: relative;
+    flex-shrink: 0;
+}
+[data-product='vectorbench'] .panel.ddmenu {
+    position: absolute;
+    top: calc(100% + 5px);
+    z-index: 50;
+}
+[data-product='vectorbench'] .ddmenu > .bd {
+    max-height: calc(100dvh - 150px);
+    overflow-y: auto;
+}
+[data-product='vectorbench'] .ddhead {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 10px;
+    background: var(--head);
+    border-bottom: 0.5px solid var(--line);
+}
+[data-product='vectorbench'] .ddhead:not(:first-child) {
+    border-top: 0.5px solid var(--line);
+}
+[data-product='vectorbench'] .ddhead > span:first-child {
+    font-size: 10.5px;
+    font-weight: 700;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    color: var(--mut);
+}
+[data-product='vectorbench'] .ddhead .note {
+    font-size: 10px;
+    color: var(--mut);
+}
+[data-product='vectorbench'] .ddhead .link {
+    margin-left: auto;
+}
+
+/* ---- the split: table | rule | graph ----------------------------------------- */
+[data-product='vectorbench'] .split {
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    /* The table's sticky header and the rule stack inside the split, so a
+       menu dropped from the toolbar lies over both of them. */
+    isolation: isolate;
+}
+[data-product='vectorbench'] .split.dragging {
+    cursor: col-resize;
+    user-select: none;
+}
+[data-product='vectorbench'] .pane {
+    min-width: 0;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+}
+[data-product='vectorbench'] .splitter {
+    flex: 0 0 1px;
+    position: relative;
+    z-index: 4;
+    background: var(--line);
+    cursor: col-resize;
+    outline: none;
+}
+/* An 9px target for a 1px rule, and the rule lit while it is held. */
+[data-product='vectorbench'] .splitter::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: -4px;
+    right: -4px;
+}
+[data-product='vectorbench'] .splitter::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: -1px;
+    right: -1px;
+    transition: background 0.12s;
+}
+[data-product='vectorbench'] .splitter:hover::after,
+[data-product='vectorbench'] .splitter:focus-visible::after,
+[data-product='vectorbench'] .split.dragging .splitter::after {
+    background: var(--accent);
+}
+[data-product='vectorbench'] .tablepane,
+[data-product='vectorbench'] .graphpane {
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    background: var(--card);
+}
+/* The graph's head lines up with the table's sticky header across the rule. */
+[data-product='vectorbench'] .panehead {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    height: var(--th);
+    padding: 0 12px;
+    background: var(--head);
+    border-bottom: 0.5px solid var(--line);
+    white-space: nowrap;
+    overflow: hidden;
+}
+[data-product='vectorbench'] .panehead .pt {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--mut);
+}
+[data-product='vectorbench'] .panehead .pm {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--fg);
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+[data-product='vectorbench'] .panehead .pn {
+    margin-left: auto;
+    font-size: 10.5px;
+    color: var(--mut);
+}
+[data-product='vectorbench'] .graphbody {
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 12px 0 10px 0;
+}
+/* The pinned y axis and, beside it, the plot that scrolls under it. */
+[data-product='vectorbench'] .graphview {
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    position: relative;
+}
+[data-product='vectorbench'] svg.curve-yaxis {
+    display: block;
+    flex-shrink: 0;
+    overflow: visible;
+}
+[data-product='vectorbench'] .graphscroll {
+    flex: 1;
+    min-width: 0;
+    overflow-x: auto;
+    overflow-y: hidden;
+}
+[data-product='vectorbench'] .graphscroll.pans {
+    cursor: grab;
+}
+[data-product='vectorbench'] .graphscroll.dragging {
+    cursor: grabbing;
+    user-select: none;
+}
+[data-product='vectorbench'] .graphscroll::-webkit-scrollbar {
+    height: 9px;
+}
+[data-product='vectorbench'] .graphempty {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 20px;
+    text-align: center;
+    font-size: 11px;
+    color: var(--mut);
+}
+[data-product='vectorbench'] .graphempty b {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--fg);
+}
+
+/* ---- the status bar ---------------------------------------------------------- */
+[data-product='vectorbench'] .vb-status {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    height: 25px;
+    padding: 0 12px;
+    border-top: 0.5px solid var(--line);
+    background: var(--head);
+    font-size: 10.5px;
+    color: var(--mut);
+    white-space: nowrap;
+    overflow: hidden;
+}
+[data-product='vectorbench'] .vb-status .st-meta {
+    flex-shrink: 0;
+    color: var(--fg);
+    font-weight: 600;
+}
+[data-product='vectorbench'] .vb-status .st-hint {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+[data-product='vectorbench'] .vb-status .st-legend {
+    flex-shrink: 0;
+    display: flex;
+    gap: 10px;
+}
+
+/* ---- checkboxes: a ticked row, a participant on screen ------------------------ */
+[data-product='vectorbench'] .ck {
+    position: relative;
+    display: inline-block;
+    flex-shrink: 0;
+    width: 11px;
+    height: 11px;
+    margin-right: 7px;
+    vertical-align: -1.5px;
+    border: 1px solid color-mix(in srgb, var(--fg) 38%, transparent);
+    background: var(--card);
+}
+[data-product='vectorbench'] .prow .ck {
+    margin-right: 0;
+}
+[data-product='vectorbench'] .rowlab.pick:hover .ck {
+    border-color: var(--accent);
+}
+[data-product='vectorbench'] .ck.on,
+[data-product='vectorbench'] .rowlab.on .ck {
+    background: var(--accent);
+    border-color: var(--accent);
+}
+[data-product='vectorbench'] .ck.on::after,
+[data-product='vectorbench'] .rowlab.on .ck::after {
+    content: '';
+    position: absolute;
+    left: 3px;
+    top: 0.5px;
+    width: 3px;
+    height: 6px;
+    border: solid #fff;
+    border-width: 0 1.5px 1.5px 0;
+    transform: rotate(45deg);
 }

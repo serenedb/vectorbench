@@ -499,12 +499,19 @@ the participant's points rather than read from a latency triple.
 - Three sections as in section 2: GENERAL (load time, on disk, max memory during load, startup),
   NO FILTER and FILTERED (max memory during queries, score, coverage, rows). Rows are queries, columns
   participants, cells colored by ratio to the row's best, failed cells grey with the reason on hover.
-- Row click: half-height graph, expandable; cell click: full detail; header click: phases bar, info
-  list, startup statistics. Later: explain and explain-analyze in the cell detail.
-- Layout: SearchBench's, so the two pages read as one family — the selectors, the chips and the
-  participant toggles in a sidebar left of the table, `⛶ max` to hide it. Hiding a participant
-  recomputes every best, common bar, score and coverage over the ones shown. The details open as
-  modals rather than in a query panel under the table.
+- Row click: ticks the row, and its curves join the graph beside the table; cell click: full
+  detail; header click: phases bar, info list, startup statistics. Later: explain and
+  explain-analyze in the cell detail.
+- Layout: one desktop-style window in SearchBench's visual language — title bar, toolbar, the table
+  and the graph side by side under a draggable rule, status bar. The dataset, the view and the
+  latency statistic are in the toolbar; the chips and the participant toggles (Filter) and the row
+  reading and cell format (Display) are menus off it. The table's rows are the graph's checkboxes,
+  in one block per filter case, each row named by what it asks (`k=10 · eq-10`, `k=100 · eq-10`)
+  with no recall bar in the group reading, each cell its number and `@` the recall its participant
+  reaches; the table is kept narrow, and the graph is 80% of the screen wide, scrolling under a
+  pinned y axis and opening at recall 1. SereneDB is drawn in the brand's purple, and no one else.
+  Hiding a participant recomputes every best, common bar, score and coverage over the ones shown.
+  The cell and header details open as modals rather than in a query panel under the table.
 - Crossing, frontier, density check, scores and coverage are computed in the frontend from points and
   the query list, and unit-tested there.
 

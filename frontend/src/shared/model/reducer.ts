@@ -1,6 +1,9 @@
 /* Every transition the page has, one action per gesture. Pure: Sets and arrays
    are replaced, never mutated, and any guard that needs the data travels in the
-   action payload (`tags` on `dataset`), so shared/model never imports upward. */
+   action payload (`tags` on `dataset`), so shared/model never imports upward.
+   For the same reason `plot` carries the whole next selection: a range or an
+   "only this row" needs the rows on screen, which the table has and this does
+   not. */
 
 import type { BenchState, CellMode, Detail, LatencyMetric, RowMode, SortSection, View } from './state.ts';
 
@@ -18,18 +21,12 @@ export type BenchAction =
   /** `present`: every participant of the dataset on screen, hidden ones included. */
   | { type: 'toggle-all'; present: readonly string[] }
   | { type: 'sort'; section: SortSection }
-  /** Toggle the inline graph under a query row. */
-  | { type: 'row'; id: string }
-  /** Open the full-screen graph with this row (and the inline one, if any). */
-  | { type: 'graph-open'; id: string }
-  | { type: 'graph-toggle'; id: string }
-  | { type: 'graph-close' }
+  /** The rows ticked for the graph, all of them. */
+  | { type: 'plot'; ids: readonly string[] }
   | { type: 'detail'; detail: Detail }
   | { type: 'detail-close' }
-  /** Escape: the detail first, then the full-screen graph. */
-  | { type: 'escape' }
-  /** Hide or restore the sidebar. */
-  | { type: 'max' };
+  /** Escape: closes the detail. The graph is part of the page and stays. */
+  | { type: 'escape' };
 
 export function benchReducer(state: BenchState, action: BenchAction): BenchState {
   switch (action.type) {
@@ -39,7 +36,7 @@ export function benchReducer(state: BenchState, action: BenchAction): BenchState
       // that may not exist there, and chips that no row answers to would hide
       // the whole table.
       const chips = new Set([...state.chips].filter((t) => action.tags.has(t)));
-      return { ...state, dataset: action.id, chips, openRow: null, graphRows: null, detail: null };
+      return { ...state, dataset: action.id, chips, graphRows: null, detail: null };
     }
     case 'view':
       return { ...state, view: action.value };
@@ -48,8 +45,9 @@ export function benchReducer(state: BenchState, action: BenchAction): BenchState
     case 'cells':
       return { ...state, cells: action.value };
     case 'row-mode':
-      // The open row is a query id in one mode and a group key in the other.
-      return { ...state, rowMode: action.value, openRow: null, graphRows: null, detail: null };
+      // The ticked rows carry over (BenchPage reads a group key as its bars and
+      // a bar as its group); the detail names a row of the other reading.
+      return { ...state, rowMode: action.value, detail: null };
     case 'chip': {
       const next = new Set(state.chips);
       if (next.has(action.tag)) next.delete(action.tag);
@@ -82,30 +80,13 @@ export function benchReducer(state: BenchState, action: BenchAction): BenchState
     }
     case 'sort':
       return { ...state, sortSection: action.section };
-    case 'row':
-      return { ...state, openRow: state.openRow === action.id ? null : action.id };
-    case 'graph-open': {
-      const rows = [action.id];
-      if (state.openRow && state.openRow !== action.id) rows.push(state.openRow);
-      for (const r of state.graphRows ?? []) if (!rows.includes(r)) rows.push(r);
-      return { ...state, graphRows: rows };
-    }
-    case 'graph-toggle': {
-      const rows = state.graphRows ?? [];
-      const next = rows.includes(action.id) ? rows.filter((r) => r !== action.id) : [...rows, action.id];
-      return { ...state, graphRows: next };
-    }
-    case 'graph-close':
-      return { ...state, graphRows: null };
+    case 'plot':
+      return { ...state, graphRows: action.ids };
     case 'detail':
       return { ...state, detail: action.detail };
     case 'detail-close':
       return { ...state, detail: null };
     case 'escape':
-      if (state.detail) return { ...state, detail: null };
-      if (state.graphRows) return { ...state, graphRows: null };
-      return state;
-    case 'max':
-      return { ...state, max: !state.max };
+      return state.detail ? { ...state, detail: null } : state;
   }
 }

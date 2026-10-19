@@ -1,11 +1,15 @@
-/* The page frame — searchbench's: the header, the synthetic-data banner when
-   the file says so, then two columns, the sidebar (dataset, config, query
-   chips, participants) and the table, and whichever modal is open. ⛶ max in
-   the table's head drops the sidebar. There is no query panel under the
-   table: a cell, a row label and a GENERAL row each open their detail as a
-   modal, which shows more than a strip would hold.
+/* The page: one window — the title bar, the toolbar, the table and the graph
+   side by side, the status bar — and whichever detail is open over it.
 
-   Everything right of the sidebar is a pure function of `state` and the
+   The table is the list the graph draws from: a ticked row is a drawn one, so
+   choosing rows, comparing them and reading their numbers happen in one place
+   and the curves answer beside it. The dataset, the view and the latency
+   statistic sit in the toolbar; the rest of what was a sidebar — the chips,
+   the participants, the row reading, the cell format — waits in its menus. A
+   cell or a GENERAL row opens its detail as a modal, which shows more than a
+   strip would hold.
+
+   Everything under the toolbar is a pure function of `state` and the
    benchmark: the grid is computed once per (dataset, view, metric), the scores
    once per grid and visible rows, and the column order from the section the
    reader picked — all of it over the participants on screen. */
@@ -29,22 +33,23 @@ import {
   type SectionScores,
 } from '../../entities/results';
 import { useBenchShortcuts, useBenchState, type BenchEnv, type BenchState } from '../../shared/model';
-import { ConfigPanel } from '../../widgets/config-panel/ConfigPanel';
-import { FullGraphModal } from '../../widgets/curve-graph/FullGraphModal';
-import { DatasetPanel } from '../../widgets/dataset-panel/DatasetPanel';
+import { Panel, SplitPane } from '../../shared/ui';
+import { GraphPane } from '../../widgets/curve-graph/GraphPane';
 import { CellDetailModal } from '../../widgets/detail/CellDetailModal';
 import { HeaderDetailModal } from '../../widgets/detail/HeaderDetailModal';
 import { BenchHeader } from '../../widgets/header/BenchHeader';
-import { ParticipantsPanel } from '../../widgets/participants-panel/ParticipantsPanel';
-import { QueriesPanel } from '../../widgets/queries-panel/QueriesPanel';
-import { ResultsTable } from '../../widgets/results-table';
+import { ResultsTable, tableWidth } from '../../widgets/results-table';
+import { StatusBar } from '../../widgets/status-bar/StatusBar';
+import { Toolbar } from '../../widgets/toolbar/Toolbar';
+import { readingSize, screenRows, tickedRows } from './model/selection';
 
 const EMPTY_TAGS: ReadonlySet<string> = new Set();
 
 type TableInputs = Pick<BenchState, 'view' | 'rowMode' | 'chips' | 'sortSection'>;
 
 /** What the table draws for one set of participants: the grid, the rows the
-    chips leave, both sections' scores and the column order they give. */
+    chips leave, the group rows they leave, both sections' scores and the
+    column order they give. */
 function tableModel(dataset: DatasetModel, metric: Metric, { view, rowMode, chips, sortSection }: TableInputs) {
   const grid = computeGrid(dataset, view, metric);
   const rows = visibleRows(dataset.queries, chips);
@@ -63,7 +68,7 @@ function tableModel(dataset: DatasetModel, metric: Metric, { view, rowMode, chip
           nofilter: sectionScores(grid, dataset.results, rows.filter((r) => r.section === 'nofilter'), 'nofilter'),
           filtered: sectionScores(grid, dataset.results, rows.filter((r) => r.section === 'filtered'), 'filtered'),
         };
-  return { grid, rows, scores, results: orderResults(dataset.results, scores[sortSection]) };
+  return { grid, rows, gRows, scores, results: orderResults(dataset.results, scores[sortSection]) };
 }
 
 export function BenchPage() {
@@ -76,7 +81,8 @@ export function BenchPage() {
         const d = datasetById(id);
         return d ? allChipTags(d) : EMPTY_TAGS;
       },
-      rowsFor: (id) => new Set(datasetById(id)?.queries.map((q) => q.id) ?? []),
+      // Either reading's ids: a link may tick query rows or groups.
+      rowsFor: (id) => new Set(datasetById(id)?.queries.flatMap((q) => [q.id, q.key]) ?? []),
       participants: BENCH?.participants.map((p) => p.id) ?? [],
     }),
     [],
@@ -105,88 +111,94 @@ export function BenchPage() {
     () => (!dataset || !model ? [] : shown === dataset ? model.results : tableModel(dataset, metric, { view, rowMode, chips, sortSection }).results),
     [dataset, shown, model, metric, view, rowMode, chips, sortSection],
   );
+  const onScreen = useMemo(() => (model ? screenRows(model.rows, rowMode) : []), [model, rowMode]);
+  const ticked = useMemo(() => (dataset ? tickedRows(state.graphRows, rowMode, dataset, onScreen) : []), [state.graphRows, rowMode, dataset, onScreen]);
+  const plotted = useMemo(() => ticked.filter((id) => onScreen.includes(id)), [ticked, onScreen]);
 
   if (!BENCH || !dataset || !shown || !model) {
     return (
       <div className="vb-app">
-        <BenchHeader />
-        <div className="err">
-          {BENCH_ERROR ? (
-            <>
-              <div>The results file could not be read.</div>
-              <code>{BENCH_ERROR.message}</code>
-            </>
-          ) : (
-            <div>
-              No results yet. Run a participant, then <code>vectorbench assemble</code> and <code>npm run build</code> in <code>frontend/</code>.
-            </div>
-          )}
-        </div>
+        <Panel grow className="vb-window">
+          <BenchHeader />
+          <div className="err">
+            {BENCH_ERROR ? (
+              <>
+                <div>The results file could not be read.</div>
+                <code>{BENCH_ERROR.message}</code>
+              </>
+            ) : (
+              <div>
+                No results yet. Run a participant, then <code>vectorbench assemble</code> and <code>npm run build</code> in <code>frontend/</code>.
+              </div>
+            )}
+          </div>
+        </Panel>
       </div>
     );
   }
 
-  const { grid, rows, scores, results } = model;
+  const { grid, rows, gRows, scores, results } = model;
   const detail = state.detail;
   const detailResult = detail?.kind === 'cell' ? dataset.results.find((r) => r.id === detail.pid) : undefined;
   const detailRow = detail?.kind === 'cell' ? dataset.queries.find((q) => q.id === detail.qid) : undefined;
 
   return (
     <div className="vb-app">
-      <BenchHeader />
-      {BENCH.sample && (
-        <div className="banner" data-role="sample-banner">
-          <b>synthetic sample</b>
-          <span>
-            Every number on this page was generated by <code>frontend/scripts/sample-results.mjs</code> to exercise the page; nothing was measured.{' '}
-            <code>vectorbench assemble</code> replaces <code>results.json</code> with real results.
-          </span>
-        </div>
-      )}
-      <div
-        style={{
-          display: 'grid',
-          gridTemplateColumns: state.max ? '1fr' : '300px 1fr',
-          columnGap: 14,
-          flex: 1,
-          minHeight: 0,
-        }}
-      >
-        {!state.max && (
-          <aside
-            style={{
-              display: 'flex',
-              flexDirection: 'column',
-              gap: 11,
-              minHeight: 0,
-              minWidth: 0,
-              // A short window squeezes the participant list first (it grows
-              // into whatever is left); past that the column scrolls rather
-              // than cutting off the panels at the bottom of the page.
-              overflowY: 'auto',
-            }}
-          >
-            <DatasetPanel bench={BENCH} dataset={dataset} dispatch={dispatch} />
-            <ConfigPanel state={state} dispatch={dispatch} />
-            <QueriesPanel dataset={dataset} state={state} dispatch={dispatch} />
-            <ParticipantsPanel everyone={everyone} hidden={hidden} shownCount={shown.results.length} dispatch={dispatch} />
-          </aside>
+      <Panel grow className="vb-window">
+        <BenchHeader />
+        <Toolbar bench={BENCH} dataset={dataset} everyone={everyone} state={state} dispatch={dispatch} />
+        {BENCH.sample && (
+          <div className="banner" data-role="sample-banner">
+            <b>synthetic sample</b>
+            <span>
+              Every number on this page was generated by <code>frontend/scripts/sample-results.mjs</code> to exercise the page; nothing was measured.{' '}
+              <code>vectorbench assemble</code> replaces <code>results.json</code> with real results.
+            </span>
+          </div>
         )}
-
-        <main style={{ display: 'flex', flexDirection: 'column', gap: 11, minWidth: 0, minHeight: 0 }}>
-          <ResultsTable
-            dataset={shown}
-            participants={dataset.results.length}
-            results={results}
-            rows={rows}
-            grid={grid}
-            scores={scores}
-            state={state}
-            dispatch={dispatch}
-          />
-        </main>
-      </div>
-      {state.graphRows && <FullGraphModal dataset={shown} results={results} grid={grid} state={state} dispatch={dispatch} />}
+        {/* Until the reader drags the rule, the table takes what its columns
+            want and the graph the rest, but never less than 38% of the width. */}
+        <SplitPane
+          storageKey="vb-split"
+          defaultLeft={`min(${tableWidth(results)}px, 62%)`}
+          minLeft={380}
+          minRight={340}
+          left={
+            <ResultsTable
+              dataset={shown}
+              results={results}
+              rows={rows}
+              groups={gRows}
+              grid={grid}
+              scores={scores}
+              state={state}
+              onScreen={onScreen}
+              ticked={ticked}
+              dispatch={dispatch}
+            />
+          }
+          right={
+            <GraphPane
+              dataset={shown}
+              results={results}
+              grid={grid}
+              mode={rowMode}
+              groups={gRows}
+              plotted={plotted}
+              ticked={ticked.length}
+              onClear={() => dispatch({ type: 'plot', ids: [] })}
+            />
+          }
+        />
+        <StatusBar
+          dataset={dataset}
+          shown={shown.results.length}
+          participants={dataset.results.length}
+          rows={onScreen.length}
+          total={readingSize(dataset, rowMode)}
+          state={state}
+        />
+      </Panel>
       {detail?.kind === 'header' && <HeaderDetailModal dataset={shown} results={results} row={detail.row} dispatch={dispatch} />}
       {detail?.kind === 'cell' && detailResult && detailRow && (
         <CellDetailModal dataset={dataset} result={detailResult} row={detailRow} state={state} dispatch={dispatch} />

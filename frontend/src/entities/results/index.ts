@@ -45,5 +45,5 @@ export {
 export type { Coverage, SectionScores } from './model/scores';
 export { orderResults, ratioTo, sectionScores, sectionScoresByGroup } from './model/scores';
 export type { ChipDimension } from './model/rows';
-export { CHIP_DIMENSIONS, allChipTags, chipLabel, chipTag, rowPasses, visibleRows } from './model/rows';
+export { CHIP_DIMENSIONS, allChipTags, chipLabel, chipTag, rowPasses, rowTitle, tableOrder, visibleRows } from './model/rows';
 export { BENCH, BENCH_ERROR, datasetById, participantColor } from './model/dataset';
