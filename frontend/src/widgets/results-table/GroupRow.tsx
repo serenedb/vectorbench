@@ -14,6 +14,7 @@ import { ratioTo } from '../../entities/results';
 import { ratioBg } from '../../shared/lib/color';
 import { fmtMetric, fmtRatio, fmtRecall, metricUnit } from '../../shared/lib/format';
 import type { CellMode } from '../../shared/model';
+import { OpensMark } from '../../shared/ui';
 import type { Direction, Metric } from '../../entities/results';
 
 /* A measured recall, three decimals. `fmtRecall` is for the bars a family
@@ -73,7 +74,7 @@ export function GroupTableRow({
     <div className="trow" style={{ gridTemplateColumns: gridCols }}>
       <button type="button" className={'rowlab' + (open ? ' open' : '')} data-act="row" data-id={row.key} title={barNote + ' · click for the full curves'} onClick={onToggle}>
         {row.key}
-        <span className="mk">{open ? '▾' : ''}</span>
+        <OpensMark />
         <span className="tg">{tags}</span>
       </button>
       {results.map((r) => {

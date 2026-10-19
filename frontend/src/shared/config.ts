@@ -2,8 +2,9 @@
     built from it, so the whole service can move with a one-line change. */
 export const PRODUCT_PATH = '/vectorbench';
 
-/** id of this product in @serenedb/ui's PLATFORM_SERVICES (not registered yet:
-    the header falls back to the name below until the kit lists it). */
+/** id of this product in @serenedb/ui's PLATFORM_SERVICES, where the header
+    reads its name and path; the two below stand in under a kit that predates
+    the entry. */
 export const SERVICE_ID = 'vectorbench';
 
 export const PRODUCT_NAME = 'VectorBench';

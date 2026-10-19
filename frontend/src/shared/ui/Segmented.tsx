@@ -45,7 +45,9 @@ export function Seg<V extends string>({ act, opts, cur, grow = false, pad = '4px
   );
 }
 
-const LABEL: CSSProperties = {
+/** searchbench's row caption: a fixed-width column, so the strips beside it line up. */
+export const ROW_LABEL: CSSProperties = {
+  width: 48,
   flexShrink: 0,
   fontSize: '9.5px',
   fontWeight: 700,
@@ -54,12 +56,12 @@ const LABEL: CSSProperties = {
   color: 'var(--mut)',
 };
 
-/** A caption in front of one or more controls — one group of the toolbar. */
-export function Labeled({ label, children }: { label: string; children: React.ReactNode }) {
+/** A strip behind a fixed-width caption, dividing the rest of the row evenly — one row of the config panel. */
+export function SegRow<V extends string>({ label, ...seg }: { label: string } & Omit<SegProps<V>, 'grow'>) {
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-      <span style={LABEL}>{label}</span>
-      {children}
+      <span style={ROW_LABEL}>{label}</span>
+      <Seg {...seg} grow />
     </div>
   );
 }

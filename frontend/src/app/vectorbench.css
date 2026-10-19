@@ -1,12 +1,13 @@
 /* ---------------------------------------------------------------------------
    vectorbench — the page's own stylesheet, scoped under [data-product='vectorbench'].
 
-   The palette, the panel, the segmented control, the chips and the table
-   classes are searchbench's (frontend/src/app/searchbench.css), byte for byte
-   where the two pages draw the same thing, so the two benchmarks look like one
-   family in the playground. Light is the base and dark sits under `.dark` on
-   <html>, which the platform ThemeProvider owns. Everything after the table
-   section is VectorBench's own: failed cells, the inline graph, the modals.
+   The palette, the panel, the segmented control, the chips, the sidebar rows
+   and the table classes are searchbench's (frontend/src/app/searchbench.css),
+   byte for byte where the two pages draw the same thing, so the two benchmarks
+   look like one family in the playground. Light is the base and dark sits
+   under `.dark` on <html>, which the platform ThemeProvider owns. Everything
+   after the table section is VectorBench's own: failed cells, the graph, the
+   modals.
 --------------------------------------------------------------------------- */
 
 [data-product='vectorbench'] .vb-app {
@@ -60,7 +61,7 @@
 [data-product='vectorbench'] .vb-app {
     background: var(--bg);
     color: var(--fg);
-    font-family: 'Gilroy', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    font-family: 'Urbanist', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
     line-height: normal;
     tab-size: 8;
     display: flex;
@@ -71,9 +72,10 @@
     padding: 14px;
     font-size: 13px;
     overflow: hidden;
-    /* Pinned to the width the table was designed at; the page scrolls sideways
-       below it instead of squeezing four participant columns into a phone. */
-    min-width: 1100px;
+    /* searchbench's number, for searchbench's reason: the 300px sidebar and
+       the table beside it are laid out at this width, and below it the page
+       scrolls sideways instead of squeezing the table to a sliver. */
+    min-width: 1280px;
 }
 
 [data-product='vectorbench'] .vb-app a {
@@ -266,33 +268,7 @@
     flex-shrink: 0;
 }
 
-/* ---- toolbar and chips ---------------------------------------------------- */
-[data-product='vectorbench'] .toolbar {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 9px 22px;
-    padding: 9px 12px;
-}
-[data-product='vectorbench'] .chips {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 5px;
-    padding: 7px 12px 8px;
-    border-top: 0.5px solid var(--line);
-}
-[data-product='vectorbench'] .chips .cl {
-    font-size: 9.5px;
-    font-weight: 700;
-    letter-spacing: 0.07em;
-    text-transform: uppercase;
-    color: var(--mut);
-    margin: 0 3px 0 6px;
-}
-[data-product='vectorbench'] .chips .cl:first-child {
-    margin-left: 0;
-}
+/* ---- chips ---------------------------------------------------------------- */
 [data-product='vectorbench'] .chip {
     border: 0.5px solid var(--line);
     background: transparent;
@@ -306,6 +282,33 @@
     border-color: var(--accent);
     background: var(--accent);
     color: #fff;
+}
+
+/* ---- sidebar rows --------------------------------------------------------- */
+[data-product='vectorbench'] .dsrow {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 6px;
+    border: 0.5px solid transparent;
+    background: transparent;
+    cursor: pointer;
+    text-align: left;
+    width: 100%;
+}
+[data-product='vectorbench'] .prow {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 4px 7px;
+    border: 0;
+    background: transparent;
+    cursor: pointer;
+    text-align: left;
+    flex-shrink: 0;
+}
+[data-product='vectorbench'] .prow:hover {
+    background: var(--inset);
 }
 
 /* ---- the synthetic-data banner -------------------------------------------- */
@@ -442,6 +445,14 @@
     opacity: 0.6;
     font-weight: 500;
     margin-left: 4px;
+}
+/* The mark on a label that opens something: the row's curves, or a GENERAL
+   row's detail. Accent so it reads as a link before the hover says so. */
+[data-product='vectorbench'] .rowlab .go {
+    display: inline-block;
+    margin-left: 5px;
+    color: var(--accent);
+    vertical-align: 0;
 }
 [data-product='vectorbench'] .cell {
     border-bottom: 0.5px solid rgba(0, 0, 0, 0.1);

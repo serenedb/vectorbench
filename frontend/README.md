@@ -30,7 +30,30 @@ JS, CSS, fonts and the current `frontend/results.json` (its sha256 is written
 to a `<meta name="vectorbench-results-sha256">` tag). Commit the HTML. It can
 be opened with a double click, copied by itself, or hosted as a static page.
 No CDN, module fetch or JSON fetch is needed to render it. URL state and the
-theme toggle work in both modes.
+theme toggle work in both modes. The embedded face is Urbanist from the design
+kit; its licence is `Urbanist-OFL.txt` next to the HTML.
+
+## Layout
+
+SearchBench's page with VectorBench's controls. The header strip on top; under
+it a 300px sidebar and the table:
+
+| panel | what it holds |
+|---|---|
+| dataset | one row per `<family>-<size>` with results: vectors × dimension · metric, participant count |
+| config | view (Throughput / Latency), rows (by group / by recall bar), cells (relative / absolute), metric (QPS, or the latency statistic) |
+| queries | the row chips: filter case, k, recall |
+| participants | show / hide per participant, and select all / unselect all; the list keeps the order the columns have with nobody hidden |
+
+Hiding a participant takes it out of the comparison, as SearchBench measures
+every ratio against the fastest engine on screen: each row's best, each
+group's common recall bar, the scores, the coverage and the column order are
+computed over the participants shown. One click never hides the last of them.
+
+`⛶ max` in the table's head hides the sidebar. Unlike SearchBench there is no
+query panel under the table: a cell, a row label and a GENERAL row each open
+their detail as a modal, and the labels that do carry an arrow to the top
+right.
 
 ## What the page computes
 
@@ -48,6 +71,7 @@ the graph and the detail can never disagree:
 | `model/rows.ts` | the chips: `filter:<case base>`, `k:<k>`, `recall:<r|exact>`; OR within a dimension, AND across |
 | `src/widgets/curve-graph/*` | the graph under a row and the full-screen graph: frontier lines, hollow dominated points, the row's recall line, every crossing |
 | `src/widgets/detail/*` | the cell detail (statement, every point, the bracket) and the GENERAL details (load phases with "other", on-disk info, memory, startup distribution) |
+| `src/widgets/*-panel/*` | the sidebar: dataset, config, queries (chips) and participants |
 
 The `filter` chips group cases by predicate (`eq` covers eq-10 / eq-1 /
 eq-0.1), as the mock in DESIGN.md section 2 shows.
@@ -78,19 +102,41 @@ provideResults(resultsJson);   // the object `vectorbench assemble` writes
 const { ProductApp, path, serviceId } = await import('@vectorbench/frontend');
 ```
 
+A host that keeps several benchmarks for one page (SereneDB Playground's
+operator panel does) can also hand over the list, before the same import:
+
+```ts
+const { provideResults, provideRuns } = await import('@vectorbench/frontend/results');
+provideResults(resultsJson);
+provideRuns({ runs, currentId, onSelect });   // runs: { id, date, participants }[]
+```
+
+The header then offers them in a selector labelled `2026-10-12 · 3
+participants`. Picking one only calls `onSelect`: the results are frozen when
+the product's modules are first imported, so showing another run is a new
+document, and that is the host's to load. The standalone build never calls
+`provideRuns`, and the selector does not render.
+
 The host supplies `ThemeProvider` and its React Router context. Inside that
 context, header links use the host router; standalone links use ordinary
 anchors and absolute service URLs. Styles are scoped under
 `[data-product='vectorbench']`; `path` is `/vectorbench` and `serviceId` is
-`vectorbench` (not yet in the kit's service registry — the header falls back to
-the product name until it is).
+`vectorbench`, listed in the kit's service registry, which is where the header
+and the switcher take its name from.
+
+SereneDB Playground carries this repository as the `products/vectorbench`
+submodule, compiles `frontend/` into its single web build, and serves this
+`results.json` as a static file at `/vectorbench-data/results.json` that its
+loader fetches before importing the product. A new benchmark reaches the
+playground as a submodule bump; nothing in the playground has to change.
 
 ## URL state
 
 Every selector and chip is encoded in `?s=<base64url json>`; readable
 overrides work next to it and are canonicalised on the next render:
-`?dataset=wiki-v3-1024-100k&view=latency&metric=p99&cells=absolute&chips=k:10,filter:eq&sort=filtered&row=V14&graph=V14,V35&theme=dark`.
-Modals are never encoded.
+`?dataset=wiki-v3-1024-100k&view=latency&metric=p99&cells=absolute&chips=k:10,filter:eq&hidden=qdrant-hnsw&sort=filtered&row=V14&graph=V14,V35&theme=dark&expanded=1`
+(`hidden` lists participant ids switched off, `expanded=1` is ⛶ max: the
+sidebar hidden). Modals are never encoded.
 
 ## Checks
 
@@ -110,8 +156,9 @@ TypeScript types itself, so the model is tested from source):
 - `model.test.mjs` — the generated sample through the loader: cells, scores,
   coverage, column order, chips, the loader's strictness, the URL codec;
 - `offline.test.mjs` — the committed `index.html` over `file://` with the
-  network disabled: table, row graph, full-screen graph, cell and header
-  details, selectors, theme, reload, and zero network requests.
+  network disabled: sidebar and table, row graph, full-screen graph, cell and
+  header details, selectors, the dataset switch, ⛶ max, theme, reload, and
+  zero network requests.
 
 Rebuild before running the browser test after changing source or results. On a
 host where Playwright's Chromium cannot start for lack of system libraries and

@@ -28,6 +28,8 @@ export interface CodecEnv {
   tagsFor: (dataset: string) => ReadonlySet<string>;
   /** Query ids of a dataset's family; unknown rows are dropped on restore. */
   rowsFor: (dataset: string) => ReadonlySet<string>;
+  /** Every participant id in the benchmark; unknown ones are dropped from `hidden` on restore. */
+  participants: readonly string[];
 }
 
 /** The decoded `?s=` payload. Short keys, `v` is the format version. */
@@ -78,10 +80,12 @@ export function shortState(state: BenchState, env: CodecEnv, theme: ThemeName): 
   put('m', state.latencyMetric, 'p50');
   put('c', state.cells, 'relative');
   put('q', csv(state.chips), '');
+  put('h', csv(state.hidden), '');
   put('s', state.sortSection, 'nofilter');
   put('r', state.openRow, null);
   put('g', (state.graphRows ?? []).join(','), '');
   put('th', theme, 'light');
+  put('x', state.max ? 1 : 0, 0);
   return compact;
 }
 
@@ -108,10 +112,12 @@ const FIELDS: Record<string, string> = {
   metric: 'm',
   cells: 'c',
   chips: 'q',
+  hidden: 'h',
   sort: 's',
   row: 'r',
   graph: 'g',
   theme: 'th',
+  expanded: 'x',
 };
 
 /**
@@ -144,11 +150,14 @@ export function restoreUrlState(search: string, env: CodecEnv, initial: BenchSta
     patch.latencyMetric = isLatencyMetric(metric) ? (metric as LatencyMetric) : initial.latencyMetric;
     patch.cells = oneOf<CellMode>('cells', ['relative', 'absolute'], initial.cells)!;
     patch.chips = new Set(split('chips').filter((t) => tags.has(t)));
+    const known = new Set(env.participants);
+    patch.hidden = new Set(split('hidden').filter((p) => known.has(p)));
     patch.sortSection = oneOf<SortSection>('sort', ['nofilter', 'filtered'], initial.sortSection)!;
     const row = get('row');
     patch.openRow = typeof row === 'string' && rows.has(row) ? row : null;
     const graph = split('graph').filter((id) => rows.has(id));
     patch.graphRows = graph.length ? graph : null;
+    patch.max = String(get('expanded')) === '1';
     theme = oneOf<ThemeName>('theme', ['dark', 'light'], null);
   } catch {
     /* a malformed link opens the default view rather than a blank page */
