@@ -13,6 +13,10 @@ export type BenchAction =
   | { type: 'row-mode'; value: RowMode }
   | { type: 'chip'; tag: string }
   | { type: 'clear-chips' }
+  /** `visibleCount`: participants shown *before* this click; hiding the last one is refused. */
+  | { type: 'part'; pid: string; visibleCount: number }
+  /** `present`: every participant of the dataset on screen, hidden ones included. */
+  | { type: 'toggle-all'; present: readonly string[] }
   | { type: 'sort'; section: SortSection }
   /** Toggle the inline graph under a query row. */
   | { type: 'row'; id: string }
@@ -54,6 +58,28 @@ export function benchReducer(state: BenchState, action: BenchAction): BenchState
     }
     case 'clear-chips':
       return { ...state, chips: new Set() };
+    case 'part': {
+      const next = new Set(state.hidden);
+      if (next.has(action.pid)) {
+        next.delete(action.pid);
+        return { ...state, hidden: next };
+      }
+      // searchbench's guard: one click never empties the table.
+      if (action.visibleCount <= 1) return state;
+      next.add(action.pid);
+      return { ...state, hidden: next };
+    }
+    case 'toggle-all': {
+      const allShown = action.present.length > 0 && !action.present.some((p) => state.hidden.has(p));
+      // Participants hidden while another dataset was on screen are not in
+      // `present`, so they keep their state.
+      const next = new Set(state.hidden);
+      for (const p of action.present) {
+        if (allShown) next.add(p);
+        else next.delete(p);
+      }
+      return { ...state, hidden: next };
+    }
     case 'sort':
       return { ...state, sortSection: action.section };
     case 'row':

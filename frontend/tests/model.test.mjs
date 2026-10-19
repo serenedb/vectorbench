@@ -202,6 +202,7 @@ test('URL codec round-trips the selectors and chips', () => {
     defaultDataset: bench.defaultDataset,
     tagsFor: (id) => allChipTags(dataset(id)),
     rowsFor: (id) => new Set(dataset(id).family.queries.map((q) => q.id)),
+    participants: bench.participants.map((p) => p.id),
   };
   assert.deepEqual(shortState(INITIAL_STATE, env, 'light'), { v: 1 });
   const state = {
@@ -215,9 +216,11 @@ test('URL codec round-trips the selectors and chips', () => {
     openRow: 'V14',
     graphRows: ['V14', 'V35'],
     max: true,
+    hidden: new Set(['serenedb-hnsw', 'pgvector-hnsw']),
   };
   const packed = shortState(state, env, 'dark');
-  assert.deepEqual(packed, { v: 1, d: 'wiki-v3-1024-100k', t: 'latency', m: 'p99', c: 'absolute', q: 'filter:eq,k:10', s: 'filtered', r: 'V14', g: 'V14,V35', th: 'dark', x: 1 });
+  assert.deepEqual(packed, { v: 1, d: 'wiki-v3-1024-100k', t: 'latency', m: 'p99', c: 'absolute', q: 'filter:eq,k:10', h: 'pgvector-hnsw,serenedb-hnsw', s: 'filtered', r: 'V14', g: 'V14,V35', th: 'dark', x: 1 });
+  assert.deepEqual(Object.keys(packed), ['v', 'd', 't', 'm', 'c', 'q', 'h', 's', 'r', 'g', 'th', 'x'], 'key order is the wire format');
   const b64 = Buffer.from(JSON.stringify(packed)).toString('base64url');
   const { patch, theme } = restoreUrlState('?s=' + b64, env, INITIAL_STATE);
   assert.equal(theme, 'dark');
@@ -231,8 +234,10 @@ test('URL codec round-trips the selectors and chips', () => {
   assert.deepEqual(patch.graphRows, ['V14', 'V35']);
   assert.equal(patch.max, true);
   // readable overrides win, unknown values fall back, unknown chips and rows are dropped
-  const o = restoreUrlState('?s=' + b64 + '&view=throughput&chips=k:10,bogus:1&row=V99&dataset=nope&expanded=0', env, INITIAL_STATE);
+  assert.deepEqual([...patch.hidden].sort(), ['pgvector-hnsw', 'serenedb-hnsw']);
+  const o = restoreUrlState('?s=' + b64 + '&view=throughput&chips=k:10,bogus:1&row=V99&dataset=nope&expanded=0&hidden=nobody,qdrant-hnsw', env, INITIAL_STATE);
   assert.equal(o.patch.max, false);
+  assert.deepEqual([...o.patch.hidden], ['qdrant-hnsw'], 'unknown participants are dropped');
   assert.equal(o.patch.view, 'throughput');
   assert.deepEqual([...o.patch.chips], ['k:10']);
   assert.equal(o.patch.openRow, null);

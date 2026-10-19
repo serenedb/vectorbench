@@ -81,14 +81,17 @@ function memoryRow(section: Section): HeaderSpec {
   };
 }
 
-export function tableRows(dataset: DatasetModel, visible: readonly QueryRow[]): RowSpec[] {
+/** @param participants how many participants the dataset has, hidden ones included */
+export function tableRows(dataset: DatasetModel, visible: readonly QueryRow[], participants = dataset.results.length): RowSpec[] {
   const fam = dataset.family;
   const out: RowSpec[] = [];
   out.push({
     kind: 'section',
     key: 'sec:general',
     title: 'GENERAL',
-    note: `${dataset.id} · ${fmtInt(dataset.rows)} rows · ${fam.dims}-d · ${fam.metric} · ${dataset.results.length} participants · lower is better in every row`,
+    note: `${dataset.id} · ${fmtInt(dataset.rows)} rows · ${fam.dims}-d · ${fam.metric} · ${
+      dataset.results.length === participants ? participants : `${dataset.results.length} of ${participants}`
+    } participants · lower is better in every row`,
   });
   out.push(
     {

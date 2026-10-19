@@ -59,6 +59,9 @@ export interface BenchState {
   rowMode: RowMode;
   /** Active chip tags: `filter:eq`, `k:10`, `recall:0.95`, `recall:exact`. */
   chips: ReadonlySet<string>;
+  /** Participants switched off, by id. Kept across datasets: an id names the
+      same database and index family in every one. */
+  hidden: ReadonlySet<string>;
   sortSection: SortSection;
   /** The query row whose inline graph is open. */
   openRow: string | null;
@@ -77,6 +80,7 @@ export const INITIAL_STATE: BenchState = {
   cells: 'relative',
   rowMode: 'groups',
   chips: new Set(),
+  hidden: new Set(),
   sortSection: 'nofilter',
   openRow: null,
   graphRows: null,

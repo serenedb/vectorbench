@@ -16,7 +16,10 @@ import { TableLegend } from './TableLegend';
 import { tableRows } from './model/tableRows';
 
 export interface ResultsTableProps {
+  /** The dataset with only the participants on screen. */
   dataset: DatasetModel;
+  /** How many participants the dataset has, hidden ones included. */
+  participants: number;
   /** Participants in column order. */
   results: readonly ResultModel[];
   /** Rows the chips left visible, family order. */
@@ -31,9 +34,9 @@ function colW(r: ResultModel): number {
   return Math.min(200, Math.max(112, Math.round(r.name.length * 6.8) + 56));
 }
 
-export function ResultsTable({ dataset, results, rows, grid, scores, state, dispatch }: ResultsTableProps): ReactNode {
+export function ResultsTable({ dataset, participants, results, rows, grid, scores, state, dispatch }: ResultsTableProps): ReactNode {
   const gridCols = '262px ' + results.map((r) => colW(r) + 'px').join(' ');
-  const specs = useMemo(() => tableRows(dataset, rows), [dataset, rows]);
+  const specs = useMemo(() => tableRows(dataset, rows, participants), [dataset, rows, participants]);
   // The chips select query rows; a group is visible when any of its rows is.
   const visibleKeys = useMemo(() => new Set(rows.map((r) => r.key)), [rows]);
   const gRows = useMemo(
@@ -46,7 +49,8 @@ export function ResultsTable({ dataset, results, rows, grid, scores, state, disp
     return m;
   }, [gRows]);
   const total = dataset.queries.length;
-  const meta = `${dataset.id} · ${results.length} participants · ${rows.length === total ? total + ' rows' : rows.length + ' of ' + total + ' rows'} · ${VIEW_LABELS[state.view]} · ${fmtInt(dataset.rows)} vectors`;
+  const shown = results.length === participants ? `${participants} participants` : `${results.length} of ${participants} participants`;
+  const meta = `${dataset.id} · ${shown} · ${rows.length === total ? total + ' rows' : rows.length + ' of ' + total + ' rows'} · ${VIEW_LABELS[state.view]} · ${fmtInt(dataset.rows)} vectors`;
   const selectedPid = state.detail?.kind === 'cell' ? state.detail.pid : null;
   const selectedQid = state.detail?.kind === 'cell' ? state.detail.qid : null;
 
@@ -124,7 +128,7 @@ export function ResultsTable({ dataset, results, rows, grid, scores, state, disp
         })}
       </div>
 
-      <TableLegend state={state} metric={grid.metric} />
+      <TableLegend />
     </Panel>
   );
 }

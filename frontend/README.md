@@ -43,11 +43,17 @@ it a 300px sidebar and the table:
 | dataset | one row per `<family>-<size>` with results: vectors × dimension · metric, participant count |
 | config | view (Throughput / Latency), rows (by group / by recall bar), cells (relative / absolute), metric (QPS, or the latency statistic) |
 | queries | the row chips: filter case, k, recall |
-| participants | the columns in their current order and colours, with the hardware tier in the head; a legend, not a filter |
+| participants | show / hide per participant, and select all / unselect all; the list keeps the order the columns have with nobody hidden |
+
+Hiding a participant takes it out of the comparison, as SearchBench measures
+every ratio against the fastest engine on screen: each row's best, each
+group's common recall bar, the scores, the coverage and the column order are
+computed over the participants shown. One click never hides the last of them.
 
 `⛶ max` in the table's head hides the sidebar. Unlike SearchBench there is no
 query panel under the table: a cell, a row label and a GENERAL row each open
-their detail as a modal.
+their detail as a modal, and the labels that do carry an arrow to the top
+right.
 
 ## What the page computes
 
@@ -113,8 +119,9 @@ playground as a submodule bump; nothing in the playground has to change.
 
 Every selector and chip is encoded in `?s=<base64url json>`; readable
 overrides work next to it and are canonicalised on the next render:
-`?dataset=wiki-v3-1024-100k&view=latency&metric=p99&cells=absolute&chips=k:10,filter:eq&sort=filtered&row=V14&graph=V14,V35&theme=dark&expanded=1`
-(`expanded=1` is ⛶ max: the sidebar hidden). Modals are never encoded.
+`?dataset=wiki-v3-1024-100k&view=latency&metric=p99&cells=absolute&chips=k:10,filter:eq&hidden=qdrant-hnsw&sort=filtered&row=V14&graph=V14,V35&theme=dark&expanded=1`
+(`hidden` lists participant ids switched off, `expanded=1` is ⛶ max: the
+sidebar hidden). Modals are never encoded.
 
 ## Checks
 

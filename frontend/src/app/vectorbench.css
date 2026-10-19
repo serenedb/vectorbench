@@ -296,15 +296,19 @@
     text-align: left;
     width: 100%;
 }
-/* searchbench's participant row, without its gesture: a participant here is a
-   column and a colour, not a toggle — hiding one would move every row's best
-   and the bar each group is read at. So no pointer and no hover. */
 [data-product='vectorbench'] .prow {
     display: flex;
     align-items: center;
     gap: 8px;
     padding: 4px 7px;
+    border: 0;
+    background: transparent;
+    cursor: pointer;
+    text-align: left;
     flex-shrink: 0;
+}
+[data-product='vectorbench'] .prow:hover {
+    background: var(--inset);
 }
 
 /* ---- the synthetic-data banner -------------------------------------------- */
@@ -441,6 +445,14 @@
     opacity: 0.6;
     font-weight: 500;
     margin-left: 4px;
+}
+/* The mark on a label that opens something: the row's curves, or a GENERAL
+   row's detail. Accent so it reads as a link before the hover says so. */
+[data-product='vectorbench'] .rowlab .go {
+    display: inline-block;
+    margin-left: 5px;
+    color: var(--accent);
+    vertical-align: 0;
 }
 [data-product='vectorbench'] .cell {
     border-bottom: 0.5px solid rgba(0, 0, 0, 0.1);

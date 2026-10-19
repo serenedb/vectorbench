@@ -1,34 +1,29 @@
-/* The participant list — searchbench's participants panel, as the legend of
-   this page rather than a filter. Rows are in column order, each with the
-   colour the participant wears in every graph and detail, and the one panel
-   that grows: it takes whatever height the three above it leave and scrolls.
+/* The participant list and its visibility toggles — searchbench's participants
+   panel. The one panel that grows: it takes whatever height the three above it
+   leave and scrolls.
 
-   There are no show/hide toggles, and that is the page's logic and not an
-   omission: a column hidden here would still be the best of some rows and the
-   participant every group's common recall bar has to reach, so removing it
-   from view would change the numbers left on screen. The head names the
-   hardware tier the results were measured on, which is the one thing every
-   column shares. */
+   Switching a participant off takes it out of the comparison as well as out of
+   view: the page recomputes every row's best, each group's common recall bar,
+   the scores, the coverage and the column order over the participants left on
+   screen (BenchPage), as searchbench measures every ratio against the fastest
+   engine shown.
 
-import type { ReactNode } from 'react';
-import { participantColor, type DatasetModel, type ResultModel } from '../../entities/results';
-import { fmtBytes, fmtKnobs } from '../../shared/lib/format';
+   Rows are in the order the columns take with nobody hidden, so a participant
+   switched off stays where it was instead of the list reshuffling under the
+   pointer. Two guards travel with the clicks, both from searchbench: one click
+   never hides the last participant on screen, and "select all" / "unselect
+   all" acts on this dataset's participants only, so one hidden while another
+   dataset was open keeps its state. */
+
+import type { Dispatch, ReactNode } from 'react';
+import { participantColor, type ResultModel } from '../../entities/results';
+import { fmtKnobs } from '../../shared/lib/format';
+import type { BenchAction } from '../../shared/model';
 import { Panel } from '../../shared/ui';
-
-/** The hardware tier every result of the dataset was run on, or a note that they differ. */
-function tierOf(dataset: DatasetModel): string {
-  const tiers = new Set(
-    dataset.results.map((r) => {
-      const h = r.raw.hardware;
-      if (!h) return 'unknown tier';
-      return [`${h.cpus} CPUs`, h.memory_bytes ? fmtBytes(h.memory_bytes) : null, h.storage || null].filter(Boolean).join(' · ');
-    }),
-  );
-  return tiers.size === 1 ? [...tiers][0] : 'mixed tiers (see each tooltip)';
-}
 
 function tooltip(r: ResultModel): string {
   const raw = r.raw;
+  const h = raw.hardware;
   return [
     `${r.name} · ${r.system} · ${raw.family} index`,
     raw.version ? `v${raw.version}` : null,
@@ -36,33 +31,44 @@ function tooltip(r: ResultModel): string {
     [raw.os, raw.date].filter(Boolean).join(' · ') || null,
     (raw.tags ?? []).join(' · ') || null,
     raw.index?.params ? `index: ${fmtKnobs(raw.index.params)}` : null,
-    raw.hardware ? `tier: ${raw.hardware.host}` : null,
+    h ? `tier: ${[h.host, h.storage].filter(Boolean).join(' · ')}` : null,
+    'click to show / hide',
   ]
     .filter(Boolean)
     .join('\n');
 }
 
 export function ParticipantsPanel({
-  dataset,
-  results,
+  everyone,
+  hidden,
+  shownCount,
+  dispatch,
 }: {
-  dataset: DatasetModel;
-  /** The dataset's participants, in column order. */
-  results: readonly ResultModel[];
+  /** Every participant of the dataset, hidden ones included, in the column order nobody hidden gives. */
+  everyone: readonly ResultModel[];
+  hidden: ReadonlySet<string>;
+  /** Participants of the dataset on screen now. */
+  shownCount: number;
+  dispatch: Dispatch<BenchAction>;
 }): ReactNode {
-  const tier = tierOf(dataset);
+  const present = everyone.map((r) => r.id);
+  const allShown = present.length > 0 && !present.some((p) => hidden.has(p));
   return (
     <Panel grow style={{ flex: 1, minHeight: 96, display: 'flex' }}>
       <div className="ph">
         <span className="pr">&gt;</span>
         <span className="pt">participants</span>
-        <span
-          className="note"
-          title={tier}
-          style={{ marginLeft: 'auto', minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
-        >
-          {tier}
-        </span>
+        {present.length > 0 && (
+          <button
+            type="button"
+            className="link"
+            style={{ marginLeft: 'auto' }}
+            data-act="toggle-all"
+            onClick={() => dispatch({ type: 'toggle-all', present })}
+          >
+            {allShown ? 'unselect all' : 'select all'}
+          </button>
+        )}
       </div>
       <div
         style={{
@@ -75,28 +81,42 @@ export function ParticipantsPanel({
           gap: 1,
         }}
       >
-        {results.map((r) => (
-          <div key={r.id} className="prow" data-pid={r.id} title={tooltip(r)}>
-            <span className="swatch" style={{ background: participantColor(r.id) }} />
-            <span
-              style={{
-                flex: 1,
-                minWidth: 0,
-                fontSize: '12.5px',
-                fontWeight: 600,
-                color: 'var(--fg)',
-                overflow: 'hidden',
-                textOverflow: 'ellipsis',
-                whiteSpace: 'nowrap',
-              }}
+        {everyone.map((r) => {
+          const off = hidden.has(r.id);
+          return (
+            <button
+              key={r.id}
+              type="button"
+              className="prow"
+              data-act="part"
+              data-pid={r.id}
+              aria-pressed={!off}
+              title={tooltip(r)}
+              style={{ opacity: off ? 0.4 : 1 }}
+              onClick={() => dispatch({ type: 'part', pid: r.id, visibleCount: shownCount })}
             >
-              {r.name}
-            </span>
-            <span style={{ fontSize: 10, color: 'var(--mut)', whiteSpace: 'nowrap' }}>
-              {r.raw.version ? 'v' + r.raw.version : ''}
-            </span>
-          </div>
-        ))}
+              <span className="swatch" style={{ background: participantColor(r.id) }} />
+              <span
+                style={{
+                  flex: 1,
+                  minWidth: 0,
+                  fontSize: '12.5px',
+                  fontWeight: 600,
+                  color: 'var(--fg)',
+                  textDecoration: off ? 'line-through' : 'none',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  whiteSpace: 'nowrap',
+                }}
+              >
+                {r.name}
+              </span>
+              <span style={{ fontSize: 10, color: 'var(--mut)', whiteSpace: 'nowrap' }}>
+                {off ? 'hidden' : r.raw.version ? 'v' + r.raw.version : ''}
+              </span>
+            </button>
+          );
+        })}
       </div>
     </Panel>
   );

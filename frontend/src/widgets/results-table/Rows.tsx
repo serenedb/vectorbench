@@ -18,6 +18,7 @@ import {
 import { ratioBg } from '../../shared/lib/color';
 import { fmtMetric, fmtRatio, fmtRecall, metricUnit } from '../../shared/lib/format';
 import type { CellMode, Detail } from '../../shared/model';
+import { OpensMark } from '../../shared/ui';
 import type { CoverageSpec, HeaderSpec, QuerySpec, ScoreSpec } from './model/tableRows';
 
 interface Common {
@@ -58,6 +59,7 @@ export function HeaderRow({ spec, results, gridCols, onDetail }: Common & { spec
       <button type="button" className="rowlab" data-act="header" data-key={spec.key} title={spec.title} onClick={() => onDetail({ kind: 'header', row: spec.key })}>
         {spec.label}
         <span className="un">{spec.unit}</span>
+        <OpensMark />
       </button>
       {results.map((r, i) => {
         const v = values[i];
@@ -140,7 +142,7 @@ export function QueryTableRow({
     <div className="trow" style={{ gridTemplateColumns: gridCols }}>
       <button type="button" className={'rowlab' + (open ? ' open' : '')} data-act="row" data-id={row.id} title="click: the curves behind this row, full screen" onClick={onToggle}>
         {row.id}
-        <span className="mk" />
+        <OpensMark />
         <span className="tg">{tags}</span>
       </button>
       {results.map((r) => {
