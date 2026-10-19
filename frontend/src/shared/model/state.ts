@@ -43,7 +43,7 @@ export const ROW_MODE_LABELS: Record<RowMode, string> = {
 /** The section whose coverage and score order the columns. */
 export type SortSection = 'nofilter' | 'filtered';
 
-/** The rows whose header click opens a detail rather than a graph. */
+/** The rows whose label opens a detail rather than ticking a curve. */
 export type HeaderRowKey = 'load' | 'disk' | 'memload' | 'startup' | 'memq:nofilter' | 'memq:filtered';
 
 export type Detail =
@@ -63,14 +63,14 @@ export interface BenchState {
       same database and index family in every one. */
   hidden: ReadonlySet<string>;
   sortSection: SortSection;
-  /** The query row whose inline graph is open. */
-  openRow: string | null;
-  /** Rows drawn in the full-screen graph; null = closed. */
+  /** The rows ticked in the table, whose curves the graph beside it draws.
+      Query ids in the bar reading, group keys in the group one; either kind is
+      read in the reading on screen (a group stands for its bars, a bar for its
+      group), so switching the reading keeps what was ticked. null = nothing
+      picked yet, which ticks the first row; [] = everything unticked. */
   graphRows: readonly string[] | null;
   /** Never encoded in the URL: a link cannot open a modal. */
   detail: Detail | null;
-  /** Maximised: the sidebar is hidden and the table takes the whole width. */
-  max: boolean;
 }
 
 export const INITIAL_STATE: BenchState = {
@@ -82,8 +82,6 @@ export const INITIAL_STATE: BenchState = {
   chips: new Set(),
   hidden: new Set(),
   sortSection: 'nofilter',
-  openRow: null,
   graphRows: null,
   detail: null,
-  max: false,
 };

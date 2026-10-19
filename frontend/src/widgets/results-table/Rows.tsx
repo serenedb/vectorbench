@@ -2,14 +2,19 @@
    row, the coverage row and a query row. All four share the sticky label
    button on the left and one cell per participant, coloured ClickBench-style
    by the ratio to the row's best; a cell with nothing to colour is grey and
-   carries its reason as text. */
+   carries its reason as text.
 
-import type { ReactNode } from 'react';
+   The labels say what a click on them does: a header row's carries the arrow
+   of a detail that opens, a query row's is the checkbox that draws the row's
+   curves beside the table, and score and coverage sort the columns. */
+
+import type { MouseEvent, ReactNode } from 'react';
 import {
   cellValue,
   failLabel,
   gridCell,
   ratioTo,
+  rowTitle,
   statusLabel,
   type Grid,
   type ResultModel,
@@ -25,6 +30,9 @@ interface Common {
   results: readonly ResultModel[];
   gridCols: string;
 }
+
+/** What a query or group label answers to, said where the pointer is. */
+export const PICK_TITLE = 'tick to draw this row’s curves beside the table · double-click: this row alone · shift-click: every row between';
 
 function Cell({ ratio, text, title, extra, onClick, act, data }: { ratio: number; text: string; title: string; extra?: string; onClick?: () => void; act?: string; data?: Record<string, string> }) {
   const attrs: Record<string, string> = {};
@@ -81,7 +89,7 @@ export function ScoreRow({ spec, results, gridCols, scores, sorted, onSort }: Co
     <div className="trow" style={{ gridTemplateColumns: gridCols }}>
       <button type="button" className={'rowlab' + (sorted ? ' open' : '')} data-act="sort" data-section={spec.section} title="geomean of each participant's ratios to the row's best over the visible rows it answers · click to order the columns by this section" onClick={onSort}>
         score
-        <span className="tg">geomean, visible rows</span>
+        <span className="tg">geomean</span>
         <span className="mk">{sorted ? '▲' : ''}</span>
       </button>
       {results.map((r, i) => {
@@ -121,28 +129,44 @@ export function QueryTableRow({
   gridCols,
   grid,
   cells,
-  open,
+  lead,
+  plotted,
   selected,
-  onToggle,
+  onPlot,
   onCell,
 }: Common & {
   spec: QuerySpec;
   grid: Grid;
   cells: CellMode;
-  open: boolean;
+  /** First of its filter case's block: a firmer rule above it. */
+  lead: boolean;
+  /** Ticked: its curves are on the graph. */
+  plotted: boolean;
   /** participant id of the cell whose detail is open, if any. */
   selected: string | null;
-  onToggle: () => void;
+  onPlot: (e: MouseEvent<HTMLButtonElement>) => void;
   onCell: (pid: string) => void;
 }): ReactNode {
   const row = spec.row;
   const best = grid.best.get(row.id) ?? null;
-  const tags = [row.filter === 'none' ? null : row.filter, `k=${row.k}`, row.exact ? 'exact' : `recall ${fmtRecall(row.recall)}`].filter(Boolean).join(' · ');
+  // In this reading a row is one recall bar of its group: the bar is what tells
+  // V01, V02 and V03 apart, so unlike a group row's label this one prints it.
+  const reading = row.exact ? 'exact' : '@ ' + fmtRecall(row.recall);
+  const tags = `${rowTitle(row)} ${reading}`;
   return (
-    <div className="trow" style={{ gridTemplateColumns: gridCols }}>
-      <button type="button" className={'rowlab' + (open ? ' open' : '')} data-act="row" data-id={row.id} title="click: the curves behind this row, full screen" onClick={onToggle}>
+    <div className={'trow' + (lead ? ' lead' : '')} style={{ gridTemplateColumns: gridCols }}>
+      <button
+        type="button"
+        role="checkbox"
+        aria-checked={plotted}
+        className={'rowlab pick' + (plotted ? ' on' : '')}
+        data-act="row"
+        data-id={row.id}
+        title={`${row.id} · ${rowTitle(row)} ${reading}\n${PICK_TITLE}`}
+        onClick={onPlot}
+      >
+        <span className="ck" aria-hidden="true" />
         {row.id}
-        <OpensMark />
         <span className="tg">{tags}</span>
       </button>
       {results.map((r) => {

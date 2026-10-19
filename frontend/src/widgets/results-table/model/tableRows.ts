@@ -8,8 +8,8 @@
    (lower is better for all of them); score and coverage come from scores.ts;
    query rows come from the grid. Only the visible rows (chips) are listed. */
 
-import { groupFor, type DatasetModel, type QueryRow, type ResultModel, type Section } from '../../../entities/results';
-import { fmtGB, fmtInt, fmtSec } from '../../../shared/lib/format';
+import { groupFor, tableOrder, type DatasetModel, type QueryRow, type ResultModel, type Section } from '../../../entities/results';
+import { fmtGB, fmtSec } from '../../../shared/lib/format';
 import type { HeaderRowKey } from '../../../shared/model';
 
 export interface SectionSpec {
@@ -81,18 +81,12 @@ function memoryRow(section: Section): HeaderSpec {
   };
 }
 
-/** @param participants how many participants the dataset has, hidden ones included */
-export function tableRows(dataset: DatasetModel, visible: readonly QueryRow[], participants = dataset.results.length): RowSpec[] {
+export function tableRows(dataset: DatasetModel, visible: readonly QueryRow[]): RowSpec[] {
   const fam = dataset.family;
   const out: RowSpec[] = [];
-  out.push({
-    kind: 'section',
-    key: 'sec:general',
-    title: 'GENERAL',
-    note: `${dataset.id} · ${fmtInt(dataset.rows)} rows · ${fam.dims}-d · ${fam.metric} · ${
-      dataset.results.length === participants ? participants : `${dataset.results.length} of ${participants}`
-    } participants · lower is better in every row`,
-  });
+  // What the dataset is and who is on screen, the toolbar and the status bar
+  // say; the heading keeps to what the rows under it share.
+  out.push({ kind: 'section', key: 'sec:general', title: 'GENERAL', note: 'lower is better in every row' });
   out.push(
     {
       kind: 'header',
@@ -137,7 +131,7 @@ export function tableRows(dataset: DatasetModel, visible: readonly QueryRow[], p
   );
   for (const section of ['nofilter', 'filtered'] as const) {
     const all = fam.queries.filter((q) => q.section === section);
-    const rows = visible.filter((q) => q.section === section);
+    const rows = tableOrder(visible.filter((q) => q.section === section));
     out.push({
       kind: 'section',
       key: `sec:${section}`,

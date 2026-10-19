@@ -8,14 +8,14 @@
    is always a number, and what each engine reaches on its own stays visible
    next to it. */
 
-import type { ReactNode } from 'react';
+import type { MouseEvent, ReactNode } from 'react';
 import type { GroupRowModel, ParticipantCurve, ResultModel } from '../../entities/results';
-import { ratioTo } from '../../entities/results';
+import { ratioTo, rowTitle } from '../../entities/results';
 import { ratioBg } from '../../shared/lib/color';
 import { fmtMetric, fmtRatio, fmtRecall, metricUnit } from '../../shared/lib/format';
 import type { CellMode } from '../../shared/model';
-import { OpensMark } from '../../shared/ui';
 import type { Direction, Metric } from '../../entities/results';
+import { PICK_TITLE } from './Rows';
 
 /* A measured recall, three decimals. `fmtRecall` is for the bars a family
    declares (0.90, 0.95, 0.99) and prints the raw float for anything else,
@@ -28,6 +28,11 @@ function reachText(c: ParticipantCurve): string {
   return c.reach === null ? '—' : r3(c.reach);
 }
 
+/** Where a group row is read: its common bar, or `exact`. */
+export function groupReading(row: GroupRowModel): string {
+  return row.exact ? 'exact' : row.bar === null || row.qualityGap ? 'no common bar' : `@ ${r3(row.bar)}`;
+}
+
 export function GroupTableRow({
   row,
   results,
@@ -35,9 +40,10 @@ export function GroupTableRow({
   metric,
   direction,
   cells,
-  open,
+  lead,
+  plotted,
   selected,
-  onToggle,
+  onPlot,
   onCell,
 }: {
   row: GroupRowModel;
@@ -46,18 +52,20 @@ export function GroupTableRow({
   metric: Metric;
   direction: Direction;
   cells: CellMode;
-  open: boolean;
+  /** First of its filter case's block: a firmer rule above it. */
+  lead: boolean;
+  /** Ticked: its curves are on the graph. */
+  plotted: boolean;
   selected: string | null;
-  onToggle: () => void;
+  onPlot: (e: MouseEvent<HTMLButtonElement>) => void;
   onCell: (pid: string) => void;
 }): ReactNode {
-  const tags = [
-    row.filter === 'none' ? null : row.filter,
-    `k=${row.k}`,
-    row.exact ? 'exact' : row.bar === null ? 'no common bar' : row.qualityGap ? 'no common bar' : `@ ${r3(row.bar)}`,
-  ]
-    .filter(Boolean)
-    .join(' · ');
+  // The label is the title: the key (`eq-10/10`) says the same, and the bar
+  // the row is read at is the graph's line (and this label's title). What a
+  // label still says beside the title is what no bar can: an exact row, or a
+  // group with no bar every participant can be read at.
+  const reading = groupReading(row);
+  const tail = row.exact ? 'exact' : row.bar === null || row.qualityGap ? 'no common bar' : null;
 
   const barNote =
     row.barKind === 'declared'
@@ -71,11 +79,20 @@ export function GroupTableRow({
           : 'no participant has a curve here';
 
   return (
-    <div className="trow" style={{ gridTemplateColumns: gridCols }}>
-      <button type="button" className={'rowlab' + (open ? ' open' : '')} data-act="row" data-id={row.key} title={barNote + ' · click for the full curves'} onClick={onToggle}>
-        {row.key}
-        <OpensMark />
-        <span className="tg">{tags}</span>
+    <div className={'trow' + (lead ? ' lead' : '')} style={{ gridTemplateColumns: gridCols }}>
+      <button
+        type="button"
+        role="checkbox"
+        aria-checked={plotted}
+        className={'rowlab pick' + (plotted ? ' on' : '')}
+        data-act="row"
+        data-id={row.key}
+        title={`${rowTitle(row)} ${reading}\n${barNote}\n${PICK_TITLE}`}
+        onClick={onPlot}
+      >
+        <span className="ck" aria-hidden="true" />
+        {rowTitle(row)}
+        {tail && <span className="tg">{tail}</span>}
       </button>
       {results.map((r) => {
         const c = row.curves.find((x) => x.pid === r.id);
@@ -107,7 +124,7 @@ export function GroupTableRow({
             <span className="gv">{row.qualityGap ? 'reaches ' + reachText(c) : v === null ? '—' : cells === 'relative' ? fmtRatio(ratio) : fmtMetric(metric, v)}</span>
             {!row.qualityGap && (
               <span className="greach" title="highest recall this participant's curve reaches">
-                ↗{reachText(c)}
+                @ {reachText(c)}
               </span>
             )}
           </div>

@@ -1,7 +1,8 @@
-/* The arrow to the top right after a row label that opens a modal — the row's
-   curves, or a GENERAL row's detail — so the label reads as clickable before
-   the pointer finds it. Drawn rather than typed: the cells already print `↗`
-   for the recall a curve reaches, and this is a different thing. */
+/* The arrow to the top right after a row label that opens a detail — a
+   GENERAL row or a memory row — so the label reads as clickable before the
+   pointer finds it. Query rows carry a checkbox instead: theirs draws curves
+   beside the table rather than opening anything. Drawn rather than typed, so
+   it reads as a mark and not as part of the label's text. */
 
 export function OpensMark() {
   return (

@@ -35,25 +35,74 @@ kit; its licence is `Urbanist-OFL.txt` next to the HTML.
 
 ## Layout
 
-SearchBench's page with VectorBench's controls. The header strip on top; under
-it a 300px sidebar and the table:
+One window, laid out like a desktop application rather than a page of cards:
+a title bar, a toolbar, the table and the graph side by side, a status bar.
 
-| panel | what it holds |
+| part | what it holds |
 |---|---|
-| dataset | one row per `<family>-<size>` with results: vectors × dimension · metric, participant count |
-| config | view (Throughput / Latency), rows (by group / by recall bar), cells (relative / absolute), metric (QPS, or the latency statistic) |
-| queries | the row chips: filter case, k, recall |
-| participants | show / hide per participant, and select all / unselect all; the list keeps the order the columns have with nobody hidden |
+| title bar | the product, the service switcher, the run selector when the host offers several benchmarks, the source link, the theme |
+| toolbar | the dataset (a menu: one row per `<family>-<size>` with results), the view (Throughput / Latency) and, in the Latency view, the statistic; then **Filter** — the row chips (filter case, k, recall) and the participants — and **Display** — rows by group / by recall bar, cells relative / absolute |
+| table (left) | the grid; every query row (group row, in the group reading) is a checkbox |
+| graph (right) | the curves of the ticked rows, on a plot 80% of the screen wide that scrolls under a pinned y axis |
+| status bar | what is on screen, the gestures, the colour ramp |
+
+What is changed while comparing — dataset, view, statistic — sits in the
+toolbar; what is set once — chips, participants, the row reading, the cell
+format — waits in the two menus, and while they are closed the toolbar still
+says what is on: a count on Filter and a pill per chip or hidden participant,
+each removable with a click.
+
+The table is the list the graph draws from. A click on a row ticks it and its
+curves join the graph; a double-click draws that row alone, a shift-click
+ticks every row from the last one clicked, and the graph's `clear` unticks
+them all. With nothing picked yet the first row is ticked. On the keyboard ↑ ↓
+walk the row labels and Space ticks the one with focus. In the group reading a
+group is drawn at the common bar its cells are read at; switching the reading
+keeps the ticks (a group stands for its bars, a bar for its group).
+
+A section's rows read in blocks, one per filter case, a firmer rule above
+each, and every row is named by what it asks — k, then the case:
+`k=10 · eq-10`, `k=100 · eq-10`. k leads because it is what changes inside a
+block; NO FILTER rows name no case, as the heading does. A family that lists a
+case's extra bars at the end of its query list (eq-1 at 0.99, eq-1 exact) has
+them joined to that case's block. The group key (`eq-10/10`) says what the
+label does and is not printed.
+
+In the group reading a label carries no recall bar: where a row is read is the
+graph's dashed line, and the label's tooltip. It still says `exact`, and
+`no common bar` where every participant cannot be read at one. A cell prints
+its number and, after it, `@ 0.997` — the highest recall that participant's
+curve reaches; the number itself is read at the row's common bar, the same for
+every participant of the row. In the bar reading the label keeps its bar, as
+the bar is what tells V01, V02 and V03 apart.
+
+Every participant keeps one colour in the table head, the menus and the graph:
+SereneDB the brand's purple, the others a palette with no purple in it
+(`src/shared/lib/color.ts`).
+
+The table is kept narrow so the graph gets the width: labels say each thing
+once, and a participant's column is as wide as the longest word of its name,
+which wraps onto a second line in the header.
+
+The plot is 80% of the screen wide, which beside the table is wider than its
+pane: what a reader compares sits close to recall 1, and a plot squeezed into
+the pane crowds exactly that part. It opens scrolled to recall 1, its y axis
+stays put, and it pans by the scrollbar, the wheel or a drag; ticking rows or
+moving the rule keeps where the reader left it.
+
+The rule between the panes drags (← → once focused); until it is moved the
+table takes the width its columns want, at most 62%. The width picked is kept
+in this browser; a double-click on the rule forgets it.
 
 Hiding a participant takes it out of the comparison, as SearchBench measures
 every ratio against the fastest engine on screen: each row's best, each
 group's common recall bar, the scores, the coverage and the column order are
 computed over the participants shown. One click never hides the last of them.
 
-`⛶ max` in the table's head hides the sidebar. Unlike SearchBench there is no
-query panel under the table: a cell, a row label and a GENERAL row each open
-their detail as a modal, and the labels that do carry an arrow to the top
-right.
+Unlike SearchBench there is no query panel under the table: a cell and a
+GENERAL row open their detail as a modal, and the GENERAL labels carry an
+arrow to the top right to say so. Escape closes a detail, or an open menu
+first.
 
 ## What the page computes
 
@@ -69,9 +118,10 @@ the graph and the detail can never disagree:
 | `model/cells.ts` | row → group (`"<filter>/<k>"`, `"exact/<filter>/<k>"`) for the selected view, the cell per participant, the grid per (dataset, view, metric) |
 | `model/scores.ts` | score (geomean of ratios to the row's best over the visible rows) and coverage per section — contracts section 10 — and the column order |
 | `model/rows.ts` | the chips: `filter:<case base>`, `k:<k>`, `recall:<r|exact>`; OR within a dimension, AND across |
-| `src/widgets/curve-graph/*` | the graph under a row and the full-screen graph: frontier lines, hollow dominated points, the row's recall line, every crossing |
+| `src/widgets/curve-graph/*` | the graph pane: frontier lines, hollow dominated points, each ticked row's recall line, every crossing |
 | `src/widgets/detail/*` | the cell detail (statement, every point, the bracket) and the GENERAL details (load phases with "other", on-disk info, memory, startup distribution) |
-| `src/widgets/*-panel/*` | the sidebar: dataset, config, queries (chips) and participants |
+| `src/widgets/toolbar/*` | the toolbar and its menus: dataset, view and statistic; Filter (chips, participants), Display (rows, cells) |
+| `src/pages/bench/model/selection.ts` | the ticked rows in the reading on screen, and the first row when nothing is picked yet |
 
 The `filter` chips group cases by predicate (`eq` covers eq-10 / eq-1 /
 eq-0.1), as the mock in DESIGN.md section 2 shows.
@@ -134,9 +184,11 @@ playground as a submodule bump; nothing in the playground has to change.
 
 Every selector and chip is encoded in `?s=<base64url json>`; readable
 overrides work next to it and are canonicalised on the next render:
-`?dataset=wiki-v3-1024-100k&view=latency&metric=p99&cells=absolute&chips=k:10,filter:eq&hidden=qdrant-hnsw&sort=filtered&row=V14&graph=V14,V35&theme=dark&expanded=1`
-(`hidden` lists participant ids switched off, `expanded=1` is ⛶ max: the
-sidebar hidden). Modals are never encoded.
+`?dataset=wiki-v3-1024-100k&view=latency&metric=p99&cells=absolute&rows=bars&chips=k:10,filter:eq&hidden=qdrant-hnsw&sort=filtered&graph=V14,V35&theme=dark`
+(`hidden` lists participant ids switched off; `graph` the ticked rows, query
+ids or group keys in either reading, `-` for none ticked). A link from before
+the graph moved beside the table still opens: its `row=` is ticked, and
+`expanded=` is ignored. Modals and the split are never encoded.
 
 ## Checks
 
@@ -156,9 +208,10 @@ TypeScript types itself, so the model is tested from source):
 - `model.test.mjs` — the generated sample through the loader: cells, scores,
   coverage, column order, chips, the loader's strictness, the URL codec;
 - `offline.test.mjs` — the committed `index.html` over `file://` with the
-  network disabled: sidebar and table, row graph, full-screen graph, cell and
-  header details, selectors, the dataset switch, ⛶ max, theme, reload, and
-  zero network requests.
+  network disabled: the window (table and graph side by side, the rule that
+  drags), the menus, ticking rows by click, double-click and keyboard, cell
+  and header details, the selectors and the reading switch, the dataset
+  switch, theme, reload, and zero network requests.
 
 Rebuild before running the browser test after changing source or results. On a
 host where Playwright's Chromium cannot start for lack of system libraries and
