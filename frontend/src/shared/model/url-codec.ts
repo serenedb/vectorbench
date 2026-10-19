@@ -82,6 +82,7 @@ export function shortState(state: BenchState, env: CodecEnv, theme: ThemeName): 
   put('r', state.openRow, null);
   put('g', (state.graphRows ?? []).join(','), '');
   put('th', theme, 'light');
+  put('x', state.max ? 1 : 0, 0);
   return compact;
 }
 
@@ -112,6 +113,7 @@ const FIELDS: Record<string, string> = {
   row: 'r',
   graph: 'g',
   theme: 'th',
+  expanded: 'x',
 };
 
 /**
@@ -149,6 +151,7 @@ export function restoreUrlState(search: string, env: CodecEnv, initial: BenchSta
     patch.openRow = typeof row === 'string' && rows.has(row) ? row : null;
     const graph = split('graph').filter((id) => rows.has(id));
     patch.graphRows = graph.length ? graph : null;
+    patch.max = String(get('expanded')) === '1';
     theme = oneOf<ThemeName>('theme', ['dark', 'light'], null);
   } catch {
     /* a malformed link opens the default view rather than a blank page */

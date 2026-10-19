@@ -23,7 +23,9 @@ export type BenchAction =
   | { type: 'detail'; detail: Detail }
   | { type: 'detail-close' }
   /** Escape: the detail first, then the full-screen graph. */
-  | { type: 'escape' };
+  | { type: 'escape' }
+  /** Hide or restore the sidebar. */
+  | { type: 'max' };
 
 export function benchReducer(state: BenchState, action: BenchAction): BenchState {
   switch (action.type) {
@@ -77,5 +79,7 @@ export function benchReducer(state: BenchState, action: BenchAction): BenchState
       if (state.detail) return { ...state, detail: null };
       if (state.graphRows) return { ...state, graphRows: null };
       return state;
+    case 'max':
+      return { ...state, max: !state.max };
   }
 }

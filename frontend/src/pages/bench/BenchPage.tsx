@@ -1,8 +1,14 @@
-/* The page frame: header, the synthetic-data banner when the file says so, the
-   toolbar with its chips, the table, and whichever modal is open. Everything
-   below the toolbar is a pure function of `state` and the benchmark: the grid
-   is computed once per (dataset, view, metric), the scores once per grid and
-   visible rows, and the column order from the section the reader picked. */
+/* The page frame — searchbench's: the header, the synthetic-data banner when
+   the file says so, then two columns, the sidebar (dataset, config, query
+   chips, participants) and the table, and whichever modal is open. ⛶ max in
+   the table's head drops the sidebar. There is no query panel under the
+   table: a cell, a row label and a GENERAL row each open their detail as a
+   modal, which shows more than a strip would hold.
+
+   Everything right of the sidebar is a pure function of `state` and the
+   benchmark: the grid is computed once per (dataset, view, metric), the scores
+   once per grid and visible rows, and the column order from the section the
+   reader picked. */
 
 import { useMemo } from 'react';
 import {
@@ -22,12 +28,15 @@ import {
   type SectionScores,
 } from '../../entities/results';
 import { useBenchShortcuts, useBenchState, type BenchEnv } from '../../shared/model';
+import { ConfigPanel } from '../../widgets/config-panel/ConfigPanel';
 import { FullGraphModal } from '../../widgets/curve-graph/FullGraphModal';
+import { DatasetPanel } from '../../widgets/dataset-panel/DatasetPanel';
 import { CellDetailModal } from '../../widgets/detail/CellDetailModal';
 import { HeaderDetailModal } from '../../widgets/detail/HeaderDetailModal';
 import { BenchHeader } from '../../widgets/header/BenchHeader';
+import { ParticipantsPanel } from '../../widgets/participants-panel/ParticipantsPanel';
+import { QueriesPanel } from '../../widgets/queries-panel/QueriesPanel';
 import { ResultsTable } from '../../widgets/results-table';
-import { Toolbar } from '../../widgets/toolbar/Toolbar';
 
 const EMPTY_TAGS: ReadonlySet<string> = new Set();
 
@@ -111,8 +120,40 @@ export function BenchPage() {
           </span>
         </div>
       )}
-      <Toolbar bench={BENCH} dataset={dataset} state={state} dispatch={dispatch} />
-      <ResultsTable dataset={dataset} results={results} rows={rows} grid={grid} scores={scores} state={state} dispatch={dispatch} />
+      <div
+        style={{
+          display: 'grid',
+          gridTemplateColumns: state.max ? '1fr' : '300px 1fr',
+          columnGap: 14,
+          flex: 1,
+          minHeight: 0,
+        }}
+      >
+        {!state.max && (
+          <aside
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              gap: 11,
+              minHeight: 0,
+              minWidth: 0,
+              // A short window squeezes the participant list first (it grows
+              // into whatever is left); past that the column scrolls rather
+              // than cutting off the panels at the bottom of the page.
+              overflowY: 'auto',
+            }}
+          >
+            <DatasetPanel bench={BENCH} dataset={dataset} dispatch={dispatch} />
+            <ConfigPanel state={state} dispatch={dispatch} />
+            <QueriesPanel dataset={dataset} state={state} dispatch={dispatch} />
+            <ParticipantsPanel dataset={dataset} results={results} />
+          </aside>
+        )}
+
+        <main style={{ display: 'flex', flexDirection: 'column', gap: 11, minWidth: 0, minHeight: 0 }}>
+          <ResultsTable dataset={dataset} results={results} rows={rows} grid={grid} scores={scores} state={state} dispatch={dispatch} />
+        </main>
+      </div>
       {state.graphRows && <FullGraphModal dataset={dataset} results={results} grid={grid} state={state} dispatch={dispatch} />}
       {detail?.kind === 'header' && <HeaderDetailModal dataset={dataset} results={results} row={detail.row} dispatch={dispatch} />}
       {detail?.kind === 'cell' && detailResult && detailRow && (

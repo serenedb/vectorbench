@@ -66,6 +66,8 @@ export interface BenchState {
   graphRows: readonly string[] | null;
   /** Never encoded in the URL: a link cannot open a modal. */
   detail: Detail | null;
+  /** Maximised: the sidebar is hidden and the table takes the whole width. */
+  max: boolean;
 }
 
 export const INITIAL_STATE: BenchState = {
@@ -79,4 +81,5 @@ export const INITIAL_STATE: BenchState = {
   openRow: null,
   graphRows: null,
   detail: null,
+  max: false,
 };

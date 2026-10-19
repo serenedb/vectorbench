@@ -30,7 +30,24 @@ JS, CSS, fonts and the current `frontend/results.json` (its sha256 is written
 to a `<meta name="vectorbench-results-sha256">` tag). Commit the HTML. It can
 be opened with a double click, copied by itself, or hosted as a static page.
 No CDN, module fetch or JSON fetch is needed to render it. URL state and the
-theme toggle work in both modes.
+theme toggle work in both modes. The embedded face is Urbanist from the design
+kit; its licence is `Urbanist-OFL.txt` next to the HTML.
+
+## Layout
+
+SearchBench's page with VectorBench's controls. The header strip on top; under
+it a 300px sidebar and the table:
+
+| panel | what it holds |
+|---|---|
+| dataset | one row per `<family>-<size>` with results: vectors × dimension · metric, participant count |
+| config | view (Throughput / Latency), rows (by group / by recall bar), cells (relative / absolute), metric (QPS, or the latency statistic) |
+| queries | the row chips: filter case, k, recall |
+| participants | the columns in their current order and colours, with the hardware tier in the head; a legend, not a filter |
+
+`⛶ max` in the table's head hides the sidebar. Unlike SearchBench there is no
+query panel under the table: a cell, a row label and a GENERAL row each open
+their detail as a modal.
 
 ## What the page computes
 
@@ -48,6 +65,7 @@ the graph and the detail can never disagree:
 | `model/rows.ts` | the chips: `filter:<case base>`, `k:<k>`, `recall:<r|exact>`; OR within a dimension, AND across |
 | `src/widgets/curve-graph/*` | the graph under a row and the full-screen graph: frontier lines, hollow dominated points, the row's recall line, every crossing |
 | `src/widgets/detail/*` | the cell detail (statement, every point, the bracket) and the GENERAL details (load phases with "other", on-disk info, memory, startup distribution) |
+| `src/widgets/*-panel/*` | the sidebar: dataset, config, queries (chips) and participants |
 
 The `filter` chips group cases by predicate (`eq` covers eq-10 / eq-1 /
 eq-0.1), as the mock in DESIGN.md section 2 shows.
@@ -85,12 +103,18 @@ anchors and absolute service URLs. Styles are scoped under
 `vectorbench` (not yet in the kit's service registry — the header falls back to
 the product name until it is).
 
+SereneDB Playground carries this repository as the `products/vectorbench`
+submodule, compiles `frontend/` into its single web build, and serves this
+`results.json` as a static file at `/vectorbench-data/results.json` that its
+loader fetches before importing the product. A new benchmark reaches the
+playground as a submodule bump; nothing in the playground has to change.
+
 ## URL state
 
 Every selector and chip is encoded in `?s=<base64url json>`; readable
 overrides work next to it and are canonicalised on the next render:
-`?dataset=wiki-v3-1024-100k&view=latency&metric=p99&cells=absolute&chips=k:10,filter:eq&sort=filtered&row=V14&graph=V14,V35&theme=dark`.
-Modals are never encoded.
+`?dataset=wiki-v3-1024-100k&view=latency&metric=p99&cells=absolute&chips=k:10,filter:eq&sort=filtered&row=V14&graph=V14,V35&theme=dark&expanded=1`
+(`expanded=1` is ⛶ max: the sidebar hidden). Modals are never encoded.
 
 ## Checks
 
@@ -110,8 +134,9 @@ TypeScript types itself, so the model is tested from source):
 - `model.test.mjs` — the generated sample through the loader: cells, scores,
   coverage, column order, chips, the loader's strictness, the URL codec;
 - `offline.test.mjs` — the committed `index.html` over `file://` with the
-  network disabled: table, row graph, full-screen graph, cell and header
-  details, selectors, theme, reload, and zero network requests.
+  network disabled: sidebar and table, row graph, full-screen graph, cell and
+  header details, selectors, the dataset switch, ⛶ max, theme, reload, and
+  zero network requests.
 
 Rebuild before running the browser test after changing source or results. On a
 host where Playwright's Chromium cannot start for lack of system libraries and

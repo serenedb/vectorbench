@@ -8,7 +8,7 @@ import type { DatasetModel, Grid, QueryRow, ResultModel, Section, SectionScores 
 import { groupRows } from '../../entities/results';
 import { fmtInt } from '../../shared/lib/format';
 import { VIEW_LABELS, type BenchAction, type BenchState } from '../../shared/model';
-import { Panel } from '../../shared/ui';
+import { MaxButton, Panel } from '../../shared/ui';
 import { CoverageRow, HeaderRow, QueryTableRow, ScoreRow } from './Rows';
 import { GroupTableRow } from './GroupRow';
 import { TableHead } from './TableHead';
@@ -56,6 +56,7 @@ export function ResultsTable({ dataset, results, rows, grid, scores, state, disp
         <span className="pr">&gt;</span>
         <span className="pt">results</span>
         <span className="note" style={{ marginLeft: 'auto', fontSize: 11 }}>{meta}</span>
+        <MaxButton state={state} dispatch={dispatch} />
       </div>
 
       <div className="tscroll" id="tscroll">

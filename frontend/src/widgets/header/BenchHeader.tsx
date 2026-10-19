@@ -5,7 +5,7 @@
 import { Link, useInRouterContext } from 'react-router-dom';
 import { findService, GithubIcon, ServiceSwitcher, SereneLogo, useTheme } from '@serenedb/ui';
 import type { LinkRenderer, Theme } from '@serenedb/ui';
-import { PRODUCT_NAME, SERVICE_ID, SOURCE_URL } from '../../shared/config';
+import { PRODUCT_NAME, PRODUCT_PATH, SERVICE_ID, SOURCE_URL } from '../../shared/config';
 import { Panel } from '../../shared/ui';
 
 const THEMES: readonly Theme[] = ['light', 'dark'];
@@ -31,7 +31,9 @@ export function BenchHeader() {
     <Panel className="vb-head">
       <div style={{ padding: '8px 14px', display: 'flex', alignItems: 'center', gap: 10 }}>
         {routerLink({
-          href: internal ? (service?.path ?? '/') : window.location.pathname,
+          // The product's own path until the kit's registry lists it, not the
+          // playground's front page.
+          href: internal ? (service?.path ?? PRODUCT_PATH) : window.location.pathname,
           className: 'vb-brand',
           children: (
             <>
