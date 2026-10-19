@@ -102,6 +102,21 @@ provideResults(resultsJson);   // the object `vectorbench assemble` writes
 const { ProductApp, path, serviceId } = await import('@vectorbench/frontend');
 ```
 
+A host that keeps several benchmarks for one page (SereneDB Playground's
+operator panel does) can also hand over the list, before the same import:
+
+```ts
+const { provideResults, provideRuns } = await import('@vectorbench/frontend/results');
+provideResults(resultsJson);
+provideRuns({ runs, currentId, onSelect });   // runs: { id, date, participants }[]
+```
+
+The header then offers them in a selector labelled `2026-10-12 · 3
+participants`. Picking one only calls `onSelect`: the results are frozen when
+the product's modules are first imported, so showing another run is a new
+document, and that is the host's to load. The standalone build never calls
+`provideRuns`, and the selector does not render.
+
 The host supplies `ThemeProvider` and its React Router context. Inside that
 context, header links use the host router; standalone links use ordinary
 anchors and absolute service URLs. Styles are scoped under

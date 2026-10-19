@@ -5,10 +5,21 @@
 import { Link, useInRouterContext } from 'react-router-dom';
 import { findService, GithubIcon, ServiceSwitcher, SereneLogo, useTheme } from '@serenedb/ui';
 import type { LinkRenderer, Theme } from '@serenedb/ui';
+import { takeRuns, type BenchRunOption } from '../../entities/results/model/source';
 import { PRODUCT_NAME, PRODUCT_PATH, SERVICE_ID, SOURCE_URL } from '../../shared/config';
 import { Panel } from '../../shared/ui';
 
 const THEMES: readonly Theme[] = ['light', 'dark'];
+
+/* How a run reads: `2026-10-12 · 3 participants`, and just `3 participants`
+   when the results carry no date. The host formats the same string for its
+   operator panel and keeps its own copy, because sharing one would mean a
+   dependency on the host's package — and nothing here may need a backend, or
+   the self-contained index.html stops opening over file://. */
+function runLabel(run: BenchRunOption): string {
+  const participants = `${run.participants} participant${run.participants === 1 ? '' : 's'}`;
+  return run.date === null ? participants : `${run.date} · ${participants}`;
+}
 
 function repoLabel(href: string): string {
   const m = /^https:\/\/github\.com\/([^/]+)\/([^/?#]+)/.exec(href);
@@ -26,6 +37,9 @@ export function BenchHeader() {
   const { theme, setTheme } = useTheme();
   const service = findService(SERVICE_ID);
   const name = service?.name ?? PRODUCT_NAME;
+  /* One run is the page saying what it is, not a choice, and the standalone
+     offers none at all — in both cases the control would be a dead widget. */
+  const runs = takeRuns();
 
   return (
     <Panel className="vb-head">
@@ -59,7 +73,49 @@ export function BenchHeader() {
 
         <ServiceSwitcher currentId={SERVICE_ID} internal={internal} renderLink={routerLink} />
 
-        <span style={{ fontSize: 11, color: 'var(--mut)', marginLeft: 6, whiteSpace: 'nowrap' }}>
+        {/* searchbench's run selector: beside the identity, because it names
+            which benchmark is on screen. A native select, drawn in the page's
+            theme through `color-scheme`; `value` tracks the host and never
+            local state, because a pick loads another document and a control
+            that moved on its own would claim a switch that has not happened. */}
+        {runs !== null && runs.runs.length > 1 && (
+          <select
+            aria-label="Benchmark run"
+            title="Which measurement of this benchmark to show"
+            value={runs.currentId}
+            onChange={(e) => runs.onSelect(e.currentTarget.value)}
+            style={{
+              border: '.5px solid var(--line)',
+              borderRadius: 0,
+              background: 'var(--inset)',
+              color: 'var(--fg)',
+              fontFamily: 'inherit',
+              fontSize: 11,
+              fontWeight: 700,
+              padding: '4px 6px',
+            }}
+          >
+            {runs.runs.map((run) => (
+              <option key={run.id} value={run.id}>
+                {runLabel(run)}
+              </option>
+            ))}
+          </select>
+        )}
+
+        {/* The one thing on this strip that gives way: with the run selector
+            beside it the row would otherwise outgrow the 1280px layout. */}
+        <span
+          style={{
+            fontSize: 11,
+            color: 'var(--mut)',
+            marginLeft: 6,
+            whiteSpace: 'nowrap',
+            minWidth: 0,
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+          }}
+        >
           vector search in databases · one number per query, read off every engine's own recall curve
         </span>
 
