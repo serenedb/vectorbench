@@ -19,6 +19,10 @@ test('every group yields a readable number for every participant that has a curv
       for (const r of rows) {
         for (const c of r.curves) {
           if (c.reach === null) continue; // no curve at all: genuinely unsupported
+          if (r.qualityGap && c.reach < r.floor) {
+            assert.equal(c.value, null, `${ds.id} ${view} ${r.key} ${c.pid}: reach ${c.reach} under floor ${r.floor} but has a value`);
+            continue;
+          }
           assert.notEqual(c.value, null, `${ds.id} ${view} ${r.key} ${c.pid}: curve reaches ${c.reach} but no value at bar ${r.bar}`);
         }
       }

@@ -30,7 +30,9 @@ function reachText(c: ParticipantCurve): string {
 
 /** Where a group row is read: its common bar, or `exact`. */
 export function groupReading(row: GroupRowModel): string {
-  return row.exact ? 'exact' : row.bar === null || row.qualityGap ? 'no common bar' : `@ ${r3(row.bar)}`;
+  if (row.exact) return 'exact';
+  if (row.qualityGap) return `@ ${fmtRecall(row.floor as number)}`;
+  return row.bar === null ? 'no common bar' : `@ ${r3(row.bar)}`;
 }
 
 export function GroupTableRow({
@@ -65,14 +67,14 @@ export function GroupTableRow({
   // label still says beside the title is what no bar can: an exact row, or a
   // group with no bar every participant can be read at.
   const reading = groupReading(row);
-  const tail = row.exact ? 'exact' : row.bar === null || row.qualityGap ? 'no common bar' : null;
+  const tail = row.exact ? 'exact' : row.bar === null ? 'no common bar' : null;
 
   const barNote =
     row.barKind === 'declared'
       ? `read at recall ${r3(row.bar as number)}, the strongest bar the family declares that every participant here can be read at`
       : row.barKind === 'common-reach'
         ? row.qualityGap
-          ? `no participant-wide bar reaches the weakest the family declares (${fmtRecall(row.floor as number)}): the engines differ in what they can answer here at all, so the row reports what each reaches instead of a speed nobody can be held to`
+          ? `read at recall ${fmtRecall(row.floor as number)}, the weakest bar the family declares; ✗ marks a participant whose curve never reaches it`
           : `read at recall ${r3(row.bar as number)} — no declared bar is reachable by every participant, so the row falls back to the strongest recall they all reach`
         : row.barKind === 'exact'
           ? 'exact: every participant answers at recall 1 or not at all'
@@ -103,17 +105,22 @@ export function GroupTableRow({
             </div>
           );
         }
-        const v = row.qualityGap ? null : c.value;
+        const v = c.value;
+        const miss = row.qualityGap && v === null;
         const ratio = v !== null && row.best !== null ? ratioTo(v, row.best, direction) : 1;
         const lead = c.lead ? `leads ${fmtRecall(c.lead[0])}–${fmtRecall(c.lead[1])}` : 'never fastest';
         const title =
           `${r.name} · ${row.key} · ` +
-          (v === null ? 'no number at the row bar' : `${fmtMetric(metric, v)} ${metricUnit(metric)} · ${fmtRatio(ratio)} of the best`) +
+          (miss
+            ? `never reaches recall ${fmtRecall(row.floor as number)}`
+            : v === null
+              ? 'no number at the row bar'
+              : `${fmtMetric(metric, v)} ${metricUnit(metric)} · ${fmtRatio(ratio)} of the best`) +
           ` · reaches recall ${reachText(c)} · ${lead} — click for the measurements`;
         return (
           <div
             key={r.id}
-            className={'cell q gcell' + (row.qualityGap ? ' fail' : '') + (selected === r.id ? ' sel' : '')}
+            className={'cell q gcell' + (miss ? ' fail' : '') + (selected === r.id ? ' sel' : '')}
             style={{ background: v === null ? undefined : ratioBg(ratio) }}
             title={title}
             data-act="cell"
@@ -121,8 +128,8 @@ export function GroupTableRow({
             data-pid={r.id}
             onClick={() => onCell(r.id)}
           >
-            <span className="gv">{row.qualityGap ? 'reaches ' + reachText(c) : v === null ? '—' : cells === 'relative' ? fmtRatio(ratio) : fmtMetric(metric, v)}</span>
-            {!row.qualityGap && (
+            <span className="gv">{miss ? '✗ max ' + reachText(c) : v === null ? '—' : cells === 'relative' ? fmtRatio(ratio) : fmtMetric(metric, v)}</span>
+            {!miss && (
               <span className="greach" title="highest recall this participant's curve reaches">
                 @ {reachText(c)}
               </span>

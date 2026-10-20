@@ -65,6 +65,14 @@ function valueAt(front: readonly Point[], direction: Direction, r: number): numb
   return cellValue(crossing(front as Point[], direction, r));
 }
 
+/** Best measured value at a recall of at least r, or null when the curve stops short of it. */
+function measuredAtOrAbove(front: readonly Point[], direction: Direction, r: number): number | null {
+  const cmp = better(direction);
+  let best: number | null = null;
+  for (const p of front) if (p.recall + 1e-9 >= r && (best === null || cmp(p.value, best))) best = p.value;
+  return best;
+}
+
 /** Where each participant is on top, sampled over the recall span the row covers.
 
    A lead is reported as the span between the first and last sample a
@@ -156,15 +164,21 @@ export function groupRows(dataset: DatasetModel, view: View, metric: Metric, dir
       }
     }
 
+    const declaredBars = barsOf(rows);
+    const floor = declaredBars.length ? declaredBars[declaredBars.length - 1] : null;
+    const qualityGap = !head.exact && live.length > 0 && floor !== null && (bar === null || bar < floor - 1e-9);
+
     for (const c of curves) {
       const v =
         barKind === 'exact'
           ? c.front.length
             ? c.front[c.front.length - 1].value
             : null
-          : bar === null
-            ? null
-            : valueAt(c.front, direction, bar);
+          : qualityGap
+            ? (valueAt(c.front, direction, floor as number) ?? measuredAtOrAbove(c.front, direction, floor as number))
+            : bar === null
+              ? null
+              : valueAt(c.front, direction, bar);
       (c as { value: number | null }).value = v;
     }
 
@@ -178,12 +192,10 @@ export function groupRows(dataset: DatasetModel, view: View, metric: Metric, dir
     const cmp = better(direction);
     for (const c of curves) if (c.value !== null && (best === null || cmp(c.value, best))) best = c.value;
 
-    const declaredBars = barsOf(rows);
-    const floor = declaredBars.length ? declaredBars[declaredBars.length - 1] : null;
     out.push({
       key,
       floor,
-      qualityGap: !head.exact && bar !== null && floor !== null && bar < floor - 1e-9,
+      qualityGap,
       section: head.section,
       filter: head.filter,
       k: head.k,
