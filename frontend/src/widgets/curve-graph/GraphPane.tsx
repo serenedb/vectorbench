@@ -73,7 +73,8 @@ export function GraphPane({
       }),
     [plotted, mode, groups, dataset, results, grid],
   );
-  const data = useMemo(() => buildGraphData(results, rows, grid), [results, rows, grid]);
+  const [showDominated, setShowDominated] = useState(false);
+  const data = useMemo(() => buildGraphData(results, rows, grid, showDominated), [results, rows, grid, showDominated]);
 
   // Always mounted, so the size is known by the time a first row is ticked.
   const [viewRef, view] = useSize<HTMLDivElement>();
@@ -145,6 +146,9 @@ export function GraphPane({
           {rows.length} row{rows.length === 1 ? '' : 's'}
           {ticked > rows.length ? ` · ${ticked - rows.length} more ticked under the filters` : ''}
         </span>
+        <label className="pn" title="also draw the measured points that are not on a participant's frontier">
+          <input type="checkbox" data-act="plot-dominated" checked={showDominated} onChange={(e) => setShowDominated(e.target.checked)} /> dominated points
+        </label>
         {ticked > 0 && (
           <button type="button" className="link" data-act="plot-clear" title="untick every row" onClick={onClear}>
             clear

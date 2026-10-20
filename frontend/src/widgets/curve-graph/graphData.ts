@@ -117,7 +117,7 @@ export interface GraphData {
   yMax: number;
 }
 
-export function buildGraphData(results: readonly ResultModel[], rows: readonly PlotRow[], grid: Grid): GraphData {
+export function buildGraphData(results: readonly ResultModel[], rows: readonly PlotRow[], grid: Grid, showDominated = false): GraphData {
   const groups: { key: string; title: string }[] = [];
   for (const r of rows) {
     if (groups.some((g) => g.key === r.query.key)) continue;
@@ -132,10 +132,11 @@ export function buildGraphData(results: readonly ResultModel[], rows: readonly P
     for (const res of results) {
       const g = groupFor(res, row, grid.view);
       if (!g || g.status !== 'ok') continue;
-      const pts = usablePoints(g.points ?? [], grid.metric);
-      if (!pts.length) continue;
-      const front = frontier(pts, grid.direction);
+      const usable = usablePoints(g.points ?? [], grid.metric);
+      if (!usable.length) continue;
+      const front = frontier(usable, grid.direction);
       const onFront = new Set(front);
+      const pts = showDominated ? usable : usable.filter((p) => onFront.has(p));
       for (const p of pts) {
         yMin = Math.min(yMin, p.value);
         yMax = Math.max(yMax, p.value);
