@@ -39,10 +39,11 @@ export function fmtQps(v: number | null | undefined): string {
   return v >= 10 ? Math.round(v).toString() : v.toFixed(1);
 }
 
-/** Milliseconds with two decimals. */
+/** Milliseconds, three significant figures at most: "0.42", "7.06", "38.0", "1712".
+    A latency measured under load runs to seconds, where two decimals are noise. */
 export function fmtMs(v: number | null | undefined): string {
   if (typeof v !== 'number' || !Number.isFinite(v)) return '—';
-  return v.toFixed(2);
+  return v >= 100 ? Math.round(v).toString() : v >= 10 ? v.toFixed(1) : v.toFixed(2);
 }
 
 /** The current metric's unit, as a suffix: "QPS" or "ms". */

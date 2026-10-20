@@ -25,6 +25,7 @@ export {
   caseBase,
   defaultDatasetOfFamily,
   groupKey,
+  latencyClients,
   pickDefaultDataset,
   splitDatasetId,
 } from './model/model';

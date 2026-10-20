@@ -38,7 +38,8 @@ test('committed HTML renders, graphs and details work over file:// without netwo
     // view is off where nobody measured latency. Read it off the same file the page was built from.
     const measured = (pred) => results.results.some((r) => r.groups.some(pred));
     const hasFiltered = measured((g) => g.filter !== 'none');
-    const hasLatency = measured((g) => g.view === 'latency');
+    // A latency run, or the per-query latencies a throughput run records: the Latency view reads either.
+    const hasLatency = measured((g) => g.view === 'latency' || (g.points ?? []).some((pt) => pt.latency_ms));
 
     // the table: every participant of the default dataset is a column, the sections are there
     const text = await body();

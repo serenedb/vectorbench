@@ -7,23 +7,27 @@
    each removable with a click. */
 
 import type { Dispatch, ReactNode } from 'react';
-import { allChipTags, chipLabel, type Benchmark, type ChipDimension, type DatasetModel, type ResultModel } from '../../entities/results';
+import { allChipTags, chipLabel, latencyClients, type Benchmark, type ChipDimension, type DatasetModel, type ResultModel } from '../../entities/results';
 import { LATENCY_METRICS, type BenchAction, type BenchState, type LatencyMetric, type View } from '../../shared/model';
 import { Dropdown, Seg, type SegOption } from '../../shared/ui';
 import { DatasetLabel, DatasetMenu } from './DatasetMenu';
 import { DisplayMenu } from './DisplayMenu';
 import { FilterMenu } from './FilterMenu';
 
-/** The Latency view is off on a dataset where no participant measured it, rather than a table of empty cells. */
-function viewOptions(latency: boolean): readonly SegOption<View>[] {
+/** The Latency view says what it reads — a latency run, or the latencies the throughput run
+    recorded per query — and is off only on a dataset where nothing records latency. */
+function viewOptions(dataset: DatasetModel): readonly SegOption<View>[] {
+  const clients = latencyClients(dataset);
   return [
     { label: 'Throughput', v: 'throughput', title: '32 clients · queries per second, higher is better' },
-    latency
-      ? { label: 'Latency', v: 'latency', title: '1 client · milliseconds, lower is better' }
-      : { label: 'Latency', v: 'latency', disabled: true, title: 'no participant measured latency on this dataset' },
+    clients === null
+      ? { label: 'Latency', v: 'latency', disabled: true, title: 'nothing on this dataset records latency' }
+      : dataset.latency?.from === 'latency'
+        ? { label: 'Latency', v: 'latency', title: `${clients} · milliseconds, lower is better` }
+        : { label: 'Latency', v: 'latency', title: `the per-query latencies of the throughput run, ${clients} · milliseconds, lower is better` },
   ];
 }
-const LATENCY: readonly SegOption<LatencyMetric>[] = LATENCY_METRICS.map((m) => ({ label: m, v: m, title: `the ${m} of one client's latencies, ms` }));
+const LATENCY: readonly SegOption<LatencyMetric>[] = LATENCY_METRICS.map((m) => ({ label: m, v: m, title: `the ${m} of the per-query latencies, ms` }));
 
 /** A pill names its dimension where the chip alone would not: `eq` is a filter, `0.95` a recall. */
 function pillText(tag: string): string {
@@ -52,7 +56,6 @@ export function Toolbar({
   const shownCount = everyone.length - hiddenHere.length;
   const chips = [...state.chips].sort();
   const active = chips.length + hiddenHere.length;
-  const latency = everyone.some((r) => [...r.groups.keys()].some((k) => k.startsWith('latency|')));
 
   return (
     <div className="vb-toolbar" role="toolbar" aria-label="what the table and the graph show">
@@ -69,11 +72,11 @@ export function Toolbar({
         )}
       </Dropdown>
       <span className="tsep" />
-      <Seg act="view" opts={viewOptions(latency)} cur={state.view} pad="0 11px" onPick={(value) => dispatch({ type: 'view', value })} />
+      <Seg act="view" opts={viewOptions(dataset)} cur={state.view} pad="0 11px" onPick={(value) => dispatch({ type: 'view', value })} />
       {state.view === 'latency' && (
         <Seg act="metric" opts={LATENCY} cur={state.latencyMetric} pad="0 8px" onPick={(value) => dispatch({ type: 'metric', value })} />
       )}
-      <span className="tnote">{state.view === 'throughput' ? '32 clients · QPS, higher is better' : '1 client · ms, lower is better'}</span>
+      <span className="tnote">{state.view === 'throughput' ? '32 clients · QPS, higher is better' : `${latencyClients(dataset) ?? '—'} · ms, lower is better`}</span>
 
       <div className="pills">
         {chips.map((tag) => (

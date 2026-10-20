@@ -7,7 +7,7 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 import { generateSample, serialize } from '../scripts/sample-results.mjs';
 import { buildBenchmark, ContractError, groupKey, splitDatasetId } from '../src/entities/results/model/model.ts';
-import { computeGrid, gridCell, failLabel, metricFor } from '../src/entities/results/model/cells.ts';
+import { computeGrid, gridCell, failLabel, groupFor, metricFor } from '../src/entities/results/model/cells.ts';
 import { cellValue } from '../src/entities/results/model/frontier.ts';
 import { orderResults, ratioTo, sectionScores } from '../src/entities/results/model/scores.ts';
 import { allChipTags, chipTag, visibleRows } from '../src/entities/results/model/rows.ts';
@@ -297,4 +297,38 @@ test('the ticked rows, read in either reading', () => {
   const onlyK10 = screenRows(visibleRows(ds.queries, new Set([chipTag('k', '10')])), 'bars');
   const hiddenRow = barsOnScreen.find((id) => !onlyK10.includes(id));
   assert.deepEqual(tickedRows([hiddenRow], 'bars', ds, onlyK10), [hiddenRow]);
+});
+
+test('latency is read where the run put it', () => {
+  // The sample has latency runs: the Latency view reads them, one client.
+  const ds = dataset('sift-128-100k');
+  assert.deepEqual(ds.latency, { from: 'latency', clients: 1 });
+
+  // Without any latency run on a dataset, the throughput run's per-query latencies stand in,
+  // under its clients, for every participant of the dataset.
+  const throughputOnly = {
+    ...page,
+    results: page.results
+      .filter((r) => r.dataset === 'sift-128-100k')
+      .map((r) => ({ ...r, groups: r.groups.filter((g) => g.view === 'throughput') })),
+  };
+  const b = buildBenchmark(throughputOnly);
+  const d = b.datasets.find((x) => x.id === 'sift-128-100k');
+  assert.equal(d.latency.from, 'throughput');
+  assert.equal(d.latency.clients, d.results[0].raw.groups[0].clients ?? null);
+  const r = d.results[0];
+  const q = d.queries.find((x) => groupFor(r, x, 'throughput')?.status === 'ok');
+  assert.equal(groupFor(r, q, 'latency'), groupFor(r, q, 'throughput'), 'the throughput group stands as the latency group');
+  const grid = computeGrid(d, 'latency', metricFor('latency', 'p50'));
+  assert.ok([...grid.cells.values()].some((c) => typeof c.value === 'number'), 'the Latency view has numbers');
+
+  // Nothing records latency: no view to read it in.
+  const noLatency = {
+    ...throughputOnly,
+    results: throughputOnly.results.map((r) => ({
+      ...r,
+      groups: r.groups.map((g) => ({ ...g, points: (g.points ?? []).map(({ latency_ms, ...pt }) => pt) })),
+    })),
+  };
+  assert.equal(buildBenchmark(noLatency).datasets.find((x) => x.id === 'sift-128-100k').latency, null);
 });

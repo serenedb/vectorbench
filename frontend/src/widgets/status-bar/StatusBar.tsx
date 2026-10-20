@@ -4,7 +4,7 @@
    said the same things twice. */
 
 import type { CSSProperties, ReactNode } from 'react';
-import type { DatasetModel } from '../../entities/results';
+import { latencyClients, type DatasetModel } from '../../entities/results';
 import { ratioBg } from '../../shared/lib/color';
 import { fmtInt } from '../../shared/lib/format';
 import { VIEW_LABELS, type BenchState } from '../../shared/model';
@@ -33,7 +33,7 @@ export function StatusBar({
     `${dataset.id} · ${fmtInt(dataset.rows)} vectors`,
     shown === participants ? `${participants} participants` : `${shown} of ${participants} participants`,
     rows === total ? `${total} ${unit}` : `${rows} of ${total} ${unit}`,
-    VIEW_LABELS[state.view] + (state.view === 'latency' ? ` · ${state.latencyMetric}` : ''),
+    state.view === 'latency' ? `Latency · ${latencyClients(dataset) ?? '—'} · ${state.latencyMetric}` : VIEW_LABELS.throughput,
   ];
   return (
     <div className="vb-status" data-role="status">

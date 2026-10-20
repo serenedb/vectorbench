@@ -96,6 +96,10 @@ export interface DatasetModel {
   chips: ChipGroups;
   /** In file order; the page sorts them (scores.ts). */
   results: ResultModel[];
+  /** Where the Latency view's numbers come from: a latency run (`from: 'latency'`, 1 client), or —
+      when no participant of the dataset has one — the per-query latencies every throughput point
+      records, under that run's clients. null when nothing on the dataset records latency. */
+  latency: { from: View; clients: number | null } | null;
 }
 
 export interface ParticipantInfo {
@@ -312,6 +316,34 @@ export function defaultDatasetOfFamily(bench: Benchmark, familyId: string): stri
   return fam ? defaultSizeOf(bench.datasets, fam) : null;
 }
 
+/* Latency is read where the run put it. A dataset where any participant has a latency run reads
+   those (one client) and nothing else, so a column measured under load never sits beside one
+   measured alone. A dataset with none reads the latencies its throughput run recorded per point:
+   each throughput group also stands as the latency group, so every reader of the Latency view —
+   the cells, the group rows, the graph, the detail — finds them, and the labels name the clients
+   they were measured under. */
+function latencyOf(list: ResultModel[]): { results: ResultModel[]; source: DatasetModel['latency'] } {
+  const groups = list.flatMap((r) => [...r.groups.values()]);
+  const own = groups.find((g) => g.view === 'latency');
+  if (own) return { results: list, source: { from: 'latency', clients: own.clients ?? 1 } };
+  const loaded = groups.find((g) => g.view === 'throughput' && (g.points ?? []).some((p) => isObj(p.latency_ms)));
+  if (!loaded) return { results: list, source: null };
+  const results = list.map((r) => {
+    const both = new Map(r.groups);
+    for (const g of r.groups.values()) if (g.view === 'throughput') both.set(groupLookupKey('latency', g.key), g);
+    return { ...r, groups: both };
+  });
+  return { results, source: { from: 'throughput', clients: loaded.clients ?? null } };
+}
+
+/** What the Latency view reads on a dataset, for its labels: `1 client`, `32 clients`; null when it reads nothing. */
+export function latencyClients(dataset: DatasetModel): string | null {
+  const l = dataset.latency;
+  if (!l) return null;
+  if (l.clients === null) return 'the throughput run';
+  return `${l.clients} client${l.clients === 1 ? '' : 's'}`;
+}
+
 export function buildBenchmark(input: unknown): Benchmark {
   if (!isObj(input)) throw new ContractError('top level must be an object with families and results (section 11)');
   const raw = input as unknown as RawResults;
@@ -336,14 +368,15 @@ export function buildBenchmark(input: unknown): Benchmark {
       const id = `${fam.id}-${s.name}`;
       const list = byDataset.get(id);
       if (list) {
+        const latency = latencyOf(list);
         // A row nobody ran at this size is a promise, not a result — the rule
         // that keeps a size nobody ran out of the dataset list. The table, the
         // chips and the scores leave it out; a row someone recorded, even as
         // unsupported, stays.
         const queries = queriesForSize(fam, s.name).filter((q) => list.some((r) => VIEWS.some((v) => r.groups.has(v + '|' + q.key))));
         datasets.push({
-          id, family: fam, size: s.name, rows: s.rows, results: list,
-          queries, chips: chipGroups(fam.filterCases, queries),
+          id, family: fam, size: s.name, rows: s.rows, results: latency.results,
+          queries, chips: chipGroups(fam.filterCases, queries), latency: latency.source,
         });
       }
     }

@@ -143,8 +143,14 @@ page is assembled that way, from `wiki-v3-1024-50m` alone:
 
 The page draws what was measured. A row nobody ran at a dataset's size is left
 out — of the table, the chips and the scores — and a section with no row left
-is not drawn; a row someone recorded, even as unsupported, stays. The Latency
-view is off on a dataset where no participant measured latency.
+is not drawn; a row someone recorded, even as unsupported, stays.
+
+The Latency view reads latency where the run put it. On a dataset where any
+participant has a latency run it reads those (one client) and nothing else, so
+a column measured under load never sits beside one measured alone. On a dataset
+with none it reads the per-query latencies the throughput run recorded at each
+point, and says so: `32 clients · ms` in the toolbar, the status bar and the
+cell detail. It is off only where nothing records latency.
 
 Until real results exist the committed `results.json` is **synthetic**, written by
 

@@ -7,7 +7,8 @@
    This module has no imports so that entities/results can read the vocabulary
    without an upward dependency and node can run it straight from source. */
 
-/** The load condition: Throughput (32 clients) or Latency (1 client). */
+/** The load condition: Throughput (32 clients) or Latency — a latency run's one client, or, on a
+    dataset without one, the throughput run's per-query latencies (entities/results latencyOf). */
 export type View = 'throughput' | 'latency';
 export const VIEWS: readonly View[] = ['throughput', 'latency'];
 export const VIEW_LABELS: Record<View, string> = {

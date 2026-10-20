@@ -11,6 +11,7 @@ import {
   cellValue,
   dominated,
   groupFor,
+  latencyClients,
   metricFor,
   statusLabel,
   usablePoints,
@@ -44,7 +45,16 @@ export function CellDetailModal({ dataset, result, row, state, dispatch }: { dat
       onClose={close}
     >
       <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
-        <Seg act="detail-view" opts={VIEWS.map((v) => ({ label: VIEW_LABELS[v], v }))} cur={view} onPick={setView} />
+        <Seg
+          act="detail-view"
+          opts={VIEWS.map((v) =>
+            v === 'latency'
+              ? { label: `Latency · ${latencyClients(dataset) ?? '—'}`, v, disabled: dataset.latency === null }
+              : { label: VIEW_LABELS[v], v },
+          )}
+          cur={view}
+          onPick={setView}
+        />
         <span className="sub">
           {group ? `status ${group.status}` : 'group missing from the query file'}
           {group?.clients ? ` · ${group.clients} client${group.clients === 1 ? '' : 's'}` : ''}
