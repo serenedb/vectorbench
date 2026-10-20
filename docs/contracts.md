@@ -277,7 +277,9 @@ Memory peak rows and startup are shown, never scored.
 ## 11. Assembled page data: `frontend/results.json`
 
 Written by `vectorbench assemble` from every `*/results/*.json` (skipping `*.partial.json`) plus the
-family definitions, so the page never reads a family yml itself:
+family definitions, so the page never reads a family yml itself. `--dataset <family>-<size>`
+(repeatable) keeps only those datasets' results and their families; naming a dataset with no result
+file is an error:
 
 ```json
 {

@@ -153,7 +153,7 @@ def cmd_targets(args: argparse.Namespace) -> int:
 def cmd_assemble(args: argparse.Namespace) -> int:
     from .assemble import assemble
 
-    assemble(out_path=Path(args.out) if args.out else None)
+    assemble(out_path=Path(args.out) if args.out else None, datasets=args.dataset or ())
     return 0
 
 
@@ -230,6 +230,12 @@ def build_parser() -> argparse.ArgumentParser:
 
     s = sub.add_parser("assemble", help="build frontend/results.json from every result file")
     s.add_argument("--out")
+    s.add_argument(
+        "--dataset",
+        action="append",
+        metavar="FAMILY-SIZE",
+        help="only this dataset's results, and its family (repeatable); other result files stay put",
+    )
     s.set_defaults(fn=cmd_assemble)
     return ap
 
