@@ -24,7 +24,7 @@ datasets:
       groups:
         "*/100": {ladder: {hnsw_ef: [100, 128, 160, 256, 400, 640], oversample: [1.0]}}
         "eq-10/10": {ladder: {hnsw_ef: [16, 24, 32, 48, 64, 96, 128, 192, 256], oversample: [1.0]}}
-        "eq-1/10": {ladder: {hnsw_ef: [16, 24, 32, 48, 64, 96, 128, 192, 256], oversample: [1.0]}}
+        "eq-1/10": {ladder: {hnsw_ef: [16, 24, 32, 48, 64, 96, 128, 192, 256], oversample: [1.0, 2.0, 4.0]}}
         "eq-0.1/10": {ladder: {hnsw_ef: [16, 24, 32, 48, 64, 96, 128, 192, 256], oversample: [1.0]}}
         "range-10/10": {ladder: {hnsw_ef: [16, 24, 32, 48, 64, 96, 128, 192, 256], oversample: [1.0]}}
         "range-1/10": {ladder: {hnsw_ef: [16, 24, 32, 48, 64, 96, 128, 192, 256], oversample: [1.0]}}
