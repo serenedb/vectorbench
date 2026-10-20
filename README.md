@@ -6,6 +6,15 @@ curve at the recall the row asks for. Table and graph are two renderings of the 
 
 Design: [DESIGN.md](DESIGN.md). Formats every part agrees on: [docs/contracts.md](docs/contracts.md).
 
+## Current run: wiki-v3-1024-50m
+
+- **Data:** 50M Cohere `wikipedia-2023-11-embed-multilingual-v3` vectors, 1024 dims, inner product, 7 languages. 2000 held-out queries; exact top-100 ground truth per filter case.
+- **Queries:** unfiltered k=10 and k=100; filtered k=10 for every filter case in `datasets/wiki-v3-1024.yml` (equality at 10/1/0.1%, range at 10/1%, a conjunction, correlated and anti-correlated cluster, same and other language).
+- **Participants:** `serenedb-hnsw-quant` (SereneDB 26.10.2, HNSW, `usq8`) and `qdrant-hnsw-quant` (Qdrant 1.19.1, HNSW, `sq8`). One build each: m=16, ef_construction=128. Both keep the 8-bit codes in RAM and the float vectors on disk for rescoring. SereneDB is compacted to 8 segments; Qdrant settles at 50 segments with its default segment size. Qdrant's filtered and k=100 ladders use oversample 1: higher oversampling rescored from disk and hit the 60 s search timeout at k=100.
+- **Machine:** AWS c7i.24xlarge (96 vCPU, 185 GB RAM), data on EBS. Engines are measured one at a time.
+- **Measurement:** 32 clients, every point of each participant's ladder (`settings.yml`) over the 2000 queries; a cell is the participant's Pareto frontier at the row's recall. Latency is read from the same 32-client runs.
+- **Load time:** both engines were loaded at the same time on the machine, so their load times are not comparable to each other.
+
 ## Layout
 
 ```
@@ -16,7 +25,7 @@ lib/benchmark.sh          thin entry used by every participant's ./benchmark.sh
 frontend/                 the results page (React, single-file build), shared with SereneDB Playground
 ```
 
-Participants so far: `serenedb-ivf`, `serenedb-hnsw`, `qdrant-hnsw`.
+Participants so far: `serenedb-ivf`, `serenedb-hnsw`, `serenedb-hnsw-quant`, `qdrant-hnsw`, `qdrant-hnsw-quant`.
 
 ## Run
 
