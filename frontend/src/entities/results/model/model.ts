@@ -336,7 +336,11 @@ export function buildBenchmark(input: unknown): Benchmark {
       const id = `${fam.id}-${s.name}`;
       const list = byDataset.get(id);
       if (list) {
-        const queries = queriesForSize(fam, s.name);
+        // A row nobody ran at this size is a promise, not a result — the rule
+        // that keeps a size nobody ran out of the dataset list. The table, the
+        // chips and the scores leave it out; a row someone recorded, even as
+        // unsupported, stays.
+        const queries = queriesForSize(fam, s.name).filter((q) => list.some((r) => VIEWS.some((v) => r.groups.has(v + '|' + q.key))));
         datasets.push({
           id, family: fam, size: s.name, rows: s.rows, results: list,
           queries, chips: chipGroups(fam.filterCases, queries),

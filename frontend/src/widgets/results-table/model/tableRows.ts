@@ -10,7 +10,7 @@
 
 import { groupFor, tableOrder, type DatasetModel, type QueryRow, type ResultModel, type Section } from '../../../entities/results';
 import { fmtGB, fmtSec } from '../../../shared/lib/format';
-import type { HeaderRowKey } from '../../../shared/model';
+import type { HeaderRowKey, RowMode } from '../../../shared/model';
 
 export interface SectionSpec {
   kind: 'section';
@@ -81,8 +81,8 @@ function memoryRow(section: Section): HeaderSpec {
   };
 }
 
-export function tableRows(dataset: DatasetModel, visible: readonly QueryRow[]): RowSpec[] {
-  const fam = dataset.family;
+/** @param mode the reading on screen: a section counts the rows it draws — groups, or bars */
+export function tableRows(dataset: DatasetModel, visible: readonly QueryRow[], mode: RowMode = 'bars'): RowSpec[] {
   const out: RowSpec[] = [];
   // What the dataset is and who is on screen, the toolbar and the status bar
   // say; the heading keeps to what the rows under it share.
@@ -130,13 +130,18 @@ export function tableRows(dataset: DatasetModel, visible: readonly QueryRow[]): 
     },
   );
   for (const section of ['nofilter', 'filtered'] as const) {
-    const all = fam.queries.filter((q) => q.section === section);
+    // The dataset's rows — what was run at this size — not the family's: a
+    // section nobody ran is not drawn, and "of N" counts what a chip can hide.
+    const all = dataset.queries.filter((q) => q.section === section);
+    if (!all.length) continue;
     const rows = tableOrder(visible.filter((q) => q.section === section));
+    const count = (list: readonly QueryRow[]) => (mode === 'groups' ? new Set(list.map((q) => q.key)).size : list.length);
+    const unit = mode === 'groups' ? 'groups' : 'rows';
     out.push({
       kind: 'section',
       key: `sec:${section}`,
       title: section === 'nofilter' ? 'NO FILTER' : 'FILTERED',
-      note: rows.length === all.length ? `${all.length} rows` : `${rows.length} of ${all.length} rows visible`,
+      note: rows.length === all.length ? `${count(all)} ${unit}` : `${count(rows)} of ${count(all)} ${unit} visible`,
     });
     out.push(memoryRow(section));
     out.push({ kind: 'score', key: `score:${section}`, section });

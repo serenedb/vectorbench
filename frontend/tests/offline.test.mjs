@@ -34,10 +34,17 @@ test('committed HTML renders, graphs and details work over file:// without netwo
     await page.locator('.vb-app').waitFor();
     const body = () => page.locator('body').innerText();
 
-    // the table: every participant of the default dataset is a column, the three sections are there
+    // What was measured decides what is drawn: a section nobody ran is left out, and the Latency
+    // view is off where nobody measured latency. Read it off the same file the page was built from.
+    const measured = (pred) => results.results.some((r) => r.groups.some(pred));
+    const hasFiltered = measured((g) => g.filter !== 'none');
+    const hasLatency = measured((g) => g.view === 'latency');
+
+    // the table: every participant of the default dataset is a column, the sections are there
     const text = await body();
     assert.ok(text.includes('VectorBench'));
-    for (const s of ['GENERAL', 'NO FILTER', 'FILTERED', 'load time', 'score', 'coverage']) assert.ok(text.includes(s), s);
+    for (const s of ['GENERAL', 'NO FILTER', 'load time', 'score', 'coverage']) assert.ok(text.includes(s), s);
+    assert.equal(text.includes('FILTERED'), hasFiltered, 'a section is drawn when somebody ran it');
     const names = new Set(results.results.map((r) => r.name));
     for (const n of names) assert.ok(text.includes(n), n);
     if (results.sample) await page.locator('[data-role="sample-banner"]').waitFor();
@@ -57,9 +64,10 @@ test('committed HTML renders, graphs and details work over file:// without netwo
     const rule = await page.locator('.splitter').boundingBox();
     await page.mouse.move(rule.x + rule.width / 2, rule.y + 200);
     await page.mouse.down();
-    await page.mouse.move(rule.x - 120, rule.y + 200, { steps: 4 });
+    // to the right: a table of two participants is already near its narrowest
+    await page.mouse.move(rule.x + 120, rule.y + 200, { steps: 4 });
     await page.mouse.up();
-    assert.ok((await table.boundingBox()).width < tableBox.width - 100, 'the rule drags');
+    assert.ok((await table.boundingBox()).width > tableBox.width + 100, 'the rule drags');
     await page.locator('.splitter').dblclick();
     assert.ok(Math.abs((await table.boundingBox()).width - tableBox.width) < 2, 'a double-click resets it');
 
@@ -124,7 +132,7 @@ test('committed HTML renders, graphs and details work over file:// without netwo
     );
     assert.ok(titles.every((title) => /^k=\d+( · \S+)?$/.test(title)), 'a label is k, then the filter case');
     const blocks = titles.map((title) => title.split(' · ')[1] ?? 'none').filter((c, i, all) => c !== all[i - 1]);
-    assert.ok(blocks.length > 1);
+    assert.ok(blocks.length >= 1);
     assert.equal(new Set(blocks).size, blocks.length, "a case's rows sit together");
     assert.equal(await page.locator('.trow.lead').count(), blocks.length, 'a rule above each block');
     // the bar a group is read at is the graph's line, not the label's; a cell's recall reads `@`
@@ -175,11 +183,16 @@ test('committed HTML renders, graphs and details work over file:// without netwo
     await hd.waitFor({ state: 'detached' });
     assert.equal(await graph.locator('svg.curve-graph').count(), 1, 'Escape leaves the graph alone');
 
-    // the toolbar: the latency view shows its statistic; the rest is in Display
+    // the toolbar: the latency view shows its statistic, where somebody measured latency; the rest is in Display
     assert.equal(await page.locator('[data-act="metric"]').count(), 0, 'Throughput reads QPS and offers no statistic');
-    await page.locator('[data-act="view"][data-v="latency"]').click();
-    await page.locator('[data-act="metric"][data-v="p99"]').click();
-    assert.equal(await page.locator('[data-act="metric"][data-v="p99"]').getAttribute('class'), 'on');
+    const latencyButton = page.locator('[data-act="view"][data-v="latency"]');
+    if (hasLatency) {
+      await latencyButton.click();
+      await page.locator('[data-act="metric"][data-v="p99"]').click();
+      assert.equal(await page.locator('[data-act="metric"][data-v="p99"]').getAttribute('class'), 'on');
+    } else {
+      assert.ok(await latencyButton.isDisabled(), 'no latency measured: the Latency view is off');
+    }
     await page.locator('[data-act="display-menu"]').click();
     await page.locator('[data-act="cells"][data-v="absolute"]').click();
     // the bar reading keeps what was ticked: the group stands for its bars
@@ -188,7 +201,7 @@ test('committed HTML renders, graphs and details work over file:// without netwo
     const barTicks = await ticked();
     assert.ok(barTicks.length >= 1 && !barTicks.includes(firstRow), 'the group became its bars');
     assert.ok((await graph.locator('.panehead').innerText()).includes(`${barTicks.length} row`));
-    await page.locator('[data-act="sort"][data-section="filtered"]').first().click();
+    await page.locator(`[data-act="sort"][data-section="${hasFiltered ? 'filtered' : 'nofilter'}"]`).first().click();
 
     // chips narrow the rows; a pill names the chip while the menu is closed and removes it
     const k100 = () => page.$$eval('[data-act="row"]', (ns) => ns.filter((n) => /k=100\b/.test(n.innerText)).length);
@@ -230,7 +243,7 @@ test('committed HTML renders, graphs and details work over file:// without netwo
     await page.locator('.vb-app').waitFor();
     assert.deepEqual(await ticked(), tickedBefore, 'still ticked');
     assert.equal(await page.locator(`[data-act="unhide"][data-pid="${first}"]`).count(), 1, 'still hidden');
-    assert.equal(await page.locator('[data-act="view"][data-v="latency"]').getAttribute('class'), 'on');
+    assert.equal(await page.locator(`[data-act="view"][data-v="${hasLatency ? 'latency' : 'throughput'}"]`).getAttribute('class'), 'on');
     await page.locator('[data-act="display-menu"]').click();
     assert.equal(await page.locator('[data-act="cells"][data-v="absolute"]').getAttribute('class'), 'on');
     assert.equal(await page.locator('[data-act="row-mode"][data-v="bars"]').getAttribute('class'), 'on', 'still the bar reading');

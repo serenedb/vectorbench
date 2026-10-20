@@ -132,6 +132,20 @@ eq-0.1), as the mock in DESIGN.md section 2 shows.
 `*/results/*.json` and the family definitions and writes `frontend/results.json`.
 Then run `npm run build` in `frontend/` and commit the JSON and HTML together.
 
+`--dataset <family>-<size>` (repeatable) narrows the page to those datasets and
+their families; the other result files stay in the repository, and every
+`results.json` ever committed stays in the playground's history. The committed
+page is assembled that way, from `wiki-v3-1024-50m` alone:
+
+```bash
+.venv/bin/python -m vectorbench.cli assemble --dataset wiki-v3-1024-50m
+```
+
+The page draws what was measured. A row nobody ran at a dataset's size is left
+out — of the table, the chips and the scores — and a section with no row left
+is not drawn; a row someone recorded, even as unsupported, stays. The Latency
+view is off on a dataset where no participant measured latency.
+
 Until real results exist the committed `results.json` is **synthetic**, written by
 
 ```bash

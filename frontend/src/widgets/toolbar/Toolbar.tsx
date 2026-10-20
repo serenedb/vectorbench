@@ -14,10 +14,15 @@ import { DatasetLabel, DatasetMenu } from './DatasetMenu';
 import { DisplayMenu } from './DisplayMenu';
 import { FilterMenu } from './FilterMenu';
 
-const VIEW: readonly SegOption<View>[] = [
-  { label: 'Throughput', v: 'throughput', title: '32 clients · queries per second, higher is better' },
-  { label: 'Latency', v: 'latency', title: '1 client · milliseconds, lower is better' },
-];
+/** The Latency view is off on a dataset where no participant measured it, rather than a table of empty cells. */
+function viewOptions(latency: boolean): readonly SegOption<View>[] {
+  return [
+    { label: 'Throughput', v: 'throughput', title: '32 clients · queries per second, higher is better' },
+    latency
+      ? { label: 'Latency', v: 'latency', title: '1 client · milliseconds, lower is better' }
+      : { label: 'Latency', v: 'latency', disabled: true, title: 'no participant measured latency on this dataset' },
+  ];
+}
 const LATENCY: readonly SegOption<LatencyMetric>[] = LATENCY_METRICS.map((m) => ({ label: m, v: m, title: `the ${m} of one client's latencies, ms` }));
 
 /** A pill names its dimension where the chip alone would not: `eq` is a filter, `0.95` a recall. */
@@ -47,6 +52,7 @@ export function Toolbar({
   const shownCount = everyone.length - hiddenHere.length;
   const chips = [...state.chips].sort();
   const active = chips.length + hiddenHere.length;
+  const latency = everyone.some((r) => [...r.groups.keys()].some((k) => k.startsWith('latency|')));
 
   return (
     <div className="vb-toolbar" role="toolbar" aria-label="what the table and the graph show">
@@ -63,7 +69,7 @@ export function Toolbar({
         )}
       </Dropdown>
       <span className="tsep" />
-      <Seg act="view" opts={VIEW} cur={state.view} pad="0 11px" onPick={(value) => dispatch({ type: 'view', value })} />
+      <Seg act="view" opts={viewOptions(latency)} cur={state.view} pad="0 11px" onPick={(value) => dispatch({ type: 'view', value })} />
       {state.view === 'latency' && (
         <Seg act="metric" opts={LATENCY} cur={state.latencyMetric} pad="0 8px" onPick={(value) => dispatch({ type: 'metric', value })} />
       )}

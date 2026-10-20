@@ -36,15 +36,24 @@ export interface ResultsTableProps {
   dispatch: Dispatch<BenchAction>;
 }
 
-/* Narrow on purpose, so the graph beside the table gets the width. A label is
-   its title and its reading (`eq-10 · k=10  @ 0.950`); a column is as wide as
-   the longest word of its participant's name, which wraps onto a second line
-   — a cell's number and reach need less than that. */
+/* Narrow on purpose, so the graph beside the table gets the width. A column
+   is as wide as its participant's name needs to sit on two lines, broken
+   between words — the header's height — with the swatch on the first; a
+   cell's number and reach need less than that. */
 const LABEL_W = 206;
+/** Px per character of the 11px bold header, a little over the face's widest. */
+const CHAR_W = 6.9;
+const SWATCH_W = 14;
 
 function colW(r: ResultModel): number {
-  const word = Math.max(...r.name.split(/\s+/).map((w) => w.length));
-  return Math.min(140, Math.max(94, Math.round(word * 6.9) + 30));
+  const words = r.name.split(/\s+/);
+  let line = words.join(' ').length * CHAR_W + SWATCH_W;
+  for (let i = 1; i < words.length; i++) {
+    const first = words.slice(0, i).join(' ').length * CHAR_W + SWATCH_W;
+    const second = words.slice(i).join(' ').length * CHAR_W;
+    line = Math.min(line, Math.max(first, second));
+  }
+  return Math.min(180, Math.max(94, Math.round(line) + 18));
 }
 
 /** The width the grid wants, its scrollbar included: the split's default for the table. */
@@ -54,7 +63,7 @@ export function tableWidth(results: readonly ResultModel[]): number {
 
 export function ResultsTable({ dataset, results, rows, groups, grid, scores, state, onScreen, ticked, dispatch }: ResultsTableProps): ReactNode {
   const gridCols = `${LABEL_W}px ` + results.map((r) => colW(r) + 'px').join(' ');
-  const specs = useMemo(() => tableRows(dataset, rows), [dataset, rows]);
+  const specs = useMemo(() => tableRows(dataset, rows, state.rowMode), [dataset, rows, state.rowMode]);
   // A group row is drawn where the first of its query rows the chips leave
   // would be: a chip can hide the group's first bar and keep another.
   const groupAt = useMemo(() => {
