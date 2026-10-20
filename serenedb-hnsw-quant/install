@@ -1,0 +1,36 @@
+#!/usr/bin/env bash
+# One-time setup: make sure the engine exists (image locally, or a native binary), remove any previous
+# container or process, and wipe the engine data directory so ./load starts from an empty engine.
+set -euo pipefail
+cd "$(dirname "$0")"
+source ./common.sh
+
+if [[ -n "$VB_BINARY" ]]; then
+    [[ -x "$VB_BINARY" ]] || { echo "VB_BINARY=$VB_BINARY is not executable" >&2; exit 1; }
+    echo "SereneDB native binary: $VB_BINARY ($("$VB_BINARY" --version 2>/dev/null | head -1 || true))"
+    if pid="$(native_pid)" && [[ -n "$pid" ]]; then kill "$pid" 2>/dev/null || true; sleep 1; kill -9 "$pid" 2>/dev/null || true; fi
+    rm -rf "$VECTORBENCH_ENGINE_DIR"
+    mkdir -p "$VECTORBENCH_ENGINE_DIR"
+    exit 0
+fi
+
+command -v docker >/dev/null || { echo "docker not on PATH" >&2; exit 1; }
+docker info >/dev/null 2>&1 || { echo "docker daemon not reachable (is $(id -un) in the docker group?)" >&2; exit 1; }
+
+echo "SereneDB image: $VB_IMAGE"
+# Pull only when the tag is not present locally: a `docker build` or `docker load` of an unreleased
+# build exists nowhere else, and `docker pull` on such a tag would abort the run.
+if docker image inspect "$VB_IMAGE" >/dev/null 2>&1; then
+    echo "  using local image (not pulling)"
+else
+    docker pull --quiet "$VB_IMAGE" >/dev/null
+fi
+
+docker rm -f "$VB_CONTAINER" >/dev/null 2>&1 || true
+if [[ -d "$VECTORBENCH_ENGINE_DIR" ]]; then
+    # Files inside are owned by the image's uid; remove them through a throwaway root container.
+    docker run --rm -v "$(dirname "$VECTORBENCH_ENGINE_DIR")":/w alpine \
+        rm -rf "/w/$(basename "$VECTORBENCH_ENGINE_DIR")" >/dev/null 2>&1 || rm -rf "$VECTORBENCH_ENGINE_DIR"
+fi
+mkdir -p "$VECTORBENCH_ENGINE_DIR"
+chmod 777 "$VECTORBENCH_ENGINE_DIR"

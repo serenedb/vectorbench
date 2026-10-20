@@ -1,0 +1,25 @@
+participant: {name: "Qdrant HNSW (quantization sweep)", system: Qdrant, family: hnsw, tags: [Rust, Qdrant]}
+
+env:
+  port: 6535
+  grpc_port: 6536
+  container: vectorbench-qdrant-hnsw-quant
+  image: qdrant/qdrant:v1.19.1
+  collection: items
+  upload_workers: 4
+
+connection: {host: 127.0.0.1, port: 6535, grpc_port: 6536, prefer_grpc: true, collection: items, timeout: 600}
+
+defaults:
+  index: {m: 16, ef_construct: 128, quant: tq, tq_bits: bits4, on_disk_vectors: false, on_disk_hnsw: false,
+          segments: 8, full_scan_threshold_kb: 10000, payload_m: 0}
+  ladder: {hnsw_ef: [16, 24, 32, 48, 64, 96, 128, 192, 256], oversample: [1.0, 2.0, 4.0, 8.0]}
+  groups:
+    "*/100":  {ladder: {hnsw_ef: [100, 128, 160, 256, 400, 640], oversample: [1.0, 2.0, 4.0, 8.0]}}
+    "*/1000": {ladder: {hnsw_ef: [1000, 1600, 2500], oversample: [1.0, 2.0, 4.0]}}
+
+datasets:
+  wiki-v3-1024:
+    50m:
+      groups:
+        "*/100": {ladder: {hnsw_ef: [100, 128, 160, 256, 400, 640], oversample: [1.0]}}

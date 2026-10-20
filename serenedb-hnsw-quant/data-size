@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+# Bytes on disk: the engine's data directory (table + index + catalog), WAL excluded. Measured inside
+# the container in docker mode because the files are owned by the image's uid.
+set -euo pipefail
+cd "$(dirname "$0")"
+source ./common.sh
+
+if [[ -n "$VB_BINARY" ]]; then
+    du -sb --exclude=wal "$VECTORBENCH_ENGINE_DIR/data" 2>/dev/null | cut -f1
+    exit 0
+fi
+if docker inspect -f '{{.State.Status}}' "$VB_CONTAINER" 2>/dev/null | grep -q running; then
+    docker exec "$VB_CONTAINER" du -sb --exclude=wal /var/lib/serenedb 2>/dev/null | cut -f1
+else
+    du -sb --exclude=wal "$VECTORBENCH_ENGINE_DIR" 2>/dev/null | cut -f1
+fi

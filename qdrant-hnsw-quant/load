@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+# Whole load recipe, blocking until settled: create the collection, upload the base shards, build the
+# HNSW graph, wait for idle optimizers (prints VECTORBENCH_PHASES and VECTORBENCH_INFO). The work is in
+# load.py (pyarrow for the shards, qdrant-client over gRPC); this only picks the interpreter:
+# $VECTORBENCH_PYTHON, else the repository's .venv, else python3 on PATH.
+set -euo pipefail
+cd "$(dirname "$0")"
+
+python=${VECTORBENCH_PYTHON:-}
+if [[ -z "$python" ]]; then
+    if [[ -x ../.venv/bin/python ]]; then python=../.venv/bin/python; else python=python3; fi
+fi
+exec "$python" load.py

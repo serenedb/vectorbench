@@ -14,7 +14,7 @@ source:
   interleave_rows: 10000
   query_pool: last_shard_per_lang
 # Prefix sizes that exist for this family; 100k is for development only.
-sizes: {100k: 100000, 1m: 1000000, 10m: 10000000, 100m: 100000000}
+sizes: {100k: 100000, 1m: 1000000, 10m: 10000000, 50m: 50000000, 100m: 100000000}
 # Predicate definitions. The driver derives each query's arguments ($v, $lo, $hi, $s) from them,
 # computes the filtered ground truth with them, and checks returned ids against them.
 # Engines never read this block; they express each case in their own queries file.

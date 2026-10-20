@@ -1,0 +1,37 @@
+participant:
+  name: SereneDB HNSW (quantization sweep)
+  system: SereneDB
+  family: hnsw
+  tags: [C++, SereneDB, Postgres-wire]
+
+env:
+  port: 5500
+  container: vectorbench-serenedb-hnsw-quant
+  image: serenedb/serenedb:26.10.2
+  index_kind: hnsw
+
+connection:
+  host: 127.0.0.1
+  port: 5500
+  user: postgres
+  dbname: postgres
+
+plan_rules:
+  always: [IRESEARCH_SCAN]
+  approximate: ["Score:"]
+  filtered: [["Index Filter", "Column Filter"]]
+  exact: ["Exact:"]
+
+defaults:
+  index: {storage: search, relation: items, quant: usq8, m: 16, ef_construction: 128,
+          compression: false, segments: 8}
+  ladder: {ef: [16, 24, 32, 48, 64, 96, 128, 192, 256], oversample: [1.0, 2.0, 4.0, 8.0], mode: [auto]}
+  groups:
+    "*/100":  {ladder: {ef: [100, 128, 160, 256, 400, 640, 800], oversample: [1.0, 2.0, 4.0, 8.0, 16.0, 32.0], mode: [auto]}}
+    "*/1000": {ladder: {ef: [1000, 1600, 2500, 4000], oversample: [1.0, 2.0, 4.0, 8.0, 16.0], mode: [auto]}}
+
+datasets:
+  wiki-v3-1024:
+    50m:
+      groups:
+        "*/10": {ladder: {ef: [384, 512, 768, 1024], oversample: [1.0], mode: [auto]}}
