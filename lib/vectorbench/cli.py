@@ -58,7 +58,7 @@ def cmd_run(args: argparse.Namespace) -> int:
     p = _participant(args)
     opts = RunOptions(
         data_dir=_data_dir(args),
-        views=args.views.split(","),
+        views=[v for v in args.views.split(",") if v],
         groups=args.groups.split(",") if args.groups else None,
         cpuset=args.cpuset or None,
         memory=args.memory or None,
@@ -182,7 +182,7 @@ def build_parser() -> argparse.ArgumentParser:
     s = sub.add_parser("run", help="run every group of a participant on a dataset size")
     common(s)
     s.add_argument("--index", action="store_true", help="install, start and load before running")
-    s.add_argument("--views", default="throughput,latency")
+    s.add_argument("--views", default="throughput,latency", help="comma-separated; empty with --index loads and records the build only")
     s.add_argument("--groups", help="comma-separated group keys or <filter>/* patterns")
     s.add_argument("--clients", type=int, default=32, help="clients in the throughput view (the tier's CPU count)")
     s.add_argument("--label", help="results suffix for side-by-side builds of one participant")
