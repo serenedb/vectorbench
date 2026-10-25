@@ -103,6 +103,16 @@ def refresh(cur: psycopg.Cursor) -> None:
 
 
 def compact(cur: psycopg.Cursor) -> None:
+    if STORAGE == "search":
+        cur.execute("ALTER TABLE items SET (compaction_interval = 0)")
+    else:
+        cur.execute("ALTER INDEX items_vec SET (compaction_interval = 0)")
+    idle = 0
+    while idle < STABLE_POLLS:
+        time.sleep(POLL_S)
+        busy = gauge(cur, "compaction_active") + gauge(cur, "compaction_pending")
+        idle = idle + 1 if busy == 0 else 0
+        log(f"drain: compaction_busy={busy} idle={idle}/{STABLE_POLLS}")
     # Pin the segment count. Every engine searches every segment with the full
     # beam and unions the results, so a one-segment index and an eight-segment
     # one are different amounts of work at the same nominal ef -- the count has
@@ -138,17 +148,17 @@ def main() -> int:
         cur.execute("DROP VIEW IF EXISTS items CASCADE")
         keys = ", ".join(KEY_COLUMNS)
         if STORAGE == "search":
-            cur.execute(f"CREATE TABLE items ({columns_ddl}) WITH (storage = 'search', compaction_interval = 0)")
+            cur.execute(f"CREATE TABLE items ({columns_ddl}) WITH (storage = 'search')")
             ddl = f"CREATE INDEX items_vec ON items USING inverted({keys}, emb {opclass()})"
         elif STORAGE == "view":
             cur.execute(f"CREATE VIEW items AS SELECT {select_cols} FROM read_parquet({sql_list(shards)})")
             ddl = (
                 f"CREATE INDEX items_vec ON items USING inverted({keys}, emb {opclass()}) "
-                f"INCLUDE (id) WITH (compaction_interval = 0)"
+                f"INCLUDE (id)"
             )
         elif STORAGE == "table":
             cur.execute(f"CREATE TABLE items ({columns_ddl})")
-            ddl = f"CREATE INDEX items_vec ON items USING inverted({keys}, emb {opclass()}) WITH (compaction_interval = 0)"
+            ddl = f"CREATE INDEX items_vec ON items USING inverted({keys}, emb {opclass()})"
         else:
             log(f"ERROR: unknown VB_INDEX_STORAGE={STORAGE!r} (search | view | table)")
             return 2
