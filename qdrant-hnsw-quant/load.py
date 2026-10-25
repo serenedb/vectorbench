@@ -98,6 +98,7 @@ class IndexConfig:
     bq_encoding: str = "one_bit"
     bq_query_encoding: str = "default"
     tq_bits: str = "bits4"
+    payload_index_memory: str | None = None
 
     @classmethod
     def from_env(cls) -> IndexConfig:
@@ -112,6 +113,7 @@ class IndexConfig:
             bq_encoding=env_str("VB_INDEX_BQ_ENCODING", "one_bit").lower(),
             bq_query_encoding=env_str("VB_INDEX_BQ_QUERY_ENCODING", "default").lower(),
             tq_bits=env_str("VB_INDEX_TQ_BITS", "bits4").lower(),
+            payload_index_memory=(env_str("VB_INDEX_PAYLOAD_INDEX_MEMORY", "").lower() or None),
         )
 
     def quantization(self, metric: str) -> models.QuantizationConfig | None:
@@ -158,6 +160,8 @@ def create_collection(client: QdrantClient, target: Target, dims: int, metric: s
         quantization_config=cfg.quantization(metric),
     )
     for field, schema in PAYLOAD_INDEXES.items():
+        if cfg.payload_index_memory:
+            schema = schema.model_copy(update={"memory": models.Memory(cfg.payload_index_memory)})
         client.create_payload_index(target.collection, field, schema, wait=True)
 
 
