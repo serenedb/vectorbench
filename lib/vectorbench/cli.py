@@ -24,7 +24,7 @@ def cmd_prepare(args: argparse.Namespace) -> int:
 
     family_name, size = split_dataset_id(args.dataset)
     fam = load_family(family_name)
-    m = Preparer(fam, size, _data_dir(args)).run()
+    m = Preparer(fam, size, _data_dir(args), workers=args.workers, source_dir=Path(args.source_dir) if args.source_dir else None, queries=args.queries).run()
     print(json.dumps({k: m[k] for k in ("dataset", "rows", "nq", "dims", "metric", "norms", "groundtruth")}, indent=1))
     return 0
 
@@ -165,6 +165,9 @@ def build_parser() -> argparse.ArgumentParser:
     s = sub.add_parser("prepare", help="materialize a dataset size (download, attributes, ground truth)")
     s.add_argument("--dataset", required=True, help="<family>-<size>, e.g. sift-128-100k")
     s.add_argument("--data-dir")
+    s.add_argument("--workers", type=int, default=1, help="processes writing shards and ground truth in one pass")
+    s.add_argument("--source-dir", help="local copy of the source corpus in its own layout, instead of downloading")
+    s.add_argument("--queries", type=int, help="query count, instead of the family's queries_count")
     s.set_defaults(fn=cmd_prepare)
 
     def common(s: argparse.ArgumentParser) -> None:

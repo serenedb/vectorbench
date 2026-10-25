@@ -194,8 +194,8 @@ def predicate_mask(spec: dict[str, Any], cols: dict[str, np.ndarray], args: dict
     if op == "eq":
         field = spec["field"]
         if field == "lang":
-            s = np.asarray(args["s"][sel], dtype=object)
-            col = np.asarray(cols["lang"], dtype=object)
+            s = np.asarray(args["s"][sel]).astype(str)
+            col = np.asarray(cols["lang"]).astype(str)
             return col[None, :] == s[:, None]
         v = np.asarray(args["v"][sel], dtype=np.int64)
         return np.asarray(cols[field], dtype=np.int64)[None, :] == v[:, None]

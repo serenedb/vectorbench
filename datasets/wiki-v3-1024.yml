@@ -3,13 +3,15 @@ title: Cohere Wikipedia 2023-11, embed-multilingual-v3
 description: >
   Paragraph embeddings of Wikipedia from Cohere's embed-multilingual-v3 model, 1024 dimensions,
   unit-normalized (prepare measures norm 1.0), searched by inner product, which equals cosine here.
-  Seven languages interleaved in 10k-row chunks so every prefix is multilingual.
+  All 323 languages interleaved in 10k-row chunks so every prefix is multilingual; queries come
+  from seven of them.
 dims: 1024
 metric: ip
 source:
   kind: hf
   repo: Cohere/wikipedia-2023-11-embed-multilingual-v3
   langs: [en, de, fr, es, ru, ja, zh]
+  base_langs: all
   columns: {emb: emb, title: title}
   interleave_rows: 10000
   query_pool: last_shard_per_lang
