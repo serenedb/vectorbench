@@ -403,6 +403,10 @@ class Runner:
                     sec = "unfiltered" if g.filter == "none" else "filtered"
                     mem_sections[sec] = max(mem_sections.get(sec, 0), int(grp["memory_peak"]))
                 rf.set(startup=metrics.stats(startups), memory_peak={**(rf.obj.get("memory_peak") or {}), **mem_sections})
+        if not self.opts.index:
+            served = self.p.version(self.env)
+            if served not in ("unknown", rf.obj.get("version")):
+                rf.set(load_version=rf.obj.get("version"), version=served)
         self.p.stop(self.env)
         path = rf.finish()
         log.info("results written to %s", path)
