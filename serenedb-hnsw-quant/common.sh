@@ -16,6 +16,29 @@ PY="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)/.venv/bin/python"
 [[ -x "$PY" ]] || PY="$(command -v python3)"
 
 PIDFILE="$VECTORBENCH_ENGINE_DIR/serened.pid"
+PREWARMED="$VECTORBENCH_ENGINE_DIR/prewarmed"
+
+prewarm() {
+    rm -f "$PREWARMED"
+    (
+        for _ in $(seq 1 36000); do engine_answers && break; sleep 0.2; done
+        first_query || true
+        touch "$PREWARMED"
+    ) </dev/null >/dev/null 2>&1 &
+}
+
+first_query() {
+    "$PY" - "$VB_PORT" "${VB_INDEX_RELATION:-items}" "${VECTORBENCH_METRIC:-ip}" <<'EOF'
+import sys, psycopg
+port, rel, metric = int(sys.argv[1]), sys.argv[2], sys.argv[3]
+op = {"ip": "<#>", "l2": "<->", "cosine": "<=>"}[metric]
+with psycopg.connect(host="127.0.0.1", port=port, user="postgres", dbname="postgres", autocommit=True) as c:
+    row = c.execute(f"SELECT emb FROM {rel} LIMIT 1").fetchone()
+    if row:
+        vec = "[" + ",".join(f"{x:.9g}" for x in row[0]) + f"]::FLOAT[{len(row[0])}]"
+        c.execute(f"SELECT id FROM {rel} ORDER BY emb {op} {vec} LIMIT 10").fetchall()
+EOF
+}
 
 port_taken() {  # exit 0 iff something is already listening on VB_PORT
     "$PY" - "$VB_PORT" <<'EOF'
