@@ -83,7 +83,7 @@ class Client:
         req = q.QueryPoints(
             collection_name=self.collection,
             query=q.Query(nearest=q.VectorInput(dense=q.DenseVector(data=vec.tolist()))),
-            limit=k, params=handle.params,
+            limit=k, params=handle.params, timeout=self.timeout,
             with_payload=q.WithPayloadSelector(enable=False), with_vectors=q.WithVectorsSelector(enable=False),
         )
         if handle.filter is not None:
