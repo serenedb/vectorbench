@@ -96,9 +96,9 @@ def cmd_trace(args: argparse.Namespace) -> int:
         name, values = item.split("=", 1)
         ladder[name] = [_num(v) for v in values.split(",")]
     opts = RunOptions(data_dir=_data_dir(args), views=["latency"], groups=[args.group], cpuset=args.cpuset or None,
-                      memory=args.memory or None, tier_cpus=1, index=False, label="trace", warmup=20, passes=1,
+                      memory=args.memory or None, tier_cpus=1, index=False, label="trace", warmup=args.warmup, passes=1,
                       deadline_s=args.deadline, min_queries=min(args.queries, 100000), total_budget_s=args.deadline,
-                      query_limit=args.queries)
+                      query_limit=args.queries, startup_samples=0 if args.attach else 5, attach=args.attach)
     r = Runner(p, fam, size, opts)
     # override the ladder for the traced group
     ds = r.p.settings.setdefault("datasets", {}).setdefault(fam.name, {}).setdefault(size, {})
@@ -210,6 +210,9 @@ def build_parser() -> argparse.ArgumentParser:
     s.add_argument("--knob", action="append", required=True, help="name=v1,v2,...; repeatable")
     s.add_argument("--queries", type=int, default=1000)
     s.add_argument("--deadline", type=float, default=20.0)
+    s.add_argument("--warmup", type=int, default=20)
+    s.add_argument("--attach", action="store_true",
+                   help="query the engine as it runs, even mid-load: no restart, no load record, left running")
     s.set_defaults(fn=cmd_trace)
 
     s = sub.add_parser("check", help="predicate, k-count and exact-recall checks on a small dataset")

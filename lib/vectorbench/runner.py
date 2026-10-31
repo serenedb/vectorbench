@@ -70,6 +70,7 @@ class RunOptions:
     # seconds of actual measurement. After the sample is taken the engine stays up, which also means
     # every group after the first is measured warm rather than paying a cold start no deployment has.
     startup_samples: int = 5
+    attach: bool = False
     dry_run: bool = False
 
 
@@ -391,7 +392,7 @@ class Runner:
                 rf.set(load_aborted={"budget_s": e.budget, "tail": e.tail})
                 self.p.stop(self.env)
                 return rf.finish()
-        else:
+        elif not self.opts.attach:
             self.apply_load_record(rf)
         startups: list[float] = []
         mem_sections: dict[str, int] = {}
@@ -407,7 +408,8 @@ class Runner:
             served = self.p.version(self.env)
             if served not in ("unknown", rf.obj.get("version")):
                 rf.set(load_version=rf.obj.get("version"), version=served)
-        self.p.stop(self.env)
+        if not self.opts.attach:
+            self.p.stop(self.env)
         path = rf.finish()
         log.info("results written to %s", path)
         return path

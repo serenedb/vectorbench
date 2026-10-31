@@ -16,6 +16,7 @@ from __future__ import annotations
 import json
 import multiprocessing as mp
 import os
+import subprocess
 import sys
 import time
 from collections.abc import Iterator
@@ -65,6 +66,18 @@ def env_int(name: str, default: int) -> int:
 
 def env_bool(name: str, default: bool = False) -> bool:
     return env_str(name, str(default)).lower() in ("1", "true", "yes", "on")
+
+
+def pause_hook() -> float:
+    """Run VB_LOAD_PAUSE_HOOK between the ingest and the index build; the driver leaves its time out
+    of the load time (the `pause` phase)."""
+    cmd = os.environ.get("VB_LOAD_PAUSE_HOOK", "").strip()
+    if not cmd:
+        return 0.0
+    log(f"pause hook: {cmd}")
+    t = time.perf_counter()
+    subprocess.run(cmd, shell=True, check=False)
+    return time.perf_counter() - t
 
 
 @dataclass(frozen=True)
@@ -284,14 +297,20 @@ def main() -> int:
     if uploaded != rows:
         raise SystemExit(f"uploaded {uploaded} rows, expected {rows}")
     drain(client, target, rows)
+    ingest = time.perf_counter() - t0
+    log(f"ingest done in {ingest:.1f}s")
+    pause = pause_hook()
+    log("building the index")
     t1 = time.perf_counter()
-    log(f"ingest done in {t1 - t0:.1f}s, building the index")
     info = build_index(client, target, rows)
     t2 = time.perf_counter()
     log(f"index done in {t2 - t1:.1f}s: {info.segments_count} segments, {info.indexed_vectors_count} indexed vectors")
     client.close()
 
-    print("VECTORBENCH_PHASES=" + json.dumps({"ingest": round(t1 - t0, 3), "index": round(t2 - t1, 3)}))
+    phases = {"ingest": round(ingest, 3), "index": round(t2 - t1, 3)}
+    if pause:
+        phases["pause"] = round(pause, 3)
+    print("VECTORBENCH_PHASES=" + json.dumps(phases))
     print("VECTORBENCH_INFO=" + json.dumps(info_tag(info, cfg, workers)))
     return 0
 

@@ -19,6 +19,7 @@ from __future__ import annotations
 
 import json
 import os
+import subprocess
 import sys
 import time
 from pathlib import Path
@@ -54,6 +55,18 @@ KEY_COLUMNS = ["id", "cat10", "cat100", "cat1000", "num", "cluster", "lang"]
 
 def log(msg: str) -> None:
     print(msg, flush=True)
+
+
+def pause_hook() -> float:
+    """Run VB_LOAD_PAUSE_HOOK between the ingest and the final compaction; the driver leaves its time
+    out of the load time (the `pause` phase)."""
+    cmd = os.environ.get("VB_LOAD_PAUSE_HOOK", "").strip()
+    if not cmd:
+        return 0.0
+    log(f"pause hook: {cmd}")
+    t = time.perf_counter()
+    subprocess.run(cmd, shell=True, check=False)
+    return time.perf_counter() - t
 
 
 def connect() -> psycopg.Connection:
@@ -177,6 +190,9 @@ def main() -> int:
                 log(f"ingested shard {i + 1}/{len(shards)} ({time.perf_counter() - t1:.0f}s)")
             phases["ingest"] = time.perf_counter() - t1
         refresh(cur)
+        pause = pause_hook()
+        if pause:
+            phases["pause"] = pause
 
         t2 = time.perf_counter()
         compact(cur)

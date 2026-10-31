@@ -7,7 +7,7 @@ participant:
 env:
   port: 5500
   container: vectorbench-serenedb-hnsw-quant
-  image: serenedb/serenedb:26.10.4
+  image: serenedb/serenedb:26.11.1
   index_kind: hnsw
 
 connection:
@@ -46,3 +46,35 @@ datasets:
         "xcorr/10": {ladder: {ef: [16, 24, 32, 48, 64, 96, 128, 192, 256], width: [1.0, 2.0], mode: [auto]}}
         "lang/10": {ladder: {ef: [16, 24, 32, 48, 64, 96, 128, 192, 256, 384, 512, 768, 1024], width: [1.0, 2.0], mode: [auto]}}
         "xlang/10": {ladder: {ef: [16, 24, 32, 48, 64, 96, 128, 192, 256, 384, 512, 768, 1024], width: [1.0, 2.0], mode: [auto]}}
+    247m:
+      index: {quant: tq, nb_bits: 2, ef_construction: 256}
+      groups:
+        "none/10":       {ladder: {ef: [128, 192, 256, 512, 768, 1024, 1536, 2048, 4096, 6144, 8192], width: [1.0, 3.0], mode: [auto]}}
+        "none/100":      {ladder: {ef: [100, 128, 192, 256, 512, 1024, 2048, 4096, 6144, 8192], width: [1.0, 3.0], mode: [auto]}}
+        "none/1000":     {ladder: {ef: [1000, 2048, 4096, 8192, 16384], width: [1.0, 3.0], mode: [auto]}}
+        "eq-10/10":      {ladder: {ef: [16, 32, 48, 64, 512, 768, 1024, 1536, 2048], width: [1.0, 3.0], mode: [auto]}}
+        "eq-10/100":     {ladder: {ef: [100, 512, 768, 1024, 2048], width: [1.0, 3.0], mode: [auto]}}
+        "eq-10/1000":    {ladder: {ef: [1000, 2048, 3072, 4096], width: [1.0, 3.0], mode: [auto]}}
+        "eq-1/10":       {ladder: {ef: [128, 160, 192, 224, 256], width: [1.0, 3.0], mode: [auto]}}
+        "eq-1/100":      {ladder: {ef: [128, 160, 192, 224, 256], width: [1.0, 3.0], mode: [auto]}}
+        "eq-1/1000":     {ladder: {ef: [1000, 2048], width: [1.0, 3.0], mode: [auto]}}
+        "eq-0.1/10":     {ladder: {ef: [16, 32], width: [1.0, 3.0], mode: [auto]}}
+        "eq-0.1/100":    {ladder: {ef: [100, 128], width: [1.0, 3.0], mode: [auto]}}
+        "eq-0.1/1000":   {ladder: {ef: [1000, 2048], width: [1.0, 3.0], mode: [auto]}}
+        "range-10/10":   {ladder: {ef: [16, 24, 32, 256, 384, 512, 768, 1024, 2048], width: [1.0, 3.0], mode: [auto]}}
+        "range-10/100":  {ladder: {ef: [100, 256, 384, 512, 1024, 2048], width: [1.0, 3.0], mode: [auto]}}
+        "range-10/1000": {ladder: {ef: [1000, 1536, 2048, 4096], width: [1.0, 3.0], mode: [auto]}}
+        "range-1/10":    {ladder: {ef: [128, 160, 192, 224, 256], width: [1.0, 3.0], mode: [auto]}}
+        "range-1/100":   {ladder: {ef: [128, 160, 192, 224, 256], width: [1.0, 3.0], mode: [auto]}}
+        "range-1/1000":  {ladder: {ef: [1000, 2048], width: [1.0, 3.0], mode: [auto]}}
+        "and-1/10":      {ladder: {ef: [16, 32, 64, 128, 192, 256], width: [1.0, 3.0], mode: [auto]}}
+        "and-1/100":     {ladder: {ef: [100, 128, 192, 256, 512], width: [1.0, 3.0], mode: [auto]}}
+        "and-1/1000":    {ladder: {ef: [1000, 2048], width: [1.0, 3.0], mode: [auto]}}
+        "corr/10":       {ladder: {ef: [32, 48, 64, 128, 192, 256, 1024, 1536, 2048], width: [1.0, 3.0], mode: [auto]}}
+        "corr/100":      {ladder: {ef: [100, 256, 384, 512, 1024, 1536, 2048], width: [1.0, 3.0], mode: [auto]}}
+        "corr/1000":     {ladder: {ef: [1000, 2048, 4096], width: [1.0, 3.0], mode: [auto]}}
+        "xcorr/10":      {ladder: {ef: [16, 24, 32, 48, 64, 128], width: [1.0, 3.0], mode: [auto]}}
+        "xcorr/100":     {ladder: {ef: [100, 128, 192, 256, 512], width: [1.0, 3.0], mode: [auto]}}
+        "xcorr/1000":    {ladder: {ef: [1000, 1536, 2048, 4096], width: [1.0, 3.0], mode: [auto]}}
+        "lang/10":       {ladder: {ef: [16, 24, 32, 48, 64, 256, 512, 1024, 2048], width: [1.0, 3.0], mode: [auto]}}
+        "xlang/10":      {ladder: {ef: [32, 48, 64, 96, 128, 192, 256, 1024, 2048, 3072, 4096], width: [1.0, 3.0], mode: [auto]}}
