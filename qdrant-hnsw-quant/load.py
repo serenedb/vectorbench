@@ -244,7 +244,12 @@ def wait_settled(client: QdrantClient, target: Target, rows: int, stable_reads: 
     point in the graph, segment count unchanged. GREEN alone is not enough: a parked collection is GREEN."""
     stable, last_segments, last_log = 0, -1, 0.0
     while True:
-        info = client.get_collection(target.collection)
+        try:
+            info = client.get_collection(target.collection)
+        except Exception as e:  # noqa: BLE001 - the server stalls for minutes while it swaps in a big segment
+            log(f"collection info unavailable, retrying: {str(e).splitlines()[0][:200]}")
+            time.sleep(SETTLE_POLL_S)
+            continue
         if info.status == models.CollectionStatus.RED or info.optimizer_status != models.OptimizersStatusOneOf.OK:
             raise SystemExit(f"collection unhealthy: status={info.status} optimizer_status={info.optimizer_status}")
         queued = info.update_queue.length if info.update_queue is not None else 0
