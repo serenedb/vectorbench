@@ -74,6 +74,7 @@ def cmd_run(args: argparse.Namespace) -> int:
         load_timeout_s=args.load_timeout or None,
         settle_s=args.settle,
         startup_samples=args.startup_samples,
+        start_timeout_s=args.start_timeout,
         dry_run=args.dry_run,
     )
     r = Runner(p, fam, size, opts)
@@ -195,6 +196,8 @@ def build_parser() -> argparse.ArgumentParser:
     s.add_argument("--startup-samples", type=int, default=5,
                    help="how many group-views begin with a restart, to sample startup; after that "
                         "the engine stays up and every group is measured warm")
+    s.add_argument("--start-timeout", type=float, default=600.0,
+                   help="seconds an engine may take to become ready after a start")
     s.add_argument("--settle", type=float, default=3.0,
                    help="seconds of discarded querying after each restart, so a JIT-compiled engine "
                         "is measured warm; 0 disables")

@@ -70,6 +70,7 @@ class RunOptions:
     # seconds of actual measurement. After the sample is taken the engine stays up, which also means
     # every group after the first is measured warm rather than paying a cold start no deployment has.
     startup_samples: int = 5
+    start_timeout_s: float = 600.0
     attach: bool = False
     dry_run: bool = False
 
@@ -235,7 +236,7 @@ class Runner:
         log.info("install %s", self.p.id)
         self.p.install(self.env)
         log.info("start %s", self.p.id)
-        self.p.start(self.env)
+        self.p.start(self.env, timeout=self.opts.start_timeout_s)
         log.info("load %s into %s", self.dataset, self.p.id)
         lr = self.p.load(self.env, timeout=self.opts.load_timeout_s)
         mem = self.p.memory_peak(self.env)
@@ -304,7 +305,7 @@ class Runner:
         if restarted:
             log.info("[%s %s] restart", view, g.key)
             self.p.stop(self.env)
-            startups.append(self.p.start(self.env))
+            startups.append(self.p.start(self.env, timeout=self.opts.start_timeout_s))
         startup = startups[-1] if startups else 0.0
         gt = self.gt.case(g.filter)
         args = self.gt.per_query_args(g.filter, self.qsel)
