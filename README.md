@@ -24,7 +24,9 @@ lib/benchmark.sh          thin entry used by every participant's ./benchmark.sh
 frontend/                 the results page (React, single-file build), shared with SereneDB Playground
 ```
 
-Participants so far: `serenedb-ivf`, `serenedb-hnsw`, `serenedb-hnsw-quant`, `qdrant-hnsw`, `qdrant-hnsw-quant`.
+Participants so far: `serenedb-ivf`, `serenedb-hnsw`, `serenedb-hnsw-qnone`, `serenedb-hnsw-quant`,
+`qdrant-hnsw`, `qdrant-hnsw-quant`, `elasticsearch-hnsw`, `opensearch-hnsw`. Only the run above has
+results in the repository.
 
 ## Run
 
@@ -42,7 +44,7 @@ cd serenedb-ivf && VECTORBENCH_DATASET=sift-128-100k ./benchmark.sh --index
 .venv/bin/python -m vectorbench.cli run --participant serenedb-ivf --dataset sift-128-100k --index
 
 # 3. assemble every participant's results and build the page
-.venv/bin/python -m vectorbench.cli assemble    # --dataset wiki-v3-1024-50m: that dataset only
+.venv/bin/python -m vectorbench.cli assemble    # --dataset wiki-v3-1024-247m: that dataset only
 (cd frontend && npm ci && npm run build)      # -> frontend/index.html, open it in a browser
 ```
 
