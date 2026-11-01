@@ -57,10 +57,10 @@ datasets:
         "and-1/10":      {ladder: {hnsw_ef: [256, 384, 512, 2048, 3072, 4096, 8192], oversample: [1.0, 2.0]}}
         "and-1/100":     {ladder: {hnsw_ef: [256, 384, 512, 768, 1024, 4096, 6144, 8192], oversample: [1.0, 2.0]}}
         "and-1/1000":    {ladder: {hnsw_ef: [1000, 1536, 2048, 8192, 12288, 16384], oversample: [1.0, 2.0]}}
-        "corr/10":       {ladder: {hnsw_ef: [32, 48, 64, 256, 512, 1536, 2048], oversample: [1.0, 2.0]}}
+        "corr/10":       {ladder: {hnsw_ef: [32, 48, 64, 96, 128, 256, 512, 1536, 2048], oversample: [1.0, 2.0]}}
         "corr/100":      {ladder: {hnsw_ef: [100, 768, 1024], oversample: [1.0, 2.0]}}
         "corr/1000":     {ladder: {hnsw_ef: [1000], oversample: [1.0, 2.0]}}
-        "xcorr/10":      {ladder: {hnsw_ef: [256, 1536, 2048, 4096, 8192], oversample: [1.0, 4.0]}}
+        "xcorr/10":      {ladder: {hnsw_ef: [256, 1024, 1280, 1536, 2048, 4096, 8192], oversample: [1.0, 4.0]}}
         "xcorr/100":     {ladder: {hnsw_ef: [256, 384, 512, 1536, 2048, 3072, 4096, 8192], oversample: [1.0, 2.0]}}
         "xcorr/1000":    {ladder: {hnsw_ef: [1000, 4096, 6144, 8192], oversample: [1.0, 2.0]}}
         "lang/10":       {ladder: {hnsw_ef: [24, 32, 48, 64, 128, 384, 512], oversample: [1.0, 2.0]}}

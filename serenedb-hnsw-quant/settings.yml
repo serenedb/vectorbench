@@ -55,8 +55,8 @@ datasets:
         "eq-10/10":      {ladder: {ef: [16, 64, 384, 512], width: [1.0, 3.0], mode: [auto]}}
         "eq-10/100":     {ladder: {ef: [100, 384, 512, 768], width: [1.0, 3.0], mode: [auto]}}
         "eq-10/1000":    {ladder: {ef: [1000, 3072, 4096], width: [1.0, 3.0], mode: [auto]}}
-        "eq-1/10":       {ladder: {ef: [160, 192, 224, 256], width: [1.0, 3.0], mode: [auto]}}
-        "eq-1/100":      {ladder: {ef: [192, 224, 256], width: [1.0, 3.0], mode: [auto]}}
+        "eq-1/10":       {ladder: {ef: [160, 192, 208, 216, 224, 240, 248, 256], width: [1.0, 3.0], mode: [auto]}}
+        "eq-1/100":      {ladder: {ef: [192, 224, 225, 226, 227, 228, 229, 230, 231, 232, 240, 248, 256], width: [1.0], mode: [auto]}}
         "eq-1/1000":     {ladder: {ef: [1000, 2048], width: [1.0, 3.0], mode: [auto]}}
         "eq-0.1/10":     {ladder: {ef: [16], width: [1.0, 3.0], mode: [auto]}}
         "eq-0.1/100":    {ladder: {ef: [100, 128], width: [1.0, 3.0], mode: [auto]}}
@@ -64,8 +64,8 @@ datasets:
         "range-10/10":   {ladder: {ef: [16, 32, 192, 256, 384], width: [1.0, 3.0], mode: [auto]}}
         "range-10/100":  {ladder: {ef: [100, 192, 256, 384], width: [1.0, 3.0], mode: [auto]}}
         "range-10/1000": {ladder: {ef: [1000, 2048, 3072, 4096], width: [1.0, 3.0], mode: [auto]}}
-        "range-1/10":    {ladder: {ef: [128, 160, 192, 224, 256], width: [1.0, 3.0], mode: [auto]}}
-        "range-1/100":   {ladder: {ef: [192, 224, 256], width: [1.0, 3.0], mode: [auto]}}
+        "range-1/10":    {ladder: {ef: [128, 160, 192, 208, 216, 224, 256], width: [1.0, 3.0], mode: [auto]}}
+        "range-1/100":   {ladder: {ef: [192, 224, 225, 226, 227, 228, 229, 230, 231, 232, 240, 248, 256], width: [1.0], mode: [auto]}}
         "range-1/1000":  {ladder: {ef: [1000, 2048], width: [1.0, 3.0], mode: [auto]}}
         "and-1/10":      {ladder: {ef: [16, 24, 32], width: [1.0, 3.0], mode: [auto]}}
         "and-1/100":     {ladder: {ef: [100, 128, 192], width: [1.0, 3.0], mode: [auto]}}
@@ -76,5 +76,5 @@ datasets:
         "xcorr/10":      {ladder: {ef: [16, 24, 48, 64, 128], width: [1.0, 3.0], mode: [auto]}}
         "xcorr/100":     {ladder: {ef: [100, 128, 192, 256, 512], width: [1.0, 3.0], mode: [auto]}}
         "xcorr/1000":    {ladder: {ef: [1000, 1536, 2048, 4096], width: [1.0, 3.0], mode: [auto]}}
-        "lang/10":       {ladder: {ef: [16, 24, 32, 48, 64, 192, 256, 512], width: [1.0, 3.0], mode: [auto]}}
+        "lang/10":       {ladder: {ef: [16, 24, 32, 40, 48, 64, 192, 256, 512], width: [1.0, 3.0], mode: [auto]}}
         "xlang/10":      {ladder: {ef: [32, 48, 64, 96, 128, 256, 768, 1024, 2048, 3072, 4096], width: [1.0, 3.0], mode: [auto]}}
