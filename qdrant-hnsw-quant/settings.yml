@@ -36,7 +36,7 @@ datasets:
     247m:
       index: {ef_construct: 256, quant: tq, tq_bits: bits2, on_disk_vectors: true, payload_index_memory: cold, max_segment_size_kb: 140000000}
       groups:
-        "none/10":       {ladder: {hnsw_ef: [128, 192, 1024, 3072, 4096], oversample: [1.0, 2.0]}}
+        "none/10":       {ladder: {hnsw_ef: [128, 160, 192, 224, 256, 384, 512, 768, 1024, 1536, 2048, 3072, 4096], oversample: [1.0, 2.0]}}
         "none/100":      {ladder: {hnsw_ef: [100, 128, 192, 256, 1536, 2048], oversample: [1.0, 2.0]}}
         "none/1000":     {ladder: {hnsw_ef: [1000], oversample: [1.0, 2.0]}}
         "eq-10/10":      {ladder: {hnsw_ef: [32, 48, 64, 128, 384, 512], oversample: [1.0, 2.0]}}
