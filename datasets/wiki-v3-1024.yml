@@ -3,18 +3,20 @@ title: Cohere Wikipedia 2023-11, embed-multilingual-v3
 description: >
   Paragraph embeddings of Wikipedia from Cohere's embed-multilingual-v3 model, 1024 dimensions,
   unit-normalized (prepare measures norm 1.0), searched by inner product, which equals cosine here.
-  Seven languages interleaved in 10k-row chunks so every prefix is multilingual.
+  All 323 languages interleaved in 10k-row chunks so every prefix is multilingual; queries come
+  from seven of them.
 dims: 1024
 metric: ip
 source:
   kind: hf
   repo: Cohere/wikipedia-2023-11-embed-multilingual-v3
   langs: [en, de, fr, es, ru, ja, zh]
+  base_langs: all
   columns: {emb: emb, title: title}
   interleave_rows: 10000
   query_pool: last_shard_per_lang
 # Prefix sizes that exist for this family; 100k is for development only.
-sizes: {100k: 100000, 1m: 1000000, 10m: 10000000, 50m: 50000000, 100m: 100000000}
+sizes: {100k: 100000, 1m: 1000000, 10m: 10000000, 50m: 50000000, 100m: 100000000, 247m: 246838423}
 # Predicate definitions. The driver derives each query's arguments ($v, $lo, $hi, $s) from them,
 # computes the filtered ground truth with them, and checks returned ids against them.
 # Engines never read this block; they express each case in their own queries file.

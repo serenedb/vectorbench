@@ -16,6 +16,7 @@ from __future__ import annotations
 import json
 import multiprocessing as mp
 import os
+import subprocess
 import sys
 import time
 from collections.abc import Iterator
@@ -67,6 +68,18 @@ def env_bool(name: str, default: bool = False) -> bool:
     return env_str(name, str(default)).lower() in ("1", "true", "yes", "on")
 
 
+def pause_hook() -> float:
+    """Run VB_LOAD_PAUSE_HOOK between the ingest and the index build; the driver leaves its time out
+    of the load time (the `pause` phase)."""
+    cmd = os.environ.get("VB_LOAD_PAUSE_HOOK", "").strip()
+    if not cmd:
+        return 0.0
+    log(f"pause hook: {cmd}")
+    t = time.perf_counter()
+    subprocess.run(cmd, shell=True, check=False)
+    return time.perf_counter() - t
+
+
 @dataclass(frozen=True)
 class Target:
     host: str
@@ -98,6 +111,7 @@ class IndexConfig:
     bq_encoding: str = "one_bit"
     bq_query_encoding: str = "default"
     tq_bits: str = "bits4"
+    payload_index_memory: str | None = None
 
     @classmethod
     def from_env(cls) -> IndexConfig:
@@ -112,6 +126,7 @@ class IndexConfig:
             bq_encoding=env_str("VB_INDEX_BQ_ENCODING", "one_bit").lower(),
             bq_query_encoding=env_str("VB_INDEX_BQ_QUERY_ENCODING", "default").lower(),
             tq_bits=env_str("VB_INDEX_TQ_BITS", "bits4").lower(),
+            payload_index_memory=(env_str("VB_INDEX_PAYLOAD_INDEX_MEMORY", "").lower() or None),
         )
 
     def quantization(self, metric: str) -> models.QuantizationConfig | None:
@@ -158,6 +173,8 @@ def create_collection(client: QdrantClient, target: Target, dims: int, metric: s
         quantization_config=cfg.quantization(metric),
     )
     for field, schema in PAYLOAD_INDEXES.items():
+        if cfg.payload_index_memory:
+            schema = schema.model_copy(update={"memory": models.Memory(cfg.payload_index_memory)})
         client.create_payload_index(target.collection, field, schema, wait=True)
 
 
@@ -227,7 +244,12 @@ def wait_settled(client: QdrantClient, target: Target, rows: int, stable_reads: 
     point in the graph, segment count unchanged. GREEN alone is not enough: a parked collection is GREEN."""
     stable, last_segments, last_log = 0, -1, 0.0
     while True:
-        info = client.get_collection(target.collection)
+        try:
+            info = client.get_collection(target.collection)
+        except Exception as e:  # noqa: BLE001 - the server stalls for minutes while it swaps in a big segment
+            log(f"collection info unavailable, retrying: {str(e).splitlines()[0][:200]}")
+            time.sleep(SETTLE_POLL_S)
+            continue
         if info.status == models.CollectionStatus.RED or info.optimizer_status != models.OptimizersStatusOneOf.OK:
             raise SystemExit(f"collection unhealthy: status={info.status} optimizer_status={info.optimizer_status}")
         queued = info.update_queue.length if info.update_queue is not None else 0
@@ -280,14 +302,20 @@ def main() -> int:
     if uploaded != rows:
         raise SystemExit(f"uploaded {uploaded} rows, expected {rows}")
     drain(client, target, rows)
+    ingest = time.perf_counter() - t0
+    log(f"ingest done in {ingest:.1f}s")
+    pause = pause_hook()
+    log("building the index")
     t1 = time.perf_counter()
-    log(f"ingest done in {t1 - t0:.1f}s, building the index")
     info = build_index(client, target, rows)
     t2 = time.perf_counter()
     log(f"index done in {t2 - t1:.1f}s: {info.segments_count} segments, {info.indexed_vectors_count} indexed vectors")
     client.close()
 
-    print("VECTORBENCH_PHASES=" + json.dumps({"ingest": round(t1 - t0, 3), "index": round(t2 - t1, 3)}))
+    phases = {"ingest": round(ingest, 3), "index": round(t2 - t1, 3)}
+    if pause:
+        phases["pause"] = round(pause, 3)
+    print("VECTORBENCH_PHASES=" + json.dumps(phases))
     print("VECTORBENCH_INFO=" + json.dumps(info_tag(info, cfg, workers)))
     return 0
 

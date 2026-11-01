@@ -13,13 +13,16 @@ The sibling participant `serenedb-hnsw/` shares every script through symlinks an
 
 ## Recipe (`./load`)
 
-1. `CREATE TABLE items (...) WITH (storage = 'search', compaction_interval = 0)`: rows live in the
-   index, background compaction is off so the settle step controls it.
+1. `CREATE TABLE items (...) WITH (storage = 'search')`: rows live in the index, and background
+   compaction merges the ingest's segments while rows arrive.
 2. `CREATE INDEX items_vec ON items USING inverted(id, cat10, cat100, cat1000, num, cluster, lang,
    emb ivf (metric = ..., quant = ...))`: attribute columns are index key columns, so a predicate is
    answered inside the scan (`Index Filter:` in EXPLAIN).
 3. `INSERT INTO items SELECT ... FROM read_parquet(shard)` per shard, then `VACUUM (REFRESH_TABLE)`.
-4. `VACUUM (COMPACT_TABLE)`, then poll `sdb_metrics` until `compaction_active + compaction_pending = 0`
+4. `ALTER TABLE items SET (compaction_interval = 0)`, wait until the merges in flight finish
+   (`compaction_active + compaction_pending = 0`: a VACUUM that starts while they hold every
+   compaction slot builds on one thread), `VACUUM (COMPACT_TABLE)` down to the pinned segment count,
+   then poll `sdb_metrics` until `compaction_active + compaction_pending = 0`
    and `num_segments` has not changed for six 5-second polls.
 
 Phases reported: `ddl`, `ingest`, `compaction`. Info reported: rows, segments, files, index bytes

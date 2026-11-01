@@ -182,7 +182,7 @@ class Participant:
                 if not isinstance(val, dict):
                     raise RuntimeError(f"{self.id}/load: VECTORBENCH_INFO must be an object")
                 info = val
-        return LoadResult(seconds, phases, info, out[-4000:])
+        return LoadResult(seconds - phases.get("pause", 0.0), phases, info, out[-4000:])
 
     def data_size(self, env: dict[str, str]) -> int | None:
         cp = self.run("data-size", env, timeout=600, check=False)
