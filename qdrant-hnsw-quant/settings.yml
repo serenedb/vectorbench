@@ -4,7 +4,7 @@ env:
   port: 6535
   grpc_port: 6536
   container: vectorbench-qdrant-hnsw-quant
-  image: qdrant/qdrant:v1.19.1
+  image: qdrant/qdrant:v1.20.0
   collection: items
   upload_workers: 4
 
@@ -33,3 +33,35 @@ datasets:
         "xcorr/10": {ladder: {hnsw_ef: [16, 24, 32, 48, 64, 96, 128, 192, 256], oversample: [1.0]}}
         "lang/10": {ladder: {hnsw_ef: [16, 24, 32, 48, 64, 96, 128, 192, 256], oversample: [1.0]}}
         "xlang/10": {ladder: {hnsw_ef: [16, 24, 32, 48, 64, 96, 128, 192, 256], oversample: [1.0]}}
+    247m:
+      index: {ef_construct: 256, quant: tq, tq_bits: bits2, on_disk_vectors: true, payload_index_memory: cold, max_segment_size_kb: 140000000}
+      groups:
+        "none/10":       {ladder: {hnsw_ef: [128, 160, 192, 224, 256, 384, 512, 768, 1024, 1536, 2048, 3072, 4096], oversample: [1.0, 2.0]}}
+        "none/100":      {ladder: {hnsw_ef: [100, 128, 192, 256, 1536, 2048], oversample: [1.0, 2.0]}}
+        "none/1000":     {ladder: {hnsw_ef: [1000], oversample: [1.0, 2.0]}}
+        "eq-10/10":      {ladder: {hnsw_ef: [32, 48, 64, 128, 384, 512], oversample: [1.0, 2.0]}}
+        "eq-10/100":     {ladder: {hnsw_ef: [100, 384, 512], oversample: [1.0, 2.0]}}
+        "eq-10/1000":    {ladder: {hnsw_ef: [1000], oversample: [1.0, 2.0]}}
+        "eq-1/10":       {ladder: {hnsw_ef: [256, 512, 768, 4096, 8192], oversample: [1.0, 2.0]}}
+        "eq-1/100":      {ladder: {hnsw_ef: [256, 384, 512, 768, 1024, 4096, 8192], oversample: [1.0, 2.0]}}
+        "eq-1/1000":     {ladder: {hnsw_ef: [1000, 2048, 3072, 8192, 16384], oversample: [1.0, 2.0]}}
+        "eq-0.1/10":     {ladder: {hnsw_ef: [16, 512, 8192], oversample: [1.0, 2.0]}}
+        "eq-0.1/100":    {ladder: {hnsw_ef: [100, 1024, 8192], oversample: [1.0, 2.0]}}
+        "eq-0.1/1000":   {ladder: {hnsw_ef: [1000, 4096, 16384], oversample: [1.0, 2.0]}}
+        "range-10/10":   {ladder: {hnsw_ef: [32, 48, 64, 128, 384, 512, 768], oversample: [1.0, 2.0]}}
+        "range-10/100":  {ladder: {hnsw_ef: [100, 128, 384, 512], oversample: [1.0, 2.0]}}
+        "range-10/1000": {ladder: {hnsw_ef: [1000], oversample: [1.0, 2.0]}}
+        "range-1/10":    {ladder: {hnsw_ef: [256, 384, 512, 768, 4096, 6144, 8192], oversample: [1.0, 2.0]}}
+        "range-1/100":   {ladder: {hnsw_ef: [256, 384, 512, 768, 1024, 4096, 8192], oversample: [1.0, 2.0]}}
+        "range-1/1000":  {ladder: {hnsw_ef: [1000, 1536, 2048, 8192, 12288, 16384], oversample: [1.0, 2.0]}}
+        "and-1/10":      {ladder: {hnsw_ef: [256, 384, 512, 2048, 3072, 4096, 8192], oversample: [1.0, 2.0]}}
+        "and-1/100":     {ladder: {hnsw_ef: [256, 384, 512, 768, 1024, 4096, 6144, 8192], oversample: [1.0, 2.0]}}
+        "and-1/1000":    {ladder: {hnsw_ef: [1000, 1536, 2048, 8192, 12288, 16384], oversample: [1.0, 2.0]}}
+        "corr/10":       {ladder: {hnsw_ef: [32, 48, 64, 96, 128, 256, 512, 1536, 2048], oversample: [1.0, 2.0]}}
+        "corr/100":      {ladder: {hnsw_ef: [100, 768, 1024], oversample: [1.0, 2.0]}}
+        "corr/1000":     {ladder: {hnsw_ef: [1000], oversample: [1.0, 2.0]}}
+        "xcorr/10":      {ladder: {hnsw_ef: [256, 1024, 1280, 1536, 2048, 4096, 8192], oversample: [1.0, 4.0]}}
+        "xcorr/100":     {ladder: {hnsw_ef: [256, 384, 512, 1536, 2048, 3072, 4096, 8192], oversample: [1.0, 2.0]}}
+        "xcorr/1000":    {ladder: {hnsw_ef: [1000, 4096, 6144, 8192], oversample: [1.0, 2.0]}}
+        "lang/10":       {ladder: {hnsw_ef: [24, 32, 48, 64, 128, 384, 512], oversample: [1.0, 2.0]}}
+        "xlang/10":      {ladder: {hnsw_ef: [64, 128, 192, 512, 3072, 4096, 8192], oversample: [1.0, 2.0]}}

@@ -38,8 +38,16 @@ limits=()
 async_scorer=false
 case "${VB_INDEX_ASYNC_SCORER,,}" in 1|true|yes|on) async_scorer=true ;; esac
 
+# Build-only overrides from the caller's environment: a load at 240M+ needs sequential advice while the
+# optimizer copies vectors into each new segment, and fewer concurrent optimizations to fit in memory.
+build=()
+[[ -n "${VB_QDRANT_MMAP_ADVICE:-}" ]] && build+=(-e QDRANT__STORAGE__MMAP_ADVICE="$VB_QDRANT_MMAP_ADVICE")
+[[ -n "${VB_QDRANT_MAX_OPTIMIZATION_THREADS:-}" ]] &&
+    build+=(-e QDRANT__STORAGE__OPTIMIZERS__MAX_OPTIMIZATION_THREADS="$VB_QDRANT_MAX_OPTIMIZATION_THREADS")
+
 docker run -d --name "$VB_CONTAINER" \
     "${limits[@]}" \
+    "${build[@]}" \
     --security-opt seccomp=unconfined \
     --network host \
     -v "${engine_dir}:/qdrant/storage" \

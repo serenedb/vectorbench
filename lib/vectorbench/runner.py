@@ -70,6 +70,8 @@ class RunOptions:
     # seconds of actual measurement. After the sample is taken the engine stays up, which also means
     # every group after the first is measured warm rather than paying a cold start no deployment has.
     startup_samples: int = 5
+    start_timeout_s: float = 600.0
+    attach: bool = False
     dry_run: bool = False
 
 
@@ -234,7 +236,7 @@ class Runner:
         log.info("install %s", self.p.id)
         self.p.install(self.env)
         log.info("start %s", self.p.id)
-        self.p.start(self.env)
+        self.p.start(self.env, timeout=self.opts.start_timeout_s)
         log.info("load %s into %s", self.dataset, self.p.id)
         lr = self.p.load(self.env, timeout=self.opts.load_timeout_s)
         mem = self.p.memory_peak(self.env)
@@ -303,7 +305,7 @@ class Runner:
         if restarted:
             log.info("[%s %s] restart", view, g.key)
             self.p.stop(self.env)
-            startups.append(self.p.start(self.env))
+            startups.append(self.p.start(self.env, timeout=self.opts.start_timeout_s))
         startup = startups[-1] if startups else 0.0
         gt = self.gt.case(g.filter)
         args = self.gt.per_query_args(g.filter, self.qsel)
@@ -391,7 +393,7 @@ class Runner:
                 rf.set(load_aborted={"budget_s": e.budget, "tail": e.tail})
                 self.p.stop(self.env)
                 return rf.finish()
-        else:
+        elif not self.opts.attach:
             self.apply_load_record(rf)
         startups: list[float] = []
         mem_sections: dict[str, int] = {}
@@ -403,7 +405,12 @@ class Runner:
                     sec = "unfiltered" if g.filter == "none" else "filtered"
                     mem_sections[sec] = max(mem_sections.get(sec, 0), int(grp["memory_peak"]))
                 rf.set(startup=metrics.stats(startups), memory_peak={**(rf.obj.get("memory_peak") or {}), **mem_sections})
-        self.p.stop(self.env)
+        if not self.opts.index:
+            served = self.p.version(self.env)
+            if served not in ("unknown", rf.obj.get("version")):
+                rf.set(load_version=rf.obj.get("version"), version=served)
+        if not self.opts.attach:
+            self.p.stop(self.env)
         path = rf.finish()
         log.info("results written to %s", path)
         return path

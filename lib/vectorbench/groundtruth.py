@@ -112,6 +112,17 @@ def compute(
     return out
 
 
+def merge(a: dict[str, Any], b: dict[str, Any], depth: int) -> dict[str, Any]:
+    """One case's `compute` results over two disjoint row sets, combined."""
+    d = np.concatenate([a["dists"], b["dists"]], axis=1)
+    i = np.concatenate([a["ids"], b["ids"]], axis=1)
+    order = np.argsort(d, axis=1, kind="stable")[:, :depth]
+    dd = np.take_along_axis(d, order, axis=1)
+    ii = np.take_along_axis(i, order, axis=1)
+    ii[~np.isfinite(dd)] = -1
+    return {"ids": ii.astype(np.int32), "dists": dd, "matches": a["matches"] + b["matches"]}
+
+
 def _none_mask(cols: dict[str, np.ndarray], qsel: slice) -> None:  # sentinel for the unfiltered case
     return None
 

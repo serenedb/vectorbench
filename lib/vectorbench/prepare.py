@@ -11,9 +11,12 @@ import datetime as dt
 import hashlib
 import json
 import logging
+import multiprocessing
 import os
 import time
 from collections.abc import Iterator
+from concurrent.futures import ProcessPoolExecutor, as_completed
+from dataclasses import replace
 from pathlib import Path
 from typing import Any
 
@@ -24,6 +27,10 @@ import pyarrow.parquet as pq
 from . import __version__, attributes, groundtruth
 from .families import Family
 from .sources import Block, make_source
+
+GT_BLOCK_ROWS = 20_000
+GT_QUERY_BATCH = 500
+THREAD_ENV = ("OPENBLAS_NUM_THREADS", "OMP_NUM_THREADS", "MKL_NUM_THREADS")
 
 log = logging.getLogger(__name__)
 
@@ -143,17 +150,106 @@ def kmeans(x: np.ndarray, k: int, iters: int = 25, seed: int = 0) -> np.ndarray:
     return centroids
 
 
+def _cut(pieces: list[Any], shard_rows: int) -> list[list[Any]]:
+    """Stream pieces regrouped into consecutive shards of `shard_rows` rows (the last may be short)."""
+    shards: list[list[Any]] = []
+    cur: list[Any] = []
+    have = 0
+    for p in pieces:
+        start, rows = p.start, p.rows
+        while rows > 0:
+            take = min(rows, shard_rows - have)
+            cur.append(replace(p, start=start, rows=take))
+            start, rows, have = start + take, rows - take, have + take
+            if have == shard_rows:
+                shards.append(cur)
+                cur, have = [], 0
+    if cur:
+        shards.append(cur)
+    return shards
+
+
+def _mask_fns(family: Family, per_case_args: dict[str, dict[str, np.ndarray]], names: list[str]) -> dict[str, groundtruth.MaskFn]:
+    cases: dict[str, groundtruth.MaskFn] = {}
+    for cname in names:
+        spec = family.filter_cases[cname]
+        if not spec:
+            cases[cname] = groundtruth.none_mask()
+        else:
+            args = per_case_args[cname]
+            cases[cname] = (lambda spec=spec, args=args: (lambda cols, qsel: attributes.predicate_mask(spec, cols, args, qsel)))()
+    return cases
+
+
+def _parallel_worker(job: dict[str, Any]) -> dict[str, Any]:
+    """Build, write and checksum this worker's shards, and fold their rows into the ground truth."""
+    logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s", datefmt="%H:%M:%S")
+    fam: Family = job["family"]
+    out = Path(job["out"])
+    source = make_source(job["source_spec"], Path(job["cache"]), fam.dims)
+    centroids = job["centroids"]
+    shards_info: list[dict[str, Any]] = []
+    t0 = time.time()
+
+    def blocks() -> Iterator[tuple[np.ndarray, np.ndarray, dict[str, np.ndarray]]]:
+        for n, (i, pieces) in enumerate(job["shards"], 1):
+            path = out / "base" / f"part_{i:05d}.parquet"
+            if path.exists():
+                t = pq.read_table(path, columns=["id", "emb", "cluster", "lang"])
+                ids = t.column("id").to_numpy()
+                vec = table_vectors(t, fam.dims)
+                cl = t.column("cluster").to_numpy()
+                lang = np.asarray(t.column("lang").to_pylist(), dtype=object)
+            else:
+                blks = [source.read_piece(p) for p in pieces]
+                vec = np.concatenate([b.vectors for b in blks])
+                lang = np.concatenate([b.extra["lang"] for b in blks])
+                title = np.concatenate([b.extra["title"] for b in blks])
+                ids = np.arange(i * fam.shard_rows, i * fam.shard_rows + len(vec), dtype=np.int64)
+                cl = attributes.assign_clusters(vec, centroids)
+                table = shard_table(ids, vec, {"lang": lang, "title": title}, cl, fam.dims)
+                tmp = path.with_suffix(".tmp.parquet")
+                pq.write_table(table, tmp, compression="none", row_group_size=min(10_000, len(table)))
+                tmp.replace(path)
+                del table
+            shards_info.append({"index": i, "rows": len(ids), "sha256": sha256_file(path)})
+            syn = attributes.synthetic_columns(ids)
+            cols = {"cat10": syn["cat10"], "cat100": syn["cat100"], "cat1000": syn["cat1000"], "num": syn["num"], "cluster": cl, "lang": lang}
+            for s in range(0, len(ids), GT_BLOCK_ROWS):
+                yield ids[s : s + GT_BLOCK_ROWS], vec[s : s + GT_BLOCK_ROWS], {k: v[s : s + GT_BLOCK_ROWS] for k, v in cols.items()}
+            log.info("worker %d: shard %d done (%d/%d, %.0fs)", job["worker"], i, n, len(job["shards"]), time.time() - t0)
+
+    cases = _mask_fns(fam, job["per_case"], job["cases"])
+    if cases:
+        gt = groundtruth.compute(job["qvec"], blocks(), fam.metric, fam.gt_depth, cases, query_batch=GT_QUERY_BATCH)
+    else:
+        gt = {}
+        for _ in blocks():
+            pass
+    return {"gt": gt, "shards": shards_info}
+
+
 class Preparer:
-    def __init__(self, family: Family, size: str, root: Path | None = None, workers: int | None = None):
-        self.family = family
+    def __init__(
+        self,
+        family: Family,
+        size: str,
+        root: Path | None = None,
+        workers: int = 1,
+        source_dir: Path | None = None,
+        queries: int | None = None,
+    ):
+        self.family = replace(family, queries_count=queries) if queries else family
         self.size = size
         self.root = root or data_dir()
         self.out = dataset_dir(family, size, self.root)
         self.rows = family.rows(size)
         self.cache = self.root / "_cache" / family.name
         self.n_shards = (self.rows + family.shard_rows - 1) // family.shard_rows
-        self.source = make_source(family.source, self.cache, family.dims)
+        self.source_spec = dict(family.source, local_dir=str(source_dir)) if source_dir else dict(family.source)
+        self.source = make_source(self.source_spec, self.cache, family.dims)
         self.train_rows = min(family.cluster_train_rows, self.rows)
+        self.workers = workers
 
     # ------------------------------------------------------------------ paths
     def shard_path(self, i: int) -> Path:
@@ -365,17 +461,9 @@ class Preparer:
     def write_groundtruth(self, paths: list[Path], qvec: np.ndarray, per_case_args: dict[str, dict[str, np.ndarray]]) -> dict[str, dict[str, Any]]:
         gtdir = self.out / "gt"
         gtdir.mkdir(exist_ok=True)
-        todo = {c for c in self.family.filter_cases if not (gtdir / f"{c}.npz").exists()}
-        summary: dict[str, dict[str, Any]] = {}
+        todo = [c for c in self.family.filter_cases if not (gtdir / f"{c}.npz").exists()]
         if todo:
-            cases: dict[str, groundtruth.MaskFn] = {}
-            for cname in todo:
-                spec = self.family.filter_cases[cname]
-                if not spec:
-                    cases[cname] = groundtruth.none_mask()
-                else:
-                    args = per_case_args[cname]
-                    cases[cname] = (lambda spec=spec, args=args: (lambda cols, qsel: attributes.predicate_mask(spec, cols, args, qsel)))()
+            cases = _mask_fns(self.family, per_case_args, todo)
             t0 = time.time()
 
             def progress(seen: int) -> None:
@@ -384,18 +472,23 @@ class Preparer:
             res = groundtruth.compute(qvec, self._blocks(paths), self.family.metric, self.family.gt_depth, cases, progress=progress)
             for cname, r in res.items():
                 np.savez(gtdir / f"{cname}.npz", ids=r["ids"], dists=r["dists"], matches=r["matches"])
+        return self.gt_summary()
+
+    def gt_summary(self) -> dict[str, dict[str, Any]]:
+        summary: dict[str, dict[str, Any]] = {}
         for cname in self.family.filter_cases:
-            z = np.load(gtdir / f"{cname}.npz")
+            z = np.load(self.out / "gt" / f"{cname}.npz")
             m = z["matches"]
             summary[cname] = {"matches_median": int(np.median(m)), "matches_min": int(m.min()), "matches_max": int(m.max())}
         return summary
 
     # ---------------------------------------------------------------- manifest
-    def write_manifest(self, paths: list[Path], gt_summary: dict[str, Any], norms: dict[str, float]) -> dict[str, Any]:
+    def write_manifest(self, paths: list[Path], gt_summary: dict[str, Any], norms: dict[str, float], sha256: dict[Path, str] | None = None) -> dict[str, Any]:
         shards = []
         for p in paths:
             md = pq.read_metadata(p)
-            shards.append({"path": str(p.relative_to(self.out)), "rows": md.num_rows, "sha256": sha256_file(p)})
+            digest = (sha256 or {}).get(p) or sha256_file(p)
+            shards.append({"path": str(p.relative_to(self.out)), "rows": md.num_rows, "sha256": digest})
         manifest = {
             "family": self.family.name,
             "size": self.size,
@@ -429,7 +522,85 @@ class Preparer:
         return {"min": float(n.min()), "p50": float(np.median(n)), "mean": float(n.mean()), "max": float(n.max()), "sample_rows": int(len(n))}
 
     # -------------------------------------------------------------------- run
+    def run_parallel(self) -> dict[str, Any]:
+        """Shards and ground truth in one pass over the source, `workers` processes each writing every
+        `workers`-th shard and folding its rows into a partial top-`gt_depth`; the partials are merged.
+        Produces the same files as `run`."""
+        log.info("prepare %s -> %s with %d workers", self.family.dataset_id(self.size), self.out, self.workers)
+        self.out.mkdir(parents=True, exist_ok=True)
+        (self.out / "base").mkdir(exist_ok=True)
+        (self.out / "gt").mkdir(exist_ok=True)
+        t0 = time.time()
+        shards = _cut(self.source.plan(self.rows), self.family.shard_rows)
+        log.info("planned %d shards in %.0fs", len(shards), time.time() - t0)
+        centroids = self.plan_centroids(shards)
+        qvec, qinfo = self.write_queries(centroids)
+        per_case = self.write_query_args(qvec, qinfo, centroids)
+        todo = [c for c in self.family.filter_cases if not (self.out / "gt" / f"{c}.npz").exists()]
+        n = min(self.workers, len(shards))
+        jobs = [
+            {
+                "worker": w,
+                "family": self.family,
+                "out": str(self.out),
+                "cache": str(self.cache),
+                "source_spec": self.source_spec,
+                "centroids": centroids,
+                "qvec": qvec,
+                "per_case": per_case,
+                "cases": todo,
+                "shards": [(i, shards[i]) for i in range(w, len(shards), n)],
+            }
+            for w in range(n)
+        ]
+        saved = {k: os.environ.get(k) for k in THREAD_ENV}
+        os.environ.update({k: "1" for k in THREAD_ENV})
+        merged: dict[str, dict[str, Any]] | None = None
+        sha256: dict[Path, str] = {}
+        try:
+            with ProcessPoolExecutor(n, mp_context=multiprocessing.get_context("spawn")) as ex:
+                futures = [ex.submit(_parallel_worker, j) for j in jobs]
+                for done, fut in enumerate(as_completed(futures), 1):
+                    r = fut.result()
+                    for s in r["shards"]:
+                        sha256[self.shard_path(s["index"])] = s["sha256"]
+                    merged = r["gt"] if merged is None else {c: groundtruth.merge(merged[c], r["gt"][c], self.family.gt_depth) for c in todo}
+                    log.info("worker results %d/%d merged (%.0fs)", done, n, time.time() - t0)
+        finally:
+            for k, v in saved.items():
+                if v is None:
+                    os.environ.pop(k, None)
+                else:
+                    os.environ[k] = v
+        for cname, r in (merged or {}).items():
+            np.savez(self.out / "gt" / f"{cname}.npz", ids=r["ids"], dists=r["dists"], matches=r["matches"])
+        paths = [self.shard_path(i) for i in range(len(shards))]
+        manifest = self.write_manifest(paths, self.gt_summary(), self.norm_stats(paths), sha256)
+        log.info("done: %d rows, %d queries, %d cases (%.0fs)", manifest["rows"], manifest["nq"], len(self.family.filter_cases), time.time() - t0)
+        return manifest
+
+    def plan_centroids(self, shards: list[list[Any]]) -> np.ndarray:
+        cpath = self.out / "centroids.npy"
+        if cpath.exists():
+            return np.load(cpath)
+        parts: list[np.ndarray] = []
+        have = 0
+        for pieces in shards:
+            for p in pieces:
+                if have >= self.train_rows:
+                    break
+                v = self.source.read_piece(p).vectors
+                parts.append(v[: self.train_rows - have])
+                have += len(parts[-1])
+        x = np.concatenate(parts)
+        log.info("k-means: %d clusters on %d rows", self.family.cluster_k, len(x))
+        c = kmeans(x, self.family.cluster_k)
+        np.save(cpath, c)
+        return c
+
     def run(self) -> dict[str, Any]:
+        if self.workers > 1 and hasattr(self.source, "plan"):
+            return self.run_parallel()
         log.info("prepare %s -> %s", self.family.dataset_id(self.size), self.out)
         self.out.mkdir(parents=True, exist_ok=True)
         paths = self.write_shards()

@@ -6,7 +6,7 @@ cd "$(dirname "$0")"
 source ./common.sh
 
 if [[ -n "$VB_BINARY" ]]; then
-    if pid="$(native_pid)" && [[ -n "$pid" ]]; then exit 0; fi
+    if pid="$(native_pid)" && [[ -n "$pid" ]]; then [[ -f "$PREWARMED" ]] || prewarm; exit 0; fi
     refuse_foreign_port
     mkdir -p "$VECTORBENCH_ENGINE_DIR/data"
     cmd=("$VB_BINARY" "$VECTORBENCH_ENGINE_DIR/data" "--listen=postgres://127.0.0.1:${VB_PORT}" "--log_storage=stdout")
@@ -23,13 +23,15 @@ if [[ -n "$VB_BINARY" ]]; then
         rm -f "$PIDFILE"
         exit 1
     }
+    prewarm
     exit 0
 fi
 
 if docker inspect "$VB_CONTAINER" >/dev/null 2>&1; then
     state="$(docker inspect -f '{{.State.Status}}' "$VB_CONTAINER")"
-    if [[ "$state" == "running" ]]; then exit 0; fi
+    if [[ "$state" == "running" ]]; then [[ -f "$PREWARMED" ]] || prewarm; exit 0; fi
     docker start "$VB_CONTAINER" >/dev/null
+    prewarm
     exit 0
 fi
 
@@ -53,3 +55,4 @@ docker run -d \
     -v "${VECTORBENCH_ENGINE_DIR}/serened.conf:/etc/serenedb/serened.conf:ro" \
     "${corpus[@]}" \
     "$VB_IMAGE" >/dev/null
+prewarm

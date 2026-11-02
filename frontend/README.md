@@ -133,12 +133,12 @@ eq-0.1), as the mock in DESIGN.md section 2 shows.
 Then run `npm run build` in `frontend/` and commit the JSON and HTML together.
 
 `--dataset <family>-<size>` (repeatable) narrows the page to those datasets and
-their families; the other result files stay in the repository, and every
-`results.json` ever committed stays in the playground's history. The committed
-page is assembled that way, from `wiki-v3-1024-50m` alone:
+their families; every `results.json` ever committed stays in the playground's
+history. The committed page is assembled that way, from `wiki-v3-1024-247m`
+alone:
 
 ```bash
-.venv/bin/python -m vectorbench.cli assemble --dataset wiki-v3-1024-50m
+.venv/bin/python -m vectorbench.cli assemble --dataset wiki-v3-1024-247m
 ```
 
 The page draws what was measured. A row nobody ran at a dataset's size is left

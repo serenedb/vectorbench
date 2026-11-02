@@ -24,7 +24,7 @@ def cmd_prepare(args: argparse.Namespace) -> int:
 
     family_name, size = split_dataset_id(args.dataset)
     fam = load_family(family_name)
-    m = Preparer(fam, size, _data_dir(args)).run()
+    m = Preparer(fam, size, _data_dir(args), workers=args.workers, source_dir=Path(args.source_dir) if args.source_dir else None, queries=args.queries).run()
     print(json.dumps({k: m[k] for k in ("dataset", "rows", "nq", "dims", "metric", "norms", "groundtruth")}, indent=1))
     return 0
 
@@ -58,7 +58,7 @@ def cmd_run(args: argparse.Namespace) -> int:
     p = _participant(args)
     opts = RunOptions(
         data_dir=_data_dir(args),
-        views=args.views.split(","),
+        views=[v for v in args.views.split(",") if v],
         groups=args.groups.split(",") if args.groups else None,
         cpuset=args.cpuset or None,
         memory=args.memory or None,
@@ -74,6 +74,7 @@ def cmd_run(args: argparse.Namespace) -> int:
         load_timeout_s=args.load_timeout or None,
         settle_s=args.settle,
         startup_samples=args.startup_samples,
+        start_timeout_s=args.start_timeout,
         dry_run=args.dry_run,
     )
     r = Runner(p, fam, size, opts)
@@ -96,9 +97,9 @@ def cmd_trace(args: argparse.Namespace) -> int:
         name, values = item.split("=", 1)
         ladder[name] = [_num(v) for v in values.split(",")]
     opts = RunOptions(data_dir=_data_dir(args), views=["latency"], groups=[args.group], cpuset=args.cpuset or None,
-                      memory=args.memory or None, tier_cpus=1, index=False, label="trace", warmup=20, passes=1,
+                      memory=args.memory or None, tier_cpus=1, index=False, label="trace", warmup=args.warmup, passes=1,
                       deadline_s=args.deadline, min_queries=min(args.queries, 100000), total_budget_s=args.deadline,
-                      query_limit=args.queries)
+                      query_limit=args.queries, startup_samples=0 if args.attach else 5, attach=args.attach)
     r = Runner(p, fam, size, opts)
     # override the ladder for the traced group
     ds = r.p.settings.setdefault("datasets", {}).setdefault(fam.name, {}).setdefault(size, {})
@@ -165,6 +166,9 @@ def build_parser() -> argparse.ArgumentParser:
     s = sub.add_parser("prepare", help="materialize a dataset size (download, attributes, ground truth)")
     s.add_argument("--dataset", required=True, help="<family>-<size>, e.g. sift-128-100k")
     s.add_argument("--data-dir")
+    s.add_argument("--workers", type=int, default=1, help="processes writing shards and ground truth in one pass")
+    s.add_argument("--source-dir", help="local copy of the source corpus in its own layout, instead of downloading")
+    s.add_argument("--queries", type=int, help="query count, instead of the family's queries_count")
     s.set_defaults(fn=cmd_prepare)
 
     def common(s: argparse.ArgumentParser) -> None:
@@ -179,7 +183,7 @@ def build_parser() -> argparse.ArgumentParser:
     s = sub.add_parser("run", help="run every group of a participant on a dataset size")
     common(s)
     s.add_argument("--index", action="store_true", help="install, start and load before running")
-    s.add_argument("--views", default="throughput,latency")
+    s.add_argument("--views", default="throughput,latency", help="comma-separated; empty with --index loads and records the build only")
     s.add_argument("--groups", help="comma-separated group keys or <filter>/* patterns")
     s.add_argument("--clients", type=int, default=32, help="clients in the throughput view (the tier's CPU count)")
     s.add_argument("--label", help="results suffix for side-by-side builds of one participant")
@@ -192,6 +196,8 @@ def build_parser() -> argparse.ArgumentParser:
     s.add_argument("--startup-samples", type=int, default=5,
                    help="how many group-views begin with a restart, to sample startup; after that "
                         "the engine stays up and every group is measured warm")
+    s.add_argument("--start-timeout", type=float, default=600.0,
+                   help="seconds an engine may take to become ready after a start")
     s.add_argument("--settle", type=float, default=3.0,
                    help="seconds of discarded querying after each restart, so a JIT-compiled engine "
                         "is measured warm; 0 disables")
@@ -207,6 +213,9 @@ def build_parser() -> argparse.ArgumentParser:
     s.add_argument("--knob", action="append", required=True, help="name=v1,v2,...; repeatable")
     s.add_argument("--queries", type=int, default=1000)
     s.add_argument("--deadline", type=float, default=20.0)
+    s.add_argument("--warmup", type=int, default=20)
+    s.add_argument("--attach", action="store_true",
+                   help="query the engine as it runs, even mid-load: no restart, no load record, left running")
     s.set_defaults(fn=cmd_trace)
 
     s = sub.add_parser("check", help="predicate, k-count and exact-recall checks on a small dataset")
