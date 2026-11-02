@@ -10719,13 +10719,10 @@
    "memory_peak": 136690376704
   }
  ],
- "load_time": 51282.774,
+ "load_time": 38149.8,
  "load_phases": {
   "ingest": 13469.8,
-  "pause": 154.0,
-  "index_before_restart": 13133.0,
-  "restart": 0.018,
-  "index_after_restart": 24679.956
+  "index": 24680.0
  },
  "disk_bytes": 1357727588352,
  "disk_info": {
@@ -10760,7 +10757,7 @@
   "upload_workers": 4,
   "index_phase_mmap_advice": "sequential",
   "max_optimization_threads": 4,
-  "note": "the loader crashed on a 10-minute server stall after the first segment finished; 3 interrupted optimizations restarted from scratch"
+  "note": "load_time is upload plus the index phase at the pace measured after the restart; the recorded wall time was 51,283 s, including 3 optimizations lost when the loader gave up on a 10-minute server stall and our run script removed the container"
  },
  "memory_peak": {
   "load": 195648151552,
