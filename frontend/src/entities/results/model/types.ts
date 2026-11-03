@@ -109,7 +109,7 @@ export interface Hardware {
 
 /** One result file: a participant on one dataset size (contracts section 8). */
 export interface RawResult {
-  /** Directory name, e.g. `serenedb-ivf` — the column's identity. */
+  /** Directory name, e.g. `serenedb-hnsw-quant` — the column's identity. */
   participant: string;
   /** Column caption, e.g. `SereneDB IVF`. */
   name: string;
@@ -132,7 +132,7 @@ export interface RawResult {
   startup: Stats | null;
   index: { params: Record<string, unknown>; ddl: string };
   groups: RawGroup[];
-  /** Provenance, added by the assembler: `serenedb-ivf/results/serenedb-ivf_wiki-v3-1024-100k.json`. */
+  /** Provenance, added by the assembler: `serenedb-hnsw-quant/results/serenedb-hnsw-quant_wiki-v3-1024-10m.json`. */
   _source?: string;
 }
 
