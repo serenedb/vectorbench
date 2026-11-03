@@ -4,13 +4,13 @@ A ClickBench-style benchmark of vector search in databases. Every participant pu
 query, the recall/speed curve it measured point by point; the table reads one number per cell off that
 curve at the recall the row asks for. Table and graph are two renderings of the same record.
 
-Design: [DESIGN.md](DESIGN.md). Formats every part agrees on: [docs/contracts.md](docs/contracts.md).
+Method: [docs/methodology.md](docs/methodology.md). Formats every part agrees on: [docs/contracts.md](docs/contracts.md).
 
 ## Current run: wiki-v3-1024-247m
 
 - **Data:** the whole Cohere `wikipedia-2023-11-embed-multilingual-v3` corpus, 246,838,423 vectors in 323 languages, 1024 dims, inner product. Only the last file of each of the 7 query languages (315,583 rows) stays out, because the 10,000 queries come from there. Exact top-1000 ground truth per filter case.
 - **Queries:** k=10, 100 and 1000, unfiltered and for every filter case in `datasets/wiki-v3-1024.yml`, plus the exact eq-1 row (V37) at one client. V04, exact search without a filter, is not run: one query reads about 1 TB of float vectors.
-- **Participants:** `serenedb-hnsw-quant` (SereneDB 26.11.1, HNSW) and `qdrant-hnsw-quant` (Qdrant 1.20.0, HNSW), both with 2-bit `tq` codes. One build each: m=16, ef_construction=256, 8 segments (Qdrant ends at 9). Codes and graphs stay in RAM; the 1 TB of float vectors stays on disk uncompressed, so every rescore reads them from EBS. Qdrant keeps its payload indexes on disk and builds no per-value graphs (`payload_m` 0). Its index phase ran with `mmap_advice` sequential and 4 optimization threads, because the defaults ran out of memory, and its load time leaves out three optimizations redone after the loader gave up during a 10-minute server stall: it is the upload plus the index phase at the pace measured after the restart (51,283 s recorded). The second knob differs: Qdrant's `oversample` rescores oversample times k candidates; SereneDB's `width` rescores a candidate while its code score plus width times the code's estimated error could still beat the k-th exact score. Each group's ladder comes from a calibration pass on the same build that brackets recall 0.90, 0.95 and 0.99.
+- **Participants:** `serenedb-hnsw-quant` (SereneDB 26.11.1, HNSW) and `qdrant-hnsw-quant` (Qdrant 1.20.0, HNSW), both with 2-bit `tq` codes. One build each: m=16, ef_construction=256, 8 segments (Qdrant ends at 9). Codes and graphs stay in RAM; the 1 TB of float vectors stays on disk uncompressed, so every rescore reads them from EBS. Qdrant keeps its payload indexes on disk and builds no per-value graphs (`payload_m` 0). Its index phase ran with `mmap_advice` sequential and 4 optimization threads, because the defaults ran out of memory. The second knob differs: Qdrant's `oversample` rescores oversample times k candidates; SereneDB's `width` rescores a candidate while its code score plus width times the code's estimated error could still beat the k-th exact score. Each group's ladder comes from a calibration pass on the same build that brackets recall 0.90, 0.95 and 0.99.
 - **Machine:** AWS c7i.24xlarge (96 vCPU, 185 GB RAM), data on EBS (about 560 MB/s, 10K IOPS). Engines are measured one at a time, without warmup.
 - **Measurement:** every query is timed once per group. The 10,000 queries are shuffled once with a fixed seed and each point of a group runs its own slice of them, all of it, with no deadline: 1,000 queries at k=10, 500 at k=100 and 200 at k=1000, fewer when the group has so many points that 9,999 queries would not go round (`--point-queries`). Before every group the engine's page cache is emptied: `drop_caches`, plus the vector files the engine memory-maps paged out of its own mappings (`--evict`, `evict_mapped` in settings.yml); graphs and codes stay in RAM. The first query of a group runs untimed and is recorded as `first_query_s`. 32 clients; a cell is the participant's Pareto frontier at the row's recall. Startup ends after the first vector query, which loads every segment's graph.
 
@@ -30,9 +30,7 @@ lib/benchmark.sh          thin entry used by every participant's ./benchmark.sh
 frontend/                 the results page (React, single-file build), shared with SereneDB Playground
 ```
 
-Participants so far: `serenedb-ivf`, `serenedb-hnsw`, `serenedb-hnsw-qnone`, `serenedb-hnsw-quant`,
-`qdrant-hnsw`, `qdrant-hnsw-quant`, `elasticsearch-hnsw`, `opensearch-hnsw`. Only the run above has
-results in the repository.
+Participants: `serenedb-hnsw-quant` and `qdrant-hnsw-quant`.
 
 ## Run
 
@@ -42,12 +40,12 @@ export VECTORBENCH_DATA_DIR=/data/vectorbench                        # prepared 
 export PYTHONPATH=lib
 
 # 1. prepare a dataset size: download, attributes, ground truth per filter case
-.venv/bin/python -m vectorbench.cli prepare --dataset sift-128-100k
+.venv/bin/python -m vectorbench.cli prepare --dataset wiki-v3-1024-10m
 
 # 2. run one participant: install, load, then every group in both views
-cd serenedb-ivf && VECTORBENCH_DATASET=sift-128-100k ./benchmark.sh --index
+cd serenedb-hnsw-quant && VECTORBENCH_DATASET=wiki-v3-1024-10m ./benchmark.sh --index
 #    or, from anywhere:
-.venv/bin/python -m vectorbench.cli run --participant serenedb-ivf --dataset sift-128-100k --index
+.venv/bin/python -m vectorbench.cli run --participant serenedb-hnsw-quant --dataset wiki-v3-1024-10m --index
 
 # 3. assemble every participant's results and build the page
 .venv/bin/python -m vectorbench.cli assemble    # --dataset wiki-v3-1024-247m: that dataset only
@@ -68,7 +66,7 @@ plan rules hold.
 
 ## Adding a participant
 
-Copy `qdrant-hnsw/` or `serenedb-ivf/`, then adjust: `settings.yml` (identity, image, ports, index
+Copy `qdrant-hnsw-quant/` or `serenedb-hnsw-quant/`, then adjust: `settings.yml` (identity, image, ports, index
 parameters and knob ladders per dataset size, plan rules), `queries.sql` or `queries.json` (one block
 per group, the engine's own dialect), `client.py` (connect, prepare a group, search), the lifecycle
 scripts (`install start stop check load data-size version`), and the README with the "Facts that are
@@ -76,11 +74,11 @@ not in the code" section. The contract is in [docs/contracts.md](docs/contracts.
 
 ## Methodology
 
-See DESIGN.md section 4. In short: participants tune in the open (one index per dataset size, knobs
-in the query text, a declared ladder measured point by point); a cell is the crossing of the
-participant's own Pareto frontier with the row's recall; two views, 32 clients for throughput and one
-client for latency; the engine is restarted before every group and each restart is a startup sample;
-load is one timer around the participant's whole recipe.
+See [docs/methodology.md](docs/methodology.md). In short: participants tune in the open (one index per
+dataset size, knobs in the query text, a declared ladder measured point by point); a cell is the
+crossing of the participant's own Pareto frontier with the row's recall; two views, 32 clients for
+throughput and one client for latency; load is one timer around the participant's whole recipe, and
+startup ends when the engine answers a vector query.
 
 ## License
 

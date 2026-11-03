@@ -6,7 +6,7 @@
 # running.
 set -euo pipefail
 
-: "${VB_CONTAINER:=vectorbench-qdrant-hnsw}"
+: "${VB_CONTAINER:=vectorbench-qdrant-hnsw-quant}"
 : "${VECTORBENCH_ENGINE_DIR:?VECTORBENCH_ENGINE_DIR must be set (the engine storage directory)}"
 
 size=$(docker exec "$VB_CONTAINER" du -sB1 /qdrant/storage 2>/dev/null | awk '{print $1}') || size=""

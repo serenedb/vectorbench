@@ -1,4 +1,4 @@
-"""Recall, tail and latency statistics (docs/contracts.md sections 3.5 of DESIGN and 8 of contracts)."""
+"""Recall, tail and latency statistics (docs/methodology.md, docs/contracts.md section 8)."""
 
 from __future__ import annotations
 

@@ -1,5 +1,5 @@
 /* Every string the page prints. fmtSec / fmtBytes are searchbench's; the rest
-   is VectorBench's own vocabulary (DESIGN.md section 2): QPS as an integer,
+   is VectorBench's own vocabulary (docs/methodology.md): QPS as an integer,
    latencies in ms with two decimals, ratios as "x1.00", recalls as "0.95". */
 
 /** Seconds, 3 significant-ish digits: 123 / 12.3 / 1.23 / 0.123. */

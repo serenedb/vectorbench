@@ -1,8 +1,8 @@
 # VectorBench contracts
 
 The exact formats every part of the benchmark agrees on: the driver (`lib/vectorbench`), the
-participant directories, the prepared data and the frontend. `DESIGN.md` explains why; this file says
-what. When they disagree, this file wins and DESIGN.md gets fixed.
+participant directories, the prepared data and the frontend. [methodology.md](methodology.md) gives the
+rules; this file gives the formats.
 
 ## 1. Dataset family definition: `datasets/<family>.yml`
 
@@ -99,7 +99,7 @@ Degenerate: a row `(case, k)` is n/a at a size when `median(matches) < 10 * k`.
 ## 4. Participant directory
 
 ```
-<participant>/                  # directory name = participant id, e.g. serenedb-ivf
+<participant>/                  # directory name = participant id, e.g. serenedb-hnsw-quant
   benchmark.sh                  # exports ENGINE_NAME, ENGINE_TAGS (JSON array string), then exec ../lib/benchmark.sh "$@"
   install                       # one-time: pull image (only if the tag is not local), wipe container and datadir
   start                         # start the engine detached; must return promptly; must NOT wait for readiness
@@ -146,11 +146,11 @@ $v2 $s` are bound by `client.py` per query.
 
 ```sql
 -- group: none/*
-SET sdb_ivf_search_nprobe = {nprobe};
+SET sdb_hnsw_ef_search = {ef};
 SELECT id FROM items ORDER BY emb <#> $q LIMIT $k;
 
 -- group: exact/none/*
-SET sdb_disable_top_k_optimization = true;
+SET sdb_ann_force_exact = on;
 SELECT id FROM items ORDER BY emb <#> $q LIMIT $k;
 ```
 
@@ -162,16 +162,16 @@ to `client.py`. A group missing from the file is `unsupported`. Key resolution o
 ## 6. `settings.yml`
 
 ```yaml
-env: {port: 5499, container: vectorbench-serenedb-ivf, image: serenedb/serenedb:26.09.1}
-connection: {host: 127.0.0.1, port: 5499, user: postgres, dbname: postgres}   # passed to Client(cfg)
+env: {port: 5500, container: vectorbench-serenedb-hnsw-quant, image: serenedb/serenedb:26.11.1}
+connection: {host: 127.0.0.1, port: 5500, user: postgres, dbname: postgres}   # passed to Client(cfg)
+evict_mapped: [.col]            # path substrings of memory-mapped files that --evict pages out
 defaults:
-  index: {quant: sq8}
-  ladder: {nprobe: [1, 2, 4, 8, 16, 32, 64, 128]}
+  index: {quant: usq8, m: 16, ef_construction: 128}
+  ladder: {ef: [16, 24, 32, 48, 64, 96, 128, 192, 256], width: [1.0, 2.0]}
 datasets:
   wiki-v3-1024:
-    100k: {ladder: {nprobe: [1, 2, 3, 4, 6, 8, 12, 16, 24, 32]}}
-    1m:   {index: {posting_size: 1024}, ladder: {nprobe: [2, 4, 8, 12, 16, 24, 32, 48, 64]},
-           groups: {"eq-0.1/*": {ladder: {nprobe: [8, 16, 32, 64, 128, 256]}}}}
+    10m:  {index: {ef_construction: 256}, ladder: {ef: [16, 32, 64, 128, 256, 512], width: [0.0]},
+           groups: {"*/1000": {ladder: {ef: [1000, 2048, 4096], width: [0.0]}}}}
 ```
 
 Resolution for a (dataset size, group): `defaults` < `datasets.<family>.<size>` < its `groups["*/<k>"]`
@@ -210,19 +210,19 @@ predicate and that exactly k ids come back.
 
 ```json
 {
-  "participant": "serenedb-ivf", "name": "SereneDB IVF", "system": "SereneDB", "family": "ivf",
-  "version": "26.09.1", "label": null, "os": "Ubuntu 24.04.4 LTS", "date": "2026-10-01",
+  "participant": "serenedb-hnsw-quant", "name": "SereneDB HNSW", "system": "SereneDB", "family": "hnsw",
+  "version": "26.11.1", "label": null, "os": "Ubuntu 24.04.4 LTS", "date": "2026-10-01",
   "dataset": "wiki-v3-1024-100k", "tags": ["C++", "SereneDB", "Postgres-wire"],
   "hardware": {"cpus": 32, "cpuset": "0-31", "memory_bytes": 68719476736, "host": "...", "storage": "nvme"},
   "load_time": 812.4, "load_phases": {"ingest": 312.4, "index": 501.0}, "disk_bytes": 22000000000,
   "disk_info": {"segments": 12}, "memory_peak": {"load": 41000000000, "unfiltered": 9000000000, "filtered": 11000000000},
   "startup": {"n": 54, "min": 0.9, "avg": 1.2, "p50": 1.1, "p95": 1.9, "p99": 2.3, "max": 2.4},
-  "index": {"params": {"quant": "sq8"}, "ddl": "..."},
+  "index": {"params": {"quant": "usq8"}, "ddl": "..."},
   "groups": [
     {"key": "eq-1/10", "filter": "eq-1", "k": 10, "view": "throughput", "clients": 32,
      "status": "ok", "block": "SET ...; SELECT ...", "startup": 1.15, "memory_peak": 8700000000,
      "points": [
-       {"ladder_index": 0, "knobs": {"nprobe": 8}, "recall": 0.902, "recall_strict": 0.897, "tail": 0.003,
+       {"ladder_index": 0, "knobs": {"ef": 64, "width": 1.0}, "recall": 0.902, "recall_strict": 0.897, "tail": 0.003,
         "qps": 24100.0, "latency_ms": {"n": 96400, "min": 0.6, "avg": 1.33, "p50": 1.2, "p95": 2.1, "p99": 3.4, "max": 15.0},
         "queries": 96400, "duration": 4.0,
         "passes": [{"qps": 24100.0, "avg": 1.33, "p50": 1.2, "p99": 3.4, "queries": 48200, "duration": 2.0}]}
@@ -397,37 +397,22 @@ numbers when they differ. Three things have to agree: `m`, `ef_construction`, an
 dimension of the stored codes, which each engine spells differently (`sq8`, `int8_hnsw`, `4x`,
 `scalar`, and so on) and which the comparison maps to a number.
 
-This is not belt and braces. A Qdrant load record from before the participants were aligned carries
-`quant: none`, so a comparison against it would have measured our eight-bit index against their full
-precision one and read the size difference as ours. A mismatch is a fact about the run, not about
-the settings files, so it is read from what the loaders recorded rather than from what the settings
-declare.
+A mismatch is a fact about the run, not about the settings files, so it is read from what the
+loaders recorded rather than from what the settings declare.
 
 A run in flight writes `<name>.partial.json` beside the published file and promotes it at the end,
 so both exist at once. The partial is the fresher of the two and is used, with the participant
 marked `RUN IN PROGRESS`, because an unfinished run must never read as a result.
 
-## 17. Settling after a restart
+## 17. Restarts, settling, query slices and eviction
 
-The driver stops and starts the engine before every group, to sample startup, so every group begins
-with an engine that has just come up. `--settle <seconds>` then runs a discarded pass before the
-first point of that group, bounded below by a query floor so a slow group still gets enough
-requests to matter.
+`--startup-samples <n>` (default 5) sets how many group-views begin with a graceful stop and start of
+the engine; each restart is a startup sample. After that the engine stays up, so `memory_peak` of a
+later group is the peak since the engine came up. Group order is identical for every participant.
 
-This is not tuning, it is the difference between measuring an engine and measuring its warm-up. A
-JVM restarted cold runs interpreted until its hot methods are compiled, and the per-point warmup of
-a hundred queries per client does not get it there: Elasticsearch's first points of a group came
-back between 2700 and 13600 queries per second at neighbouring ladder values, with p99 swinging
-from 5 to 70 milliseconds. The settle applies to every participant, because the protocol has to be
-the same for all of them, and it costs about three seconds per group.
-
-`--startup-samples <n>` bounds how many group-views begin with that restart. Sampling startup once
-per group is both more than a distribution needs and a third of the run: measured on Elasticsearch
-at a million rows, 44 restarts cost 28 seconds each against 1258 seconds of actual measurement, and
-for a JVM it also meant every group was timed from cold. After the sample is taken the engine stays
-up. The per-point warmup shrinks to a tenth after the first point of a group for the same reason:
-the engine does not change between points, only the search parameters do, and a full warmup of a
-hundred queries per client is ten seconds on a group running at three hundred queries per second.
+`--settle <seconds>` runs a discarded pass before the first point of a group that began with a
+restart, so an engine with a just-in-time compiler is measured warm rather than interpreted. It
+applies to every participant.
 
 `--point-queries 10=1000,100=500,1000=200` replaces passes, warmup and settle for an index larger than
 RAM. The query set is shuffled once with a fixed seed; point i of a group takes slice i of that
@@ -439,9 +424,3 @@ listed under the group's `capped`. `--evict` empties the engine's page cache bef
 `drop_caches`, then the files named by the participant's `evict_mapped` (path substrings) paged out
 of the engine's own mappings with process_madvise, since pages a process maps survive `drop_caches`.
 It needs passwordless sudo.
-
-Two consequences worth stating. Groups after the sample are measured warm, which is closer to a
-deployment than a cold start is, but it does mean group order matters slightly; it is identical for
-every participant. And `memory_peak` becomes the peak since the engine came up rather than the peak
-for that group, which makes it a better number for comparing engines and a worse one for
-attributing memory to a shape.

@@ -247,8 +247,8 @@ def build_parser() -> argparse.ArgumentParser:
 
     s = sub.add_parser("compare", help="head-to-head between two participants, row by row")
     s.add_argument("--dataset", required=True, help="dataset id, or several separated by commas")
-    s.add_argument("--us", default="serenedb-hnsw")
-    s.add_argument("--them", default="qdrant-hnsw")
+    s.add_argument("--us", default="serenedb-hnsw-quant")
+    s.add_argument("--them", default="qdrant-hnsw-quant")
     s.add_argument("--section", choices=["unfiltered", "filtered"], help="restrict to one section")
     s.add_argument("--verbose", action="store_true", help="list every row, not only the bad ones")
     s.set_defaults(fn=cmd_compare)

@@ -1,1 +1,0 @@
-../serenedb-ivf/client.py

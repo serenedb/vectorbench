@@ -1,5 +1,5 @@
 /* What a graph draws, computed from the same points and the same readings the
-   table shows (DESIGN.md 4.2 rules 9–12): one series per participant and
+   table shows (docs/methodology.md rules 9–12): one series per participant and
    group, its Pareto frontier as the line, dominated points hollow, a vertical
    line per row at the recall the row is read at, and every crossing marked at
    the value the cell shows. Rows sharing (filter, k) share the same points, so

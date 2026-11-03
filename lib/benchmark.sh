@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # VectorBench shared entry. A participant's ./benchmark.sh exec's this from its own directory, so
-#   cd serenedb-ivf && VECTORBENCH_DATA_DIR=/data VECTORBENCH_DATASET=sift-128-100k ./benchmark.sh --index
+#   cd serenedb-hnsw-quant && VECTORBENCH_DATA_DIR=/data VECTORBENCH_DATASET=sift-128-100k ./benchmark.sh --index
 # reads like SearchBench. Everything else is `vectorbench run` (see `vectorbench run --help`).
 set -euo pipefail
 

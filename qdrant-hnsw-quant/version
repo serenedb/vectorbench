@@ -3,7 +3,7 @@
 # That is what actually ran, unlike the image tag.
 set -euo pipefail
 
-: "${VB_PORT:=6533}"
+: "${VB_PORT:=6535}"
 
 v=$(curl -sf --max-time 5 "http://127.0.0.1:${VB_PORT}/" | sed -n 's/.*"version":"\([^"]*\)".*/\1/p') || v=""
 echo "${v:-unknown}"

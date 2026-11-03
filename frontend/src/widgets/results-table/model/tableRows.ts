@@ -1,4 +1,4 @@
-/* The rows of the results grid, in the order they are drawn (DESIGN.md section 2):
+/* The rows of the results grid, in the order they are drawn:
 
      GENERAL    load time · on disk · max memory during load · startup (avg)
      NO FILTER  max memory during queries · score · coverage · the rows with filter none

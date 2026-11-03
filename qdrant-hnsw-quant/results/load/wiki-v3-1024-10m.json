@@ -1,0 +1,61 @@
+{
+ "dataset": "wiki-v3-1024-10m",
+ "participant": "qdrant-hnsw-quant",
+ "load_time": 778.2842379310023,
+ "load_phases": {
+  "ingest": 353.529,
+  "index": 423.982
+ },
+ "disk_bytes": 56404987904,
+ "disk_info": {
+  "segments": 11,
+  "points": 10000000,
+  "indexed_vectors": 10000000,
+  "index": {
+   "m": 16,
+   "ef_construct": 256,
+   "quant": "sq8",
+   "on_disk_vectors": true,
+   "on_disk_hnsw": false,
+   "segments": 8,
+   "full_scan_threshold_kb": 10000,
+   "max_segment_size_kb": null,
+   "payload_m": 0,
+   "pq_compression": "x8",
+   "bq_encoding": "one_bit",
+   "bq_query_encoding": "default",
+   "tq_bits": "bits4",
+   "payload_index_memory": "cold"
+  },
+  "payload_indexes": [
+   "cat10",
+   "cat100",
+   "cat1000",
+   "cluster",
+   "lang",
+   "num"
+  ],
+  "indexing_threshold_kb": 1,
+  "upload_workers": 4
+ },
+ "memory_peak_load": 113875439616,
+ "version": "1.20.0",
+ "date": "2026-11-03",
+ "index": {
+  "params": {
+   "m": 16,
+   "ef_construct": 256,
+   "quant": "sq8",
+   "tq_bits": "bits4",
+   "on_disk_vectors": true,
+   "on_disk_hnsw": false,
+   "segments": 8,
+   "full_scan_threshold_kb": 10000,
+   "payload_m": 0,
+   "rescore": false,
+   "payload_index_memory": "cold",
+   "dims": 1024,
+   "metric": "ip"
+  }
+ }
+}

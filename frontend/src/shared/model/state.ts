@@ -1,5 +1,5 @@
 /* The one state object the page renders from, and the page's vocabulary
-   (DESIGN.md section 2). Shaped after searchbench/frontend/src/shared/model/state.ts:
+   (docs/methodology.md). Shaped after searchbench/frontend/src/shared/model/state.ts:
    readonly by convention — the reducer replaces Sets and arrays rather than
    mutating them — and free of the theme, which the platform's ThemeProvider
    owns (the URL codec still carries a `th` slot for links that pin one).

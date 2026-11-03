@@ -3,7 +3,7 @@
 The React results page exports `ProductApp` through `@vectorbench/frontend`.
 It is the SearchBench frontend's architecture applied to vector search: one
 number per query and participant, read off the participant's own recall curve
-(docs/contracts.md sections 9–11, DESIGN.md sections 2 and 7). It has two
+(docs/methodology.md, docs/contracts.md sections 9–11). It has two
 entry points and one set of components:
 
 - `src/standalone.tsx` supplies `results.json`, mounts React and owns the theme
@@ -114,7 +114,7 @@ the graph and the detail can never disagree:
 | where | what |
 |---|---|
 | `src/entities/results/model/frontier.ts` | Pareto frontier, crossing, density rule — contracts section 9, identical to `lib/vectorbench/frontier.py` and checked against the same `frontier_cases.json` |
-| `model/model.ts` | strict loader (`buildBenchmark`): families, datasets, rows into sections, chip tags, the default dataset (the largest size every participant of the first family has a result for) |
+| `model/model.ts` | strict loader (`buildBenchmark`): families, datasets, rows into sections, chip tags, the default dataset (`default_dataset` when set, else the largest size every participant of the first family has a result for) |
 | `model/cells.ts` | row → group (`"<filter>/<k>"`, `"exact/<filter>/<k>"`) for the selected view, the cell per participant, the grid per (dataset, view, metric) |
 | `model/scores.ts` | score (geomean of ratios to the row's best over the visible rows) and coverage per section — contracts section 10 — and the column order |
 | `model/rows.ts` | the chips: `filter:<case base>`, `k:<k>`, `recall:<r|exact>`; OR within a dimension, AND across |
@@ -124,7 +124,7 @@ the graph and the detail can never disagree:
 | `src/pages/bench/model/selection.ts` | the ticked rows in the reading on screen, and the first row when nothing is picked yet |
 
 The `filter` chips group cases by predicate (`eq` covers eq-10 / eq-1 /
-eq-0.1), as the mock in DESIGN.md section 2 shows.
+eq-0.1).
 
 ## Refresh results
 
@@ -133,12 +133,12 @@ eq-0.1), as the mock in DESIGN.md section 2 shows.
 Then run `npm run build` in `frontend/` and commit the JSON and HTML together.
 
 `--dataset <family>-<size>` (repeatable) narrows the page to those datasets and
-their families; every `results.json` ever committed stays in the playground's
-history. The committed page is assembled that way, from `wiki-v3-1024-247m`
-alone:
+their families, and `--default-dataset` names the one the page opens on. The
+committed page is assembled from the two current runs and opens on 10m:
 
 ```bash
-.venv/bin/python -m vectorbench.cli assemble --dataset wiki-v3-1024-247m
+.venv/bin/python -m vectorbench.cli assemble --dataset wiki-v3-1024-247m \
+    --dataset wiki-v3-1024-10m --default-dataset wiki-v3-1024-10m
 ```
 
 The page draws what was measured. A row nobody ran at a dataset's size is left
@@ -152,7 +152,7 @@ with none it reads the per-query latencies the throughput run recorded at each
 point, and says so: `32 clients · ms` in the toolbar, the status bar and the
 cell detail. It is off only where nothing records latency.
 
-Until real results exist the committed `results.json` is **synthetic**, written by
+For development without a run, a **synthetic** `results.json` comes from
 
 ```bash
 npm run sample     # node scripts/sample-results.mjs
@@ -204,11 +204,10 @@ playground as a submodule bump; nothing in the playground has to change.
 
 Every selector and chip is encoded in `?s=<base64url json>`; readable
 overrides work next to it and are canonicalised on the next render:
-`?dataset=wiki-v3-1024-100k&view=latency&metric=p99&cells=absolute&rows=bars&chips=k:10,filter:eq&hidden=qdrant-hnsw&sort=filtered&graph=V14,V35&theme=dark`
+`?dataset=wiki-v3-1024-100k&view=latency&metric=p99&cells=absolute&rows=bars&chips=k:10,filter:eq&hidden=qdrant-hnsw-quant&sort=filtered&graph=V14,V35&theme=dark`
 (`hidden` lists participant ids switched off; `graph` the ticked rows, query
-ids or group keys in either reading, `-` for none ticked). A link from before
-the graph moved beside the table still opens: its `row=` is ticked, and
-`expanded=` is ignored. Modals and the split are never encoded.
+ids or group keys in either reading, `-` for none ticked). Modals and the
+split are never encoded.
 
 ## Checks
 

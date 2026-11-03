@@ -1,18 +1,14 @@
 """SereneDB load recipe (called by ./load). Environment per docs/contracts.md section 4.
 
-Index kind comes from VB_INDEX_KIND (settings.yml env: index_kind) so the IVF and HNSW participants
-share this file; index parameters come from VB_INDEX_<KEY> (the resolved `index` block).
-
-Three recipes, chosen by VB_INDEX_STORAGE:
+Index parameters come from VB_INDEX_<KEY> (the resolved `index` block). Three recipes, chosen by
+VB_INDEX_STORAGE:
 
   search  CREATE TABLE ... WITH (storage = 'search'); CREATE INDEX on the empty table; INSERT every
-          shard through the index (rows live in the index; backfill of an existing search table is
-          not implemented yet, so the index must exist before the rows do). Query relation: items.
+          shard through the index, so rows live in the index. Query relation: items.
   view    CREATE VIEW items over read_parquet(shards); CREATE INDEX on the view (synchronous build,
-          no table copy, the colleague's SearchBench-dev recipe). Query relation: items_vec.
+          no table copy). Query relation: items_vec.
   table   CREATE TABLE (transactional); CREATE INDEX as a secondary index; INSERT. Query relation:
-          whatever the planner accelerates (items_vec on releases that do not rewrite base-table
-          scans).
+          items.
 """
 
 from __future__ import annotations
