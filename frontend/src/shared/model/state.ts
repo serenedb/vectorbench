@@ -86,3 +86,11 @@ export const INITIAL_STATE: BenchState = {
   graphRows: null,
   detail: null,
 };
+
+/** The chips a link with no state opens on, over INITIAL_STATE: the product's
+    bare path, the switcher's link, this page opened from disk. Only such a
+    link: one that carries state (`?s=`, or a readable parameter) is read as it
+    was written, so `?s=eyJ2IjoxfQ` still opens with no chips and a link
+    already quoted keeps its rows. A dataset with no k=10 row opens with no
+    chip. */
+export const LANDING_CHIPS: readonly string[] = ['k:10'];

@@ -7,14 +7,18 @@
      - a slot is written only when it deviates from the default, so the default
        link is `?s=eyJ2IjoxfQ`;
      - readable parameters next to `?s=` (`?view=latency&chips=k:10`) override
-       the packed state and are canonicalised back into it on the next render.
+       the packed state and are canonicalised back into it on the next render;
+     - a link with no state at all, no `?s=` the codec can read and no readable
+       parameter, opens on LANDING_CHIPS and is canonicalised to the `?s=` that
+       names them. It is the only link not read as written, so moving the
+       landing view never changes a link someone has already pasted.
 
    The theme is the platform's (`useTheme()`), so the codec takes it as an
    argument and hands a restored one back to apply via `setTheme`. Its default
    here is `light`. */
 
 import type { BenchState, CellMode, LatencyMetric, RowMode, SortSection, View } from './state.ts';
-import { isLatencyMetric } from './state.ts';
+import { LANDING_CHIPS, isLatencyMetric } from './state.ts';
 
 /** Mirrors @serenedb/ui's `Theme`, without importing it into a pure module. */
 export type ThemeName = 'dark' | 'light';
@@ -135,6 +139,9 @@ export function restoreUrlState(search: string, env: CodecEnv, initial: BenchSta
   try {
     const p = new URLSearchParams(search);
     const packed = base64UrlDecode(p.get('s'));
+    // Nothing of ours to read: the bare path, or parameters someone else put
+    // there (`?utm_source=`).
+    const bare = packed === null && !Object.keys(FIELDS).some((key) => p.has(key));
     const get = (key: string): unknown =>
       p.has(key) ? p.get(key) : packed ? packed[FIELDS[key]] : null;
     const oneOf = <T extends string>(key: string, allowed: readonly T[], fallback: T | null) => {
@@ -154,7 +161,7 @@ export function restoreUrlState(search: string, env: CodecEnv, initial: BenchSta
     patch.latencyMetric = isLatencyMetric(metric) ? (metric as LatencyMetric) : initial.latencyMetric;
     patch.cells = oneOf<CellMode>('cells', ['relative', 'absolute'], initial.cells)!;
     patch.rowMode = oneOf<RowMode>('rows', ['groups', 'bars'], initial.rowMode)!;
-    patch.chips = new Set(split('chips').filter((t) => tags.has(t)));
+    patch.chips = new Set((bare ? LANDING_CHIPS : split('chips')).filter((t) => tags.has(t)));
     const known = new Set(env.participants);
     patch.hidden = new Set(split('hidden').filter((p) => known.has(p)));
     patch.sortSection = oneOf<SortSection>('sort', ['nofilter', 'filtered'], initial.sortSection)!;

@@ -11,7 +11,7 @@ import { computeGrid, gridCell, failLabel, groupFor, metricFor } from '../src/en
 import { cellValue } from '../src/entities/results/model/frontier.ts';
 import { orderResults, ratioTo, sectionScores } from '../src/entities/results/model/scores.ts';
 import { allChipTags, chipTag, visibleRows } from '../src/entities/results/model/rows.ts';
-import { INITIAL_STATE } from '../src/shared/model/state.ts';
+import { INITIAL_STATE, LANDING_CHIPS } from '../src/shared/model/state.ts';
 import { restoreUrlState, shortState } from '../src/shared/model/url-codec.ts';
 import { readingSize, screenRows, tickedRows } from '../src/pages/bench/model/selection.ts';
 
@@ -252,6 +252,33 @@ test('URL codec round-trips the selectors and chips', () => {
   const key = row(dataset('sift-128-100k'), 'V14').key;
   assert.deepEqual(restoreUrlState(`?graph=${encodeURIComponent(key)}&row=V02`, env, INITIAL_STATE).patch.graphRows, [key, 'V02']);
   assert.deepEqual(restoreUrlState('?row=V02&expanded=1', env, INITIAL_STATE).patch.graphRows, ['V02']);
+});
+
+test('a link with no state opens on k=10, a link with state reads as written', () => {
+  const env = {
+    datasets: bench.datasets.map((d) => d.id),
+    defaultDataset: bench.defaultDataset,
+    tagsFor: (id) => allChipTags(dataset(id)),
+    rowsFor: (id) => new Set(dataset(id).family.queries.flatMap((q) => [q.id, q.key])),
+    participants: bench.participants.map((p) => p.id),
+  };
+  const chipsOf = (search, e = env) => [...restoreUrlState(search, e, INITIAL_STATE).patch.chips].sort();
+  assert.deepEqual(LANDING_CHIPS, ['k:10']);
+  assert.ok(allChipTags(dataset(bench.defaultDataset)).has('k:10'));
+  assert.deepEqual(chipsOf(''), ['k:10'], 'the bare path');
+  assert.deepEqual(chipsOf('?utm_source=x'), ['k:10'], 'a parameter that is not ours carries no state');
+  assert.deepEqual(chipsOf('?s=not-a-link'), ['k:10'], 'nor does an ?s= the codec cannot read');
+  // Every link minted before the landing view keeps its rows.
+  assert.deepEqual(chipsOf('?s=eyJ2IjoxfQ'), [], 'the default link has no chips');
+  assert.deepEqual(chipsOf('?s=eyJ2IjoxLCJ0aCI6ImRhcmsifQ'), [], 'nor does one that only pins a theme');
+  assert.deepEqual(chipsOf('?theme=dark'), [], 'a readable parameter is state');
+  assert.deepEqual(chipsOf('?chips=k:100'), ['k:100']);
+  // The landing view is minted as a link of its own, so a copy of the address bar keeps k=10.
+  const landing = { ...INITIAL_STATE, ...restoreUrlState('', env, INITIAL_STATE).patch };
+  assert.deepEqual(shortState(landing, env, 'light'), { v: 1, q: 'k:10' });
+  assert.deepEqual(chipsOf('?s=' + Buffer.from(JSON.stringify({ v: 1, q: 'k:10' })).toString('base64url')), ['k:10']);
+  // A dataset with no k=10 row opens with no chip rather than an empty table.
+  assert.deepEqual(chipsOf('', { ...env, tagsFor: () => new Set(['k:100']) }), []);
 });
 
 test('the ticked rows, read in either reading', () => {

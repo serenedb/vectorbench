@@ -50,6 +50,14 @@ test('committed HTML renders, graphs and details work over file:// without netwo
     for (const n of names) assert.ok(text.includes(n), n);
     if (results.sample) await page.locator('[data-role="sample-banner"]').waitFor();
 
+    // a link with no state opens on the payload's default dataset with k=10 on, and mints a link that says so
+    if (results.default_dataset) {
+      assert.ok((await page.locator('[data-role="status"]').innerText()).includes(results.default_dataset), 'the default dataset');
+    }
+    assert.equal(await page.locator('[data-act="unchip"][data-tag="k:10"]').count(), 1, 'k=10 is on, its pill in the toolbar');
+    const landed = JSON.parse(Buffer.from(new URL(page.url()).searchParams.get('s'), 'base64url').toString('utf8'));
+    assert.equal(landed.q, 'k:10', 'the address bar names the chip');
+
     // the window: table and graph side by side, the status bar one line, no sidebar
     const table = page.locator('[data-role="table"]');
     const graph = page.locator('[data-role="graph"]');
@@ -204,8 +212,12 @@ test('committed HTML renders, graphs and details work over file:// without netwo
     assert.ok((await graph.locator('.panehead').innerText()).includes(`${barTicks.length} row`));
     await page.locator(`[data-act="sort"][data-section="${hasFiltered ? 'filtered' : 'nofilter'}"]`).first().click();
 
-    // chips narrow the rows; a pill names the chip while the menu is closed and removes it
+    // chips narrow the rows; a pill names the chip while the menu is closed and removes it.
+    // k=10 is still on from the landing view.
     const k100 = () => page.$$eval('[data-act="row"]', (ns) => ns.filter((n) => /k=100\b/.test(n.innerText)).length);
+    assert.equal(await k100(), 0, 'opened on k=10');
+    await page.locator('[data-act="unchip"][data-tag="k:10"]').click();
+    assert.equal(await page.locator('[data-act="unchip"]').count(), 0);
     assert.ok((await k100()) > 0);
     await page.locator('[data-act="filter-menu"]').click();
     await page.locator('[data-act="chip"][data-tag="k:10"]').click();
@@ -244,6 +256,7 @@ test('committed HTML renders, graphs and details work over file:// without netwo
     await page.locator('.vb-app').waitFor();
     assert.deepEqual(await ticked(), tickedBefore, 'still ticked');
     assert.equal(await page.locator(`[data-act="unhide"][data-pid="${first}"]`).count(), 1, 'still hidden');
+    assert.equal(await page.locator('[data-act="unchip"]').count(), 0, 'a link with state is read as written: k=10 stays off');
     assert.equal(await page.locator(`[data-act="view"][data-v="${hasLatency ? 'latency' : 'throughput'}"]`).getAttribute('class'), 'on');
     await page.locator('[data-act="display-menu"]').click();
     assert.equal(await page.locator('[data-act="cells"][data-v="absolute"]').getAttribute('class'), 'on');
