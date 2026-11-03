@@ -296,6 +296,10 @@ file is an error:
 }
 ```
 
+A point may carry `"graph_only": true`: it is drawn on the graph and never read. A cell, a group's
+bar and the density rule skip it. The 247m runs use it for each engine's codes-only points (no
+reranking), which sit below every row's recall bar.
+
 Sections on the page: a query with `filter == "none"` belongs to NO FILTER, every other query to
 FILTERED. The row for query `q` reads the participant's group `"<filter>/<k>"` (or `"exact/<filter>/<k>"`
 when `recall == "exact"`) for the selected view.
@@ -421,6 +425,17 @@ for a JVM it also meant every group was timed from cold. After the sample is tak
 up. The per-point warmup shrinks to a tenth after the first point of a group for the same reason:
 the engine does not change between points, only the search parameters do, and a full warmup of a
 hundred queries per client is ten seconds on a group running at three hundred queries per second.
+
+`--point-queries 10=1000,100=500,1000=200` replaces passes, warmup and settle for an index larger than
+RAM. The query set is shuffled once with a fixed seed; point i of a group takes slice i of that
+order, of N queries for the group's k but at most (queries - 1) / points, so no query is timed twice
+within a group, and the last query of the order runs untimed as the group's first query, its seconds
+stored as `first_query_s`. Clients pull the slice's queries from one shared cursor and all of them
+run; `--point-cap` (900 s) is a safety net, and a point that passes it is not recorded as a point but
+listed under the group's `capped`. `--evict` empties the engine's page cache before every group:
+`drop_caches`, then the files named by the participant's `evict_mapped` (path substrings) paged out
+of the engine's own mappings with process_madvise, since pages a process maps survive `drop_caches`.
+It needs passwordless sudo.
 
 Two consequences worth stating. Groups after the sample are measured warm, which is closer to a
 deployment than a cold start is, but it does mean group order matters slightly; it is identical for

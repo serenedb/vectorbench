@@ -123,7 +123,7 @@ def cell(group: dict[str, Any] | None, metric: str, r: float | str) -> dict[str,
     if status != "ok":
         return {"status": status or "error", "reason": group.get("reason")}
     direction = "higher" if metric == "qps" else "lower"
-    pts = usable_points(group.get("points") or [], metric)
+    pts = usable_points([p for p in group.get("points") or [] if not p.get("graph_only")], metric)
     if r == "exact":
         if not pts:
             return {"status": "none"}

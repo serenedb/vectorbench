@@ -75,6 +75,8 @@ export interface RawPoint {
   queries?: number;
   duration?: number;
   passes?: Pass[];
+  /** Drawn on the graph, never read: a cell, a group's bar and the density rule skip it. */
+  graph_only?: boolean;
 }
 
 export interface RawGroup {

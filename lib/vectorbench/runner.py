@@ -27,6 +27,7 @@ log = logging.getLogger(__name__)
 VIEWS = {"throughput": None, "latency": 1}  # clients: None = tier cpus
 WARMUP_PER_CLIENT = 100
 PASS_DEADLINE_S = 60.0
+QUERY_ORDER_SEED = 20261102
 PASS_MIN_QUERIES = 2000
 PASSES = 1
 TOTAL_BUDGET_S = 60.0
@@ -73,6 +74,15 @@ class RunOptions:
     start_timeout_s: float = 600.0
     attach: bool = False
     dry_run: bool = False
+    # Fixed query count per point by k: each point of a group times its own slice of one shuffled
+    # order of the query set, so no point re-times a query an earlier point already pulled into the
+    # page cache, and every query of the slice runs. No warmup, no settle. `point_cap_s` is a safety
+    # net: a point that passes it is not a measurement and is left out, listed under `capped`.
+    point_queries: dict[int, int] | None = None
+    exact_queries: int = 4
+    point_cap_s: float = 900.0
+    # Empty the page cache of the engine's data before every group (Participant.evict).
+    evict: bool = False
 
 
 class GroundTruth:
@@ -150,6 +160,13 @@ def check_plan(plan: str, g: Group, rules: dict[str, Any]) -> str | None:
     return None
 
 
+def point_slice(order: list[int], li: int, npoints: int, want: int) -> list[int]:
+    """Point li's queries: slice li of the shuffled order, sized so the group's points never share a
+    query, with the order's last query left out of every slice for the group's untimed first query."""
+    n = max(1, min(want, (len(order) - 1) // npoints))
+    return order[li * n:(li + 1) * n]
+
+
 def score_pass(p: dict[str, Any]) -> dict[str, Any]:
     lat = p["latencies_ms"]
     st = metrics.stats(lat)
@@ -180,6 +197,7 @@ class Runner:
         else:
             self.qsel = list(range(nq_all))
         self.nq = len(self.qsel)
+        self.order = [int(x) for x in np.random.default_rng(QUERY_ORDER_SEED).permutation(self.nq)]
         self.engine_cpus, self.client_cpus = cpu_lists(opts.cpuset, opts.tier_cpus)
         self.index_settings = {**resolve_settings(participant.settings, family, size)["index"], "dims": family.dims, "metric": family.metric}
         self.env = participant.env(family, size, opts.data_dir, opts.cpuset, opts.memory, self.index_settings)
@@ -277,6 +295,26 @@ class Runner:
             return f"degenerate: median {med} matching rows < {DEGENERATE_FACTOR * g.k}"
         return None
 
+    def timed_passes(self, pool: WorkerPool, g: Group, view: str, li: int) -> tuple[list[dict[str, Any]], dict[int, list[int]] | None]:
+        # The engine is warm after the first point of a group; what changes between points
+        # is the search parameters, not the engine, and a full warmup at every point is the
+        # single largest fixed cost on a slow group: a hundred queries per client is 3200
+        # queries, which at 300 queries per second is ten seconds before anything is timed.
+        pool.warmup(self.opts.warmup if li == 0 else max(1, self.opts.warmup // 10), g.k)
+        passes: list[dict[str, Any]] = []
+        first_ids: dict[int, list[int]] | None = None
+        t_budget = time.perf_counter()
+        for pi in range(self.opts.passes):
+            want = self.nq if view == "throughput" else min(self.opts.min_queries, self.nq)
+            spec = PassSpec(deadline_s=self.opts.deadline_s, min_queries=want, collect_ids=(pi == 0), k=g.k)
+            res = pool.run_pass(spec)
+            if pi == 0:
+                first_ids = res["ids"]
+            passes.append(score_pass(res))
+            if time.perf_counter() - t_budget >= self.opts.total_budget_s:
+                break
+        return passes, first_ids
+
     def run_group(self, g: Group, view: str, rf: ResultFile, startups: list[float]) -> None:
         clients = VIEWS[view] or self.opts.tier_cpus
         base = {"key": g.key, "filter": g.filter, "k": g.k, "exact": g.exact, "view": view, "clients": clients}
@@ -307,6 +345,9 @@ class Runner:
             self.p.stop(self.env)
             startups.append(self.p.start(self.env, timeout=self.opts.start_timeout_s))
         startup = startups[-1] if startups else 0.0
+        if self.opts.evict:
+            log.info("[%s %s] evict: %s", view, g.key, self.p.evict(self.env).replace("\n", "; "))
+        sliced = self.opts.point_queries is not None
         gt = self.gt.case(g.filter)
         args = self.gt.per_query_args(g.filter, self.qsel)
         pool = WorkerPool(clients, self.p.dir / "client.py", self.p.connection(self.family, self.dataset, self.index_settings), self.dsdir / "queries.parquet", self.family.dims, self.client_cpus, qsel=self.qsel)
@@ -323,29 +364,31 @@ class Runner:
                         bad = check_plan(plan, g, self.p.settings.get("plan_rules") or {})
                         if bad:
                             raise PlanCheckError(bad)
-                if li == 0 and restarted and self.opts.settle_s > 0:
+                if sliced and li == 0:
+                    # A filter's first query can load that field's index (Qdrant loads payload
+                    # indexes lazily). That is a one-off of the engine, not of the point, so it is
+                    # recorded apart, on a query outside every slice of a short group.
+                    group_rec["first_query_s"] = pool.first(self.order[-1], g.k)
+                    log.info("[%s %s] first query %.1f s", view, g.key, group_rec["first_query_s"])
+                if sliced:
+                    todo = point_slice(self.order, li, len(points), self.opts.exact_queries if g.exact else self.opts.point_queries[g.k])
+                    n = len(todo)
+                    res = pool.run_pass(PassSpec(deadline_s=self.opts.point_cap_s, min_queries=n, collect_ids=True, k=g.k, queries=todo))
+                    if res["capped"]:
+                        log.warning("[%s %s] %s capped at %.0f s after %d of %d queries", view, g.key, knobs, self.opts.point_cap_s, res["queries"], n)
+                        group_rec.setdefault("capped", []).append({"ladder_index": li, "knobs": knobs, "queries": res["queries"], "of": n})
+                        rf.upsert_group(group_rec)
+                        continue
+                    passes = [score_pass(res)]
+                    first_ids = res["ids"]
+                elif li == 0 and restarted and self.opts.settle_s > 0:
                     # Discarded: this is the engine reaching steady state after the restart, not a
                     # measurement of anything.
                     pool.run_pass(PassSpec(deadline_s=self.opts.settle_s,
                                            min_queries=min(SETTLE_MIN_QUERIES, self.nq),
                                            collect_ids=False, k=g.k))
-                # The engine is warm after the first point of a group; what changes between points
-                # is the search parameters, not the engine, and a full warmup at every point is the
-                # single largest fixed cost on a slow group: a hundred queries per client is 3200
-                # queries, which at 300 queries per second is ten seconds before anything is timed.
-                pool.warmup(self.opts.warmup if li == 0 else max(1, self.opts.warmup // 10), g.k)
-                passes: list[dict[str, Any]] = []
-                first_ids: dict[int, list[int]] | None = None
-                t_budget = time.perf_counter()
-                for pi in range(self.opts.passes):
-                    want = self.nq if view == "throughput" else min(self.opts.min_queries, self.nq)
-                    spec = PassSpec(deadline_s=self.opts.deadline_s, min_queries=want, collect_ids=(pi == 0), k=g.k)
-                    res = pool.run_pass(spec)
-                    if pi == 0:
-                        first_ids = res["ids"]
-                    passes.append(score_pass(res))
-                    if time.perf_counter() - t_budget >= self.opts.total_budget_s:
-                        break
+                if not sliced:
+                    passes, first_ids = self.timed_passes(pool, g, view, li)
                 best = max(passes, key=lambda x: (x["qps"] or 0.0))
                 assert first_ids is not None
                 qis = sorted(first_ids)
