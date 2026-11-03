@@ -391,6 +391,9 @@ export function buildBenchmark(input: unknown): Benchmark {
     datasets,
     participants,
     colors: assignColors(participants),
-    defaultDataset: pickDefaultDataset(datasets, families),
+    defaultDataset:
+      typeof raw.default_dataset === 'string' && datasets.some((d) => d.id === raw.default_dataset)
+        ? raw.default_dataset
+        : pickDefaultDataset(datasets, families),
   };
 }

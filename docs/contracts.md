@@ -296,6 +296,9 @@ file is an error:
 }
 ```
 
+`--default-dataset <family>-<size>` writes `"default_dataset"`, the dataset the page opens on;
+without it the page picks the largest size every participant of the first family has.
+
 A point may carry `"graph_only": true`: it is drawn on the graph and never read. A cell, a group's
 bar and the density rule skip it. The 247m runs use it for each engine's codes-only points (no
 reranking), which sit below every row's recall bar.

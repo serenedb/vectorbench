@@ -14,6 +14,12 @@ Design: [DESIGN.md](DESIGN.md). Formats every part agrees on: [docs/contracts.md
 - **Machine:** AWS c7i.24xlarge (96 vCPU, 185 GB RAM), data on EBS (about 560 MB/s, 10K IOPS). Engines are measured one at a time, without warmup.
 - **Measurement:** every query is timed once per group. The 10,000 queries are shuffled once with a fixed seed and each point of a group runs its own slice of them, all of it, with no deadline: 1,000 queries at k=10, 500 at k=100 and 200 at k=1000, fewer when the group has so many points that 9,999 queries would not go round (`--point-queries`). Before every group the engine's page cache is emptied: `drop_caches`, plus the vector files the engine memory-maps paged out of its own mappings (`--evict`, `evict_mapped` in settings.yml); graphs and codes stay in RAM. The first query of a group runs untimed and is recorded as `first_query_s`. 32 clients; a cell is the participant's Pareto frontier at the row's recall. Startup ends after the first vector query, which loads every segment's graph.
 
+## Current run: wiki-v3-1024-10m
+
+- **Data:** the first 10,000,000 rows of the same stream, with the same 10,000 queries and filter cases; vectors, graphs and codes all fit in RAM.
+- **Participants:** the same two, built the same way (m=16, ef_construction=256, 8 segments; Qdrant ends at 11) but with 8-bit codes and no reranking: SereneDB `usq8` at `sdb_ann_rescore_width = 0`, Qdrant scalar int8 with `rescore` false. Queries never touch the float vectors.
+- **Measurement:** the engine's files are read into the page cache before its pass and nothing is evicted; every point times all 10,000 queries (repeats between points cost nothing when everything is in RAM), every query runs. Without reranking 8-bit codes cap recall near 0.98, so the 0.99 rows are not reached by either engine.
+
 ## Layout
 
 ```

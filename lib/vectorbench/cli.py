@@ -168,7 +168,7 @@ def cmd_targets(args: argparse.Namespace) -> int:
 def cmd_assemble(args: argparse.Namespace) -> int:
     from .assemble import assemble
 
-    assemble(out_path=Path(args.out) if args.out else None, datasets=args.dataset or ())
+    assemble(out_path=Path(args.out) if args.out else None, datasets=args.dataset or (), default_dataset=args.default_dataset)
     return 0
 
 
@@ -267,6 +267,7 @@ def build_parser() -> argparse.ArgumentParser:
         metavar="FAMILY-SIZE",
         help="only this dataset's results, and its family (repeatable); other result files stay put",
     )
+    s.add_argument("--default-dataset", metavar="FAMILY-SIZE", help="the dataset the page opens on, instead of its own rule")
     s.set_defaults(fn=cmd_assemble)
     return ap
 

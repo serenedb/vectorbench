@@ -66,7 +66,7 @@ def only_datasets(
     return {name: f for name, f in fams.items() if name in used}, kept
 
 
-def assemble(root: Path = REPO_ROOT, out_path: Path | None = None, datasets: Iterable[str] = ()) -> Path:
+def assemble(root: Path = REPO_ROOT, out_path: Path | None = None, datasets: Iterable[str] = (), default_dataset: str | None = None) -> Path:
     fams = {f.name: f.to_page_dict() for f in list_families(root / "datasets")}
     results = collect_results(root)
     datasets = list(datasets)
@@ -81,6 +81,10 @@ def assemble(root: Path = REPO_ROOT, out_path: Path | None = None, datasets: Ite
         "families": fams,
         "results": results,
     }
+    if default_dataset:
+        if not any(r["dataset"] == default_dataset for r in results):
+            raise SystemExit(f"--default-dataset {default_dataset}: no results for it")
+        page["default_dataset"] = default_dataset
     out_path = out_path or (root / "frontend" / "results.json")
     out_path.parent.mkdir(parents=True, exist_ok=True)
     write_json_atomic(out_path, page)
