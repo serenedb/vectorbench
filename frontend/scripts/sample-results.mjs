@@ -16,7 +16,7 @@
    - per group a ladder of about seven integer knob values designed around the
      recalls the group's rows ask for (as a participant would after `trace`),
      recall rising and QPS falling along it, both views;
-   - every group of SereneDB HNSW with a filter is `unsupported` (DESIGN.md 5.1);
+   - every group of SereneDB HNSW with a filter is `unsupported`;
    - `n/a` groups follow the degenerate rule (contracts section 3) applied to the
      nominal selectivity of each predicate spec at 100k rows;
    - pgvector's `none/10` ladder stops at recall ~0.97 (a `reached 0.97` cell),

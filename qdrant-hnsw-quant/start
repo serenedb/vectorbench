@@ -3,10 +3,10 @@
 # times startup from this call to the first successful ./check, so nothing here may wait.
 set -euo pipefail
 
-: "${VB_PORT:=6533}"
-: "${VB_GRPC_PORT:=6534}"
-: "${VB_CONTAINER:=vectorbench-qdrant-hnsw}"
-: "${VB_IMAGE:=qdrant/qdrant:v1.19.1}"
+: "${VB_PORT:=6535}"
+: "${VB_GRPC_PORT:=6536}"
+: "${VB_CONTAINER:=vectorbench-qdrant-hnsw-quant}"
+: "${VB_IMAGE:=qdrant/qdrant:v1.20.0}"
 : "${VECTORBENCH_ENGINE_DIR:?VECTORBENCH_ENGINE_DIR must be set (the engine storage directory)}"
 : "${VECTORBENCH_CPUSET:=}"
 : "${VECTORBENCH_MEMORY:=}"

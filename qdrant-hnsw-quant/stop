@@ -3,7 +3,7 @@
 # kept, not removed, so ./start resumes it with its storage.
 set -euo pipefail
 
-: "${VB_CONTAINER:=vectorbench-qdrant-hnsw}"
+: "${VB_CONTAINER:=vectorbench-qdrant-hnsw-quant}"
 
 if docker inspect "$VB_CONTAINER" >/dev/null 2>&1; then
     docker stop --time 300 "$VB_CONTAINER" >/dev/null

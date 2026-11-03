@@ -1,4 +1,4 @@
-"""`vectorbench run`: every group of a participant on one dataset size (DESIGN section 4)."""
+"""`vectorbench run`: every group of a participant on one dataset size (docs/methodology.md)."""
 
 from __future__ import annotations
 

@@ -40,7 +40,7 @@ export interface RawFamily {
   skip_by_size?: Record<string, string[]>;
 }
 
-/** Every distribution is reported the same way (DESIGN.md 4.2 rule 8). */
+/** Every distribution is reported the same way (docs/methodology.md rule 6). */
 export interface Stats {
   n: number;
   min: number;

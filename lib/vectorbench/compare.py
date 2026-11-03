@@ -4,7 +4,7 @@ Reads each row at the bar its dataset declares (contracts sections 9 and 13) and
 ahead, on both views. A row neither side can answer is not a comparison and is listed separately,
 because an unanswerable cell is a coverage failure rather than a result.
 
-`vectorbench compare --dataset sift-128-1m --us serenedb-hnsw --them qdrant-hnsw`
+`vectorbench compare --dataset sift-128-1m --us serenedb-hnsw-quant --them qdrant-hnsw-quant`
 """
 
 from __future__ import annotations

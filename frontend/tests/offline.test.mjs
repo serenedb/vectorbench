@@ -115,7 +115,7 @@ test('committed HTML renders, graphs and details work over file:// without netwo
     await graph.locator('svg.curve-graph').waitFor();
     assert.ok((await graph.locator('svg.curve-graph polyline').count()) >= 1, 'at least one curve');
     assert.ok((await graph.locator('svg.curve-graph circle').count()) >= 2, 'measured points');
-    assert.equal(await graph.locator('input, [role="checkbox"]').count(), 0, 'no row list inside the graph: the table is the list');
+    assert.equal(await graph.locator('[data-act="row"]').count(), 0, 'no row list inside the graph: the table is the list');
     // the plot is 80% of the screen wide, scrolls under a pinned y axis, and opens at recall 1
     const plot = await graph.locator('.graphscroll').evaluate((el) => ({ sw: el.scrollWidth, cw: el.clientWidth, left: el.scrollLeft }));
     assert.ok(Math.abs(plot.sw + (await graph.locator('svg.curve-yaxis').evaluate((el) => el.getBoundingClientRect().width)) - 1440 * 0.8) < 2, 'the graph is 80% of the screen');

@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 # Development runs: every listed participant on every listed dataset size with reduced budgets, then
 # assemble results and build the page. Numbers are for checking that everything works and looks sane,
-# not for publication (see DESIGN.md section 4 for the published budgets).
+# not for publication (see docs/methodology.md for the published method).
 #
-#   scripts/dev-run.sh [participants...]        default: serenedb-ivf serenedb-hnsw qdrant-hnsw
+#   scripts/dev-run.sh [participants...]        default: serenedb-hnsw-quant qdrant-hnsw-quant
 #   DATASETS="sift-128-100k wiki-v3-1024-100k"  space-separated (default both 100k slices)
 #   VB_BINARY=/path/to/serened                  native SereneDB binary instead of the docker image
 #   VECTORBENCH_DATA_DIR=...                    prepared data root (required)
@@ -15,7 +15,7 @@ cd "$root"
 : "${DATASETS:=sift-128-100k wiki-v3-1024-100k}"
 : "${CLIENTS:=32}" "${QUERY_LIMIT:=2000}" "${PASSES:=1}" "${DEADLINE:=8}" "${BUDGET:=8}" "${MIN_QUERIES:=1000}"
 participants=("$@")
-[[ ${#participants[@]} -gt 0 ]] || participants=(serenedb-ivf serenedb-hnsw qdrant-hnsw)
+[[ ${#participants[@]} -gt 0 ]] || participants=(serenedb-hnsw-quant qdrant-hnsw-quant)
 export PYTHONPATH="$root/lib" PATH="$HOME/.local/bin:$PATH"
 py="$root/.venv/bin/python"
 log_dir="$root/.dev-run-logs"; mkdir -p "$log_dir"

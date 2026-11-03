@@ -1,5 +1,5 @@
 """Client worker processes: one process, one connection, one `Client` each (docs/contracts.md section 7,
-DESIGN rules 5-7).
+docs/methodology.md rules 4-7).
 
 The coordinator sends commands over a queue; workers answer over another. A pass starts at a shared
 barrier so all clients begin together; each worker walks its share of the query set in fixed order

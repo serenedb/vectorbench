@@ -9,7 +9,7 @@ key of queries.json and checks per query: exactly k ids, all distinct and known,
 predicate evaluated in numpy; exact groups must return the true top-k (tie-aware). The recall of the
 approximate groups is printed and must stay above a loose floor.
 
-    .venv/bin/python qdrant-hnsw/smoke_test.py --port 6434 --grpc-port 6433 [--metric ip|l2|both]
+    .venv/bin/python qdrant-hnsw-quant/smoke_test.py --port 6434 --grpc-port 6433 [--metric ip|l2|both]
 
 40,000 rows rather than a few thousand so that the 0.1 % case still has more than k=10 matching rows."""
 
@@ -56,7 +56,7 @@ CASES: dict[str, dict[str, Any]] = {  # the filter cases of datasets/*.yml
 }
 KS = {"none/*": [10, 100, 1000], "eq-10/*": [10, 100]}  # every other group runs at k=10
 RECALL_FLOOR = 0.8
-KNOB_RE = re.compile(r"\{([A-Za-z_][A-Za-z0-9_]*)\}")
+KNOB_RE = re.compile(r"\{([A-Za-z_][A-Za-z0-9_.]*)\}")
 
 
 # ------------------------------------------------------------------ contracts section 2 and 3, locally
@@ -175,7 +175,8 @@ def check_group(client: Client, key: str, block: dict[str, Any], k: int, data: D
     exact = key.startswith("exact/")
     case = key.split("/")[-2]
     spec = CASES[case]
-    text = KNOB_RE.sub(lambda m: str({"hnsw_ef": hnsw_ef}[m.group(1)]), json.dumps(block))  # as the driver does
+    knobs = {"hnsw_ef": hnsw_ef, "oversample": 1.0, "index.rescore": "false"}
+    text = KNOB_RE.sub(lambda m: str(knobs[m.group(1)]), json.dumps(block))  # as the driver does
     handle = client.prepare_group(text)
     problems: list[str] = []
     recall_sum = 0.0
@@ -253,8 +254,8 @@ def run(metric: str, args: argparse.Namespace, data: Data, dataset_dir: Path) ->
 
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("--port", type=int, default=6533, help="REST port of the running Qdrant")
-    ap.add_argument("--grpc-port", type=int, default=6534, help="gRPC port of the running Qdrant")
+    ap.add_argument("--port", type=int, default=6535, help="REST port of the running Qdrant")
+    ap.add_argument("--grpc-port", type=int, default=6536, help="gRPC port of the running Qdrant")
     ap.add_argument("--metric", choices=["ip", "l2", "both"], default="both")
     ap.add_argument("--rows", type=int, default=40_000)
     ap.add_argument("--dims", type=int, default=32)

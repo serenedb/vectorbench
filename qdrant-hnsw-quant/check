@@ -4,7 +4,7 @@
 # readiness. Cheap on purpose: one curl in the steady state.
 set -euo pipefail
 
-: "${VB_PORT:=6533}"
+: "${VB_PORT:=6535}"
 : "${VB_COLLECTION:=items}"
 : "${VECTORBENCH_DIMS:=0}"
 

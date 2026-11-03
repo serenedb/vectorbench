@@ -9,7 +9,8 @@ the two tags go to stdout last.
 Environment (exported by the driver, docs/contracts.md section 4): VECTORBENCH_DATASET_DIR,
 VECTORBENCH_METRIC (ip | l2), VECTORBENCH_DIMS, VB_PORT, VB_GRPC_PORT, VB_COLLECTION, VB_UPLOAD_WORKERS
 and the index parameters VB_INDEX_<KEY> of settings.yml (m, ef_construct, quant, on_disk_vectors,
-on_disk_hnsw, segments, full_scan_threshold_kb, optional max_segment_size_kb)."""
+on_disk_hnsw, segments, full_scan_threshold_kb, payload_m, payload_index_memory, tq_bits, optional
+max_segment_size_kb)."""
 
 from __future__ import annotations
 
@@ -89,7 +90,7 @@ class Target:
 
     @classmethod
     def from_env(cls) -> Target:
-        return cls("127.0.0.1", env_int("VB_PORT", 6533), env_int("VB_GRPC_PORT", 6534), env_str("VB_COLLECTION", "items"))
+        return cls("127.0.0.1", env_int("VB_PORT", 6535), env_int("VB_GRPC_PORT", 6536), env_str("VB_COLLECTION", "items"))
 
     def connect(self, timeout: int = 600) -> QdrantClient:
         return QdrantClient(host=self.host, port=self.port, grpc_port=self.grpc_port, prefer_grpc=True,
