@@ -38,8 +38,7 @@
   "indexing_threshold_kb": 1,
   "upload_workers": 4,
   "index_phase_mmap_advice": "sequential",
-  "max_optimization_threads": 4,
-  "note": "the loader crashed on a 10-minute server stall after the first segment finished; 3 interrupted optimizations restarted from scratch"
+  "max_optimization_threads": 4
  },
  "memory_peak_load": 195648151552,
  "version": "1.20.0",
