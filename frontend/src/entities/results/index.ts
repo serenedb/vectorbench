@@ -2,7 +2,7 @@
 
 export type { Query, RawFamily, RawGroup, RawPoint, RawResult, RawResults, Recall, Stats, View } from './model/types';
 export type { Cell, Crossing, Direction, Point } from './model/frontier';
-export { EPS, GAP_LIMIT, cell, cellValue, crossing, dominated, frontier, usablePoints } from './model/frontier';
+export { EPS, GAP_LIMIT, cell, cellValue, crossing, dominated, frontier, readablePoints, usablePoints } from './model/frontier';
 export type { GroupRowModel, ParticipantCurve } from './model/groupRows';
 export { groupRows } from './model/groupRows';
 export type {

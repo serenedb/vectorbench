@@ -31,6 +31,9 @@ class PassSpec:
     min_queries: int  # across all workers
     collect_ids: bool
     k: int
+    # A fixed slice of query positions, pulled from one shared cursor by whichever client is free,
+    # every one of them run: the point is its queries, not whatever a clock let through.
+    queries: list[int] | None = None
 
 
 def _load_client_class(client_path: Path) -> type:
@@ -57,6 +60,7 @@ def _worker_main(
     cmd_q: mp.Queue,
     res_q: mp.Queue,
     barrier: Any,
+    cursor: Any,
 ) -> None:
     try:
         if cpus:
@@ -95,6 +99,14 @@ def _worker_main(
                     j = min(int(payload.get("qi", 0)), nq - 1)
                     plan = client.explain(handle, qvec[sel[j]], int(payload["k"]), group_args[j])
                 res_q.put(("ok", wid, plan))
+            elif cmd == "first":
+                took = None
+                if wid == 0:
+                    j = int(payload["qi"])
+                    t0 = time.perf_counter()
+                    client.search(handle, qvec[sel[j]], int(payload["k"]), group_args[j])
+                    took = time.perf_counter() - t0
+                res_q.put(("ok", wid, took))
             elif cmd == "warmup":
                 n = int(payload["n"])
                 k = int(payload["k"])
@@ -102,6 +114,33 @@ def _worker_main(
                 for j in rng.integers(0, nq, size=n):
                     client.search(handle, qvec[sel[j]], k, group_args[j])
                 res_q.put(("ok", wid, None))
+            elif cmd == "pass" and payload.get("queries") is not None:
+                spec = PassSpec(**payload)
+                todo = spec.queries
+                lat = np.empty(len(todo), dtype=np.float64)
+                ids_out = []
+                barrier.wait()
+                t_start = time.perf_counter()
+                done = 0
+                capped = False
+                while True:
+                    with cursor.get_lock():
+                        n = cursor.value
+                        cursor.value = n + 1
+                    if n >= len(todo):
+                        break
+                    if (time.perf_counter() - t_start) >= spec.deadline_s:
+                        capped = True
+                        break
+                    j = todo[n]
+                    t0 = time.perf_counter_ns()
+                    ids = client.search(handle, qvec[sel[j]], spec.k, group_args[j])
+                    lat[done] = (time.perf_counter_ns() - t0) / 1e6
+                    if spec.collect_ids:
+                        ids_out.append((int(sel[j]), [int(x) for x in ids]))
+                    done += 1
+                t_end = time.perf_counter()
+                res_q.put(("pass", wid, {"lat": lat[:done], "ids": ids_out, "t_start": t_start, "t_end": t_end, "done": done, "capped": capped}))
             elif cmd == "pass":
                 spec = PassSpec(**payload)
                 my = list(range(wid, nq, nworkers))
@@ -143,10 +182,11 @@ class WorkerPool:
         self.cmd_qs = [ctx.Queue() for _ in range(n)]
         self.res_q = ctx.Queue()
         self.barrier = ctx.Barrier(n + 1)
+        self.cursor = ctx.Value("q", 0)
         self.procs = [
             ctx.Process(
                 target=_worker_main,
-                args=(i, n, str(client_path), cfg, str(queries_path), dims, qsel, cpus, self.cmd_qs[i], self.res_q, self.barrier),
+                args=(i, n, str(client_path), cfg, str(queries_path), dims, qsel, cpus, self.cmd_qs[i], self.res_q, self.barrier, self.cursor),
                 daemon=True,
             )
             for i in range(n)
@@ -185,10 +225,15 @@ class WorkerPool:
         out = self._broadcast("explain", {"k": k, "qi": qi})
         return out[0] if out else None
 
+    def first(self, qi: int, k: int) -> float:
+        """One untimed query from worker 0, its seconds returned: what a group's first query pays."""
+        return self._broadcast("first", {"qi": qi, "k": k})[0]
+
     def warmup(self, n_per_client: int, k: int) -> None:
         self._broadcast("warmup", {"n": n_per_client, "k": k})
 
     def run_pass(self, spec: PassSpec) -> dict[str, Any]:
+        self.cursor.value = 0
         for q in self.cmd_qs:
             q.put(("pass", spec.__dict__))
         self.barrier.wait()
@@ -200,7 +245,8 @@ class WorkerPool:
         for r in results:
             for qi, l in r["ids"]:
                 ids[qi] = l
-        return {"latencies_ms": lat, "wall_s": t_end - t_release, "queries": int(lat.size), "ids": ids}
+        capped = any(r.get("capped") for r in results)
+        return {"latencies_ms": lat, "wall_s": t_end - t_release, "queries": int(lat.size), "ids": ids, "capped": capped}
 
     def close(self) -> None:
         for q in self.cmd_qs:

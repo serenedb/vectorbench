@@ -8,6 +8,7 @@ import os
 import re
 import signal
 import subprocess
+import sys
 import threading
 import time
 from dataclasses import dataclass
@@ -216,25 +217,9 @@ class Participant:
         name = env.get("VB_CONTAINER") or self.container()
         if not name:
             return None
-        try:
-            cp = subprocess.run(["docker", "inspect", "-f", "{{.State.Pid}}", name], capture_output=True, text=True, timeout=30)
-            pid = int((cp.stdout or "0").strip() or 0)
-        except (subprocess.SubprocessError, ValueError):
+        base = self.cgroup_dir(env)
+        if base is None:
             return None
-        if pid <= 0:
-            return None
-        try:
-            cg = Path(f"/proc/{pid}/cgroup").read_text().splitlines()
-        except OSError:
-            return None
-        rel = None
-        for line in cg:
-            parts = line.split(":", 2)
-            if len(parts) == 3 and parts[0] == "0":
-                rel = parts[2]
-        if rel is None:
-            return None
-        base = Path("/sys/fs/cgroup") / rel.lstrip("/")
         for fname in ("memory.peak", "memory.current"):
             p = base / fname
             if p.exists():
@@ -252,6 +237,42 @@ class Participant:
             except subprocess.SubprocessError:
                 continue
         return None
+
+    def cgroup_dir(self, env: dict[str, str] | None = None) -> Path | None:
+        env = env or {}
+        pidfile = Path(env.get("VECTORBENCH_ENGINE_DIR", "")) / "serened.pid"
+        try:
+            if env.get("VB_BINARY") and pidfile.is_file():
+                pid = int(pidfile.read_text().strip())
+            else:
+                name = env.get("VB_CONTAINER") or self.container()
+                if not name:
+                    return None
+                cp = subprocess.run(["docker", "inspect", "-f", "{{.State.Pid}}", name], capture_output=True, text=True, timeout=30)
+                pid = int((cp.stdout or "0").strip() or 0)
+            if pid <= 0:
+                return None
+            cg = Path(f"/proc/{pid}/cgroup").read_text().splitlines()
+        except (OSError, subprocess.SubprocessError, ValueError):
+            return None
+        for line in cg:
+            parts = line.split(":", 2)
+            if len(parts) == 3 and parts[0] == "0":
+                return Path("/sys/fs/cgroup") / parts[2].lstrip("/")
+        return None
+
+    def evict(self, env: dict[str, str]) -> str:
+        """Empty the page cache of the engine's data: everything no process maps, plus the files
+        named by settings `evict_mapped` paged out of the engine's own mappings."""
+        cg = self.cgroup_dir(env)
+        if cg is None:
+            raise RuntimeError(f"{self.name}: no cgroup to evict")
+        needles = [str(x) for x in (self.settings.get("evict_mapped") or [])]
+        cp = subprocess.run(["sudo", "-n", sys.executable, "-I", str(Path(__file__).with_name("evict.py")), str(cg), *needles],
+                            capture_output=True, text=True, timeout=1800)
+        if cp.returncode != 0:
+            raise RuntimeError(f"{self.name}: evict failed: {cp.stderr.strip()[-2000:]}")
+        return cp.stdout.strip()
 
     # ----------------------------------------------------------------- misc
     def connection(self, family: Family | None = None, dataset: str | None = None, index: dict[str, Any] | None = None) -> dict[str, Any]:

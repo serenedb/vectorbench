@@ -11,7 +11,7 @@
    what each reaches on its own and the stretch of recall where each is fastest.
    Nothing here re-measures; it is the section 9 frontier, summarised. */
 
-import { cellValue, crossing, frontier, usablePoints, type Direction, type Point } from './frontier.ts';
+import { cellValue, crossing, frontier, readablePoints, type Direction, type Point } from './frontier.ts';
 import type { DatasetModel, QueryRow, Section } from './model.ts';
 import { groupFor, type Metric } from './cells.ts';
 import type { View } from './types.ts';
@@ -119,7 +119,7 @@ export function groupRows(dataset: DatasetModel, view: View, metric: Metric, dir
     const head = rows[0];
     const curves: ParticipantCurve[] = dataset.results.map((r) => {
       const g = groupFor(r, head, view);
-      const pts = g && g.status === 'ok' ? usablePoints(g.points ?? [], metric) : [];
+      const pts = g && g.status === 'ok' ? readablePoints(g.points ?? [], metric) : [];
       const front = frontier(pts, direction);
       return {
         pid: r.id,

@@ -76,6 +76,10 @@ def cmd_run(args: argparse.Namespace) -> int:
         startup_samples=args.startup_samples,
         start_timeout_s=args.start_timeout,
         dry_run=args.dry_run,
+        point_queries=_point_queries(args.point_queries),
+        exact_queries=args.exact_queries,
+        point_cap_s=args.point_cap,
+        evict=args.evict,
     )
     r = Runner(p, fam, size, opts)
     if args.dry_run:
@@ -84,6 +88,16 @@ def cmd_run(args: argparse.Namespace) -> int:
         return 0
     r.run()
     return 0
+
+
+def _point_queries(spec: str | None) -> dict[int, int] | None:
+    if not spec:
+        return None
+    out = {}
+    for item in spec.split(","):
+        k, n = item.split("=", 1)
+        out[int(k)] = int(n)
+    return out
 
 
 def cmd_trace(args: argparse.Namespace) -> int:
@@ -154,7 +168,7 @@ def cmd_targets(args: argparse.Namespace) -> int:
 def cmd_assemble(args: argparse.Namespace) -> int:
     from .assemble import assemble
 
-    assemble(out_path=Path(args.out) if args.out else None, datasets=args.dataset or ())
+    assemble(out_path=Path(args.out) if args.out else None, datasets=args.dataset or (), default_dataset=args.default_dataset)
     return 0
 
 
@@ -204,6 +218,14 @@ def build_parser() -> argparse.ArgumentParser:
     s.add_argument("--load-timeout", type=float, default=0.0,
                    help="seconds the load recipe may take before the run is abandoned and published "
                         "as load_aborted; 0 means no budget")
+    s.add_argument("--point-queries", metavar="K=N,...",
+                   help="fixed queries per point by k (e.g. 10=1000,100=500,1000=200): each point times its own "
+                        "slice of one shuffled query order, every query runs, no warmup or settle")
+    s.add_argument("--exact-queries", type=int, default=4, help="queries per exact point with --point-queries")
+    s.add_argument("--point-cap", type=float, default=900.0,
+                   help="with --point-queries, seconds after which a point is left out as capped")
+    s.add_argument("--evict", action="store_true",
+                   help="empty the page cache of the engine's data before every group (needs sudo -n)")
     s.add_argument("--dry-run", action="store_true")
     s.set_defaults(fn=cmd_run)
 
@@ -245,6 +267,7 @@ def build_parser() -> argparse.ArgumentParser:
         metavar="FAMILY-SIZE",
         help="only this dataset's results, and its family (repeatable); other result files stay put",
     )
+    s.add_argument("--default-dataset", metavar="FAMILY-SIZE", help="the dataset the page opens on, instead of its own rule")
     s.set_defaults(fn=cmd_assemble)
     return ap
 

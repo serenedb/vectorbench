@@ -274,6 +274,13 @@ Appendix B holds the initial list.
    passes repeat until three are done or 60 s have elapsed in total. All passes are stored; the headline
    is the best pass (ClickBench convention); recall is taken from the first pass. Engine result caches
    are disabled where they exist.
+   When the index is larger than RAM this repeats queries through the page cache: every later point
+   finds the vectors an earlier point reread already cached and measures a RAM-resident index. Such
+   runs use `--point-queries` instead: the query set is shuffled once with a fixed seed and each point
+   of a group times its own slice of it (at most N per k, and never more than the set divided by the
+   group's points), every query of the slice runs, with no warm-up, no settle and no deadline; a point
+   that passes a safety cap is left out and listed under `capped`. The first query of a group runs
+   untimed and is recorded as `first_query_s`, because an engine may load a field's index on it.
 8. **Every distribution is reported the same way:** n, min, avg, p50, p95, p99, max. Per point that is
    the latency distribution; QPS is queries completed over wall time across clients (by Little's law
    about clients / avg; the gap to that shows client overhead and stragglers).
@@ -318,10 +325,12 @@ Appendix B holds the initial list.
 
 ### 4.4 Not measured in v1
 
-17. **Cold cache.** Restart before every group already gives cold-process behaviour through startup and
-    warm-up; a page-cache drop needs root or passwordless sudo and its result is hard to interpret for a
-    query set. Dropped, so the benchmark needs no privileges anywhere. A disk-resident tier (memory cap
-    below index size) may come later as an extra tier.
+17. **Cold cache.** Not measured for indexes that fit in RAM. For a disk-resident index, `--evict`
+    (passwordless sudo) empties the engine's page cache before every group: `drop_caches` for pages
+    no process maps, and `process_madvise(MADV_PAGEOUT)` over the engine's own mappings of the files
+    its settings name in `evict_mapped`, so an engine cannot keep vectors cached by memory-mapping
+    them. Graphs and codes an engine holds in its heap or maps outside those files stay. With
+    `--point-queries` this is the method of the wiki-v3-1024-247m run.
 
 ### 4.5 Scores and hardware
 
@@ -612,7 +621,8 @@ Resolved in discussion on 2026-09-14:
 10. Three sections: GENERAL (load time, on disk, max memory during load, startup), NO FILTER and
     FILTERED (max memory during queries, score, coverage, rows); every distribution reported as n, min,
     avg, p50, p95, p99, max; table, graph and detail are renderings of one complete record.
-11. No cold-cache measurement; restart before every group gives the startup distribution; no sudo.
+11. No cold-cache measurement for indexes that fit in RAM; a disk-resident run evicts the engine's page
+    cache before every group and times each query once per group (`--evict`, `--point-queries`).
 12. Two scores, ClickBench geomean over visible rows, coverage first.
 13. Develop first on `100k` and `1m` (track A); large sizes are track B.
 

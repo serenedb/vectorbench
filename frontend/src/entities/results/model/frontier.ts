@@ -74,6 +74,11 @@ export function usablePoints(points: readonly RawPoint[], metric: string): Point
   return toPoints(points, (p) => metricValue(p, metric));
 }
 
+/** The points a cell reads: every usable point but those marked `graph_only`. */
+export function readablePoints(points: readonly RawPoint[], metric: string): Point[] {
+  return usablePoints(points.filter((p) => !p.graph_only), metric);
+}
+
 /**
  * Step 2: sort by recall descending, then by metric best-first; sweep, keeping a
  * point only if its metric is strictly better than every kept point (which all
@@ -170,7 +175,7 @@ export function cell(group: RawGroup | null | undefined, metric: string, r: Reca
     return { status: status as 'unsupported' | 'n/a' | 'error', reason: group.reason ?? null };
   }
   const direction: Direction = metric === 'qps' ? 'higher' : 'lower';
-  const pts = usablePoints(group.points ?? [], metric);
+  const pts = readablePoints(group.points ?? [], metric);
   if (r === 'exact') {
     if (!pts.length) return { status: 'none' };
     const p = pts[0];

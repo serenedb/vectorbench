@@ -27,12 +27,20 @@ if [[ -n "$VB_BINARY" ]]; then
     exit 0
 fi
 
+# Resume the existing container only if it mounts this dataset's storage; one left by another
+# dataset size is replaced, or it would answer this dataset's queries from the other one's data.
 if docker inspect "$VB_CONTAINER" >/dev/null 2>&1; then
-    state="$(docker inspect -f '{{.State.Status}}' "$VB_CONTAINER")"
-    if [[ "$state" == "running" ]]; then [[ -f "$PREWARMED" ]] || prewarm; exit 0; fi
-    docker start "$VB_CONTAINER" >/dev/null
-    prewarm
-    exit 0
+    mkdir -p "$VECTORBENCH_ENGINE_DIR"
+    mounted="$(docker inspect -f '{{range .Mounts}}{{if eq .Destination "/var/lib/serenedb"}}{{.Source}}{{end}}{{end}}' "$VB_CONTAINER")"
+    if [[ "$mounted" == "$(realpath "$VECTORBENCH_ENGINE_DIR")" ]]; then
+        state="$(docker inspect -f '{{.State.Status}}' "$VB_CONTAINER")"
+        if [[ "$state" == "running" ]]; then [[ -f "$PREWARMED" ]] || prewarm; exit 0; fi
+        docker start "$VB_CONTAINER" >/dev/null
+        prewarm
+        exit 0
+    fi
+    docker stop --time 300 "$VB_CONTAINER" >/dev/null
+    docker rm "$VB_CONTAINER" >/dev/null
 fi
 
 refuse_foreign_port

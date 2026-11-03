@@ -75,6 +75,8 @@ export interface RawPoint {
   queries?: number;
   duration?: number;
   passes?: Pass[];
+  /** Drawn on the graph, never read: a cell, a group's bar and the density rule skip it. */
+  graph_only?: boolean;
 }
 
 export interface RawGroup {
@@ -143,4 +145,6 @@ export interface RawResults {
   /** Not written by `vectorbench assemble`. scripts/sample-results.mjs sets it so
       the page can say, in a banner, that every number is synthetic. */
   sample?: boolean;
+  /** `vectorbench assemble --default-dataset`: the dataset the page opens on. */
+  default_dataset?: string;
 }
