@@ -209,6 +209,13 @@ overrides work next to it and are canonicalised on the next render:
 ids or group keys in either reading, `-` for none ticked). Modals and the
 split are never encoded.
 
+A link with no state, such as the product's bare path or this file opened as it
+is, opens on the payload's `default_dataset` with the k=10 chip on
+(`LANDING_CHIPS` in `src/shared/model/state.ts`), and the address bar then
+names the chip. Any other link is read exactly as written: an `?s=` without `q`
+has no chips, so `?s=eyJ2IjoxfQ` and every link minted before the landing view
+keep their rows.
+
 ## Checks
 
 From `frontend/`:
