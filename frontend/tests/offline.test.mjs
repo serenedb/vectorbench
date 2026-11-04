@@ -321,6 +321,37 @@ test('?hide= takes panels off the page: either half of the split alone takes the
     await open('?hide=dataset,view,filter,display');
     assert.equal(await count('.vb-toolbar'), 0, 'an empty toolbar is no toolbar');
 
+    // The graph alone, in a frame narrower than the page's 1280 px (the blog's embed): the page fits
+    // the frame, the y axis stays in it, and the plot keeps the width a 1280 px page gives it,
+    // scrolling under the axis and opening at recall 1.
+    const embed = '?hide=header,toolbar,table,status';
+    const plotWidth = () => width('svg.curve-graph');
+    await page.setViewportSize({ width: 1280, height: 600 });
+    await open(embed);
+    await page.locator('svg.curve-graph').waitFor();
+    const at1280 = await plotWidth();
+    await page.setViewportSize({ width: 720, height: 600 });
+    await open(embed);
+    await page.locator('svg.curve-graph').waitFor();
+    const frame = await page.evaluate(() => {
+      const scroller = document.querySelector('.graphscroll');
+      const axis = document.querySelector('svg.curve-yaxis').getBoundingClientRect();
+      return {
+        page: document.scrollingElement.scrollWidth,
+        axis: [axis.left, axis.right],
+        scrolls: scroller.scrollWidth - scroller.clientWidth,
+        fromRight: scroller.scrollWidth - scroller.clientWidth - scroller.scrollLeft,
+      };
+    });
+    assert.ok(frame.page <= 720, `the page fits the frame (${frame.page} px wide)`);
+    assert.ok(frame.axis[0] >= 0 && frame.axis[1] <= 720, 'the y axis is in the frame');
+    assert.ok(Math.abs((await plotWidth()) - at1280) <= 1, `the plot is as wide as on a 1280 px page (${await plotWidth()} vs ${at1280})`);
+    assert.ok(frame.scrolls > 0, 'the plot scrolls under the axis');
+    assert.ok(frame.fromRight <= 1, 'and opens at recall 1');
+    // With anything else on the page it holds its 1280 px and scrolls as a whole.
+    await open('?hide=table');
+    assert.equal(await page.evaluate(() => document.scrollingElement.scrollWidth), 1280, 'the toolbar keeps the page at 1280 px');
+
     assert.deepEqual(errors, []);
     await context.close();
   } finally {

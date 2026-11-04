@@ -214,9 +214,12 @@ split are never encoded.
 `header` (the title bar), `toolbar` (the whole strip), `dataset`, `view`,
 `filter` and `display` (one group of the strip each; with all four gone the
 strip goes too), `table`, `graph` and `status` (the status bar). With `table`
-or `graph` hidden the other one takes the whole width. Unknown names are
-ignored, and the list is kept in the link (`p` in `?s=`). Nothing on the page
-turns a panel back on.
+or `graph` hidden the other one takes the whole width. With only the graph
+left (`hide=header,toolbar,table,status`) the page fits a screen narrower than
+its usual 1280 px: the y axis stays in view, and the plot keeps the width a
+1280 px page gives it and scrolls under the axis, opening at recall 1. Unknown
+names are ignored, and the list is kept in the link (`p` in `?s=`). Nothing on
+the page turns a panel back on.
 
 A link with no state, such as the product's bare path or this file opened as it
 is, opens on the payload's `default_dataset` with the k=10 chip on
