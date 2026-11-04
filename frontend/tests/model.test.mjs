@@ -217,10 +217,11 @@ test('URL codec round-trips the selectors and chips', () => {
     sortSection: 'filtered',
     graphRows: ['V14', 'V35'],
     hidden: new Set(['serenedb-hnsw', 'pgvector-hnsw']),
+    hiddenPanels: new Set(['table', 'header']),
   };
   const packed = shortState(state, env, 'dark');
-  assert.deepEqual(packed, { v: 1, d: 'wiki-v3-1024-100k', t: 'latency', m: 'p99', c: 'absolute', rm: 'bars', q: 'filter:eq,k:10', h: 'pgvector-hnsw,serenedb-hnsw', s: 'filtered', g: 'V14,V35', th: 'dark' });
-  assert.deepEqual(Object.keys(packed), ['v', 'd', 't', 'm', 'c', 'rm', 'q', 'h', 's', 'g', 'th'], 'key order is the wire format');
+  assert.deepEqual(packed, { v: 1, d: 'wiki-v3-1024-100k', t: 'latency', m: 'p99', c: 'absolute', rm: 'bars', q: 'filter:eq,k:10', h: 'pgvector-hnsw,serenedb-hnsw', s: 'filtered', g: 'V14,V35', th: 'dark', p: 'header,table' });
+  assert.deepEqual(Object.keys(packed), ['v', 'd', 't', 'm', 'c', 'rm', 'q', 'h', 's', 'g', 'th', 'p'], 'key order is the wire format');
   const b64 = Buffer.from(JSON.stringify(packed)).toString('base64url');
   const { patch, theme } = restoreUrlState('?s=' + b64, env, INITIAL_STATE);
   assert.equal(theme, 'dark');
@@ -233,6 +234,7 @@ test('URL codec round-trips the selectors and chips', () => {
   assert.equal(patch.sortSection, 'filtered');
   assert.deepEqual(patch.graphRows, ['V14', 'V35']);
   assert.deepEqual([...patch.hidden].sort(), ['pgvector-hnsw', 'serenedb-hnsw']);
+  assert.deepEqual([...patch.hiddenPanels].sort(), ['header', 'table']);
   // readable overrides win, unknown values fall back, unknown chips and rows are dropped
   const o = restoreUrlState('?s=' + b64 + '&view=throughput&rows=sideways&chips=k:10,bogus:1&graph=V14,V99&dataset=nope&hidden=nobody,qdrant-hnsw', env, INITIAL_STATE);
   assert.deepEqual([...o.patch.hidden], ['qdrant-hnsw'], 'unknown participants are dropped');
@@ -252,6 +254,29 @@ test('URL codec round-trips the selectors and chips', () => {
   const key = row(dataset('sift-128-100k'), 'V14').key;
   assert.deepEqual(restoreUrlState(`?graph=${encodeURIComponent(key)}&row=V02`, env, INITIAL_STATE).patch.graphRows, [key, 'V02']);
   assert.deepEqual(restoreUrlState('?row=V02&expanded=1', env, INITIAL_STATE).patch.graphRows, ['V02']);
+});
+
+test('?hide= takes panels off the page, and reads like searchbench', () => {
+  const env = {
+    datasets: bench.datasets.map((d) => d.id),
+    defaultDataset: bench.defaultDataset,
+    tagsFor: (id) => allChipTags(dataset(id)),
+    rowsFor: (id) => new Set(dataset(id).family.queries.flatMap((q) => [q.id, q.key])),
+    participants: bench.participants.map((p) => p.id),
+  };
+  const hide = (search) => [...restoreUrlState(search, env, INITIAL_STATE).patch.hiddenPanels].sort();
+  assert.deepEqual(hide('?hide=graph'), ['graph']);
+  assert.deepEqual(hide('?hide=table'), ['table']);
+  assert.deepEqual(hide('?hide=header,toolbar,status,sidebar,'), ['header', 'status', 'toolbar'], 'unknown panels are dropped');
+  assert.deepEqual(hide('?hide=dataset,view,filter,display'), ['dataset', 'display', 'filter', 'view']);
+  assert.deepEqual(hide(''), []);
+  // The readable parameter wins over the packed slot, and is written back into it.
+  const b64 = Buffer.from(JSON.stringify({ v: 1, p: 'graph' })).toString('base64url');
+  assert.deepEqual(hide('?s=' + b64), ['graph']);
+  assert.deepEqual(hide('?s=' + b64 + '&hide=table'), ['table']);
+  assert.deepEqual(shortState({ ...INITIAL_STATE, hiddenPanels: new Set(['graph']) }, env, 'light'), { v: 1, p: 'graph' });
+  // Framing a bare link does not stop it being bare: it still lands on k=10.
+  assert.deepEqual([...restoreUrlState('?hide=header', env, INITIAL_STATE).patch.chips], [...LANDING_CHIPS].filter((t) => allChipTags(dataset(env.defaultDataset)).has(t)));
 });
 
 test('a link with no state opens on k=10, a link with state reads as written', () => {

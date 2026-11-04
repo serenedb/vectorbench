@@ -47,6 +47,16 @@ export type SortSection = 'nofilter' | 'filtered';
 /** The rows whose label opens a detail rather than ticking a curve. */
 export type HeaderRowKey = 'load' | 'disk' | 'memload' | 'startup' | 'memq:nofilter' | 'memq:filtered';
 
+/** Parts of the page `?hide=` (packed as `p`) can switch off — searchbench's
+    parameter, with this page's panels. A link sets them; nothing on the page
+    does, so an embed cannot be talked back into the chrome it left out.
+    `table` and `graph` are the two halves of the split: either alone takes the
+    whole width. */
+export type PanelId = 'header' | 'toolbar' | 'dataset' | 'view' | 'filter' | 'display' | 'table' | 'graph' | 'status';
+
+export const PANELS: readonly PanelId[] = ['header', 'toolbar', 'dataset', 'view', 'filter', 'display', 'table', 'graph', 'status'];
+export const HIDEABLE_PANELS: ReadonlySet<PanelId> = new Set(PANELS);
+
 export type Detail =
   | { kind: 'cell'; pid: string; qid: string }
   | { kind: 'header'; row: HeaderRowKey };
@@ -70,6 +80,8 @@ export interface BenchState {
       group), so switching the reading keeps what was ticked. null = nothing
       picked yet, which ticks the first row; [] = everything unticked. */
   graphRows: readonly string[] | null;
+  /** Panels the link switched off. */
+  hiddenPanels: ReadonlySet<PanelId>;
   /** Never encoded in the URL: a link cannot open a modal. */
   detail: Detail | null;
 }
@@ -84,6 +96,7 @@ export const INITIAL_STATE: BenchState = {
   hidden: new Set(),
   sortSection: 'nofilter',
   graphRows: null,
+  hiddenPanels: new Set(),
   detail: null,
 };
 
@@ -94,3 +107,7 @@ export const INITIAL_STATE: BenchState = {
     already quoted keeps its rows. A dataset with no k=10 row opens with no
     chip. */
 export const LANDING_CHIPS: readonly string[] = ['k:10'];
+
+export function isPanelHidden(state: Pick<BenchState, 'hiddenPanels'>, id: PanelId): boolean {
+  return state.hiddenPanels.has(id);
+}

@@ -4,11 +4,15 @@
    participants wait behind Filter, how the grid is cut and printed behind
    Display. While those menus are closed the strip still says what they hold
    that is on: a count on Filter, and a pill per chip or hidden participant,
-   each removable with a click. */
+   each removable with a click.
+
+   `?hide=dataset,view,filter,display` takes the strip's groups out one by one;
+   the page drops the strip itself under `?hide=toolbar` or once all four are
+   gone. */
 
 import type { Dispatch, ReactNode } from 'react';
 import { allChipTags, chipLabel, latencyClients, type Benchmark, type ChipDimension, type DatasetModel, type ResultModel } from '../../entities/results';
-import { LATENCY_METRICS, type BenchAction, type BenchState, type LatencyMetric, type View } from '../../shared/model';
+import { LATENCY_METRICS, isPanelHidden, type BenchAction, type BenchState, type LatencyMetric, type View } from '../../shared/model';
 import { Dropdown, Seg, type SegOption } from '../../shared/ui';
 import { DatasetLabel, DatasetMenu } from './DatasetMenu';
 import { DisplayMenu } from './DisplayMenu';
@@ -56,36 +60,49 @@ export function Toolbar({
   const shownCount = everyone.length - hiddenHere.length;
   const chips = [...state.chips].sort();
   const active = chips.length + hiddenHere.length;
+  const shows = {
+    dataset: !isPanelHidden(state, 'dataset'),
+    view: !isPanelHidden(state, 'view'),
+    filter: !isPanelHidden(state, 'filter'),
+    display: !isPanelHidden(state, 'display'),
+  };
 
   return (
     <div className="vb-toolbar" role="toolbar" aria-label="what the table and the graph show">
-      <Dropdown act="dataset-menu" label={<DatasetLabel dataset={dataset} />} title="the dataset every number on the page is about" width={340}>
-        {(close) => (
-          <DatasetMenu
-            bench={bench}
-            dataset={dataset}
-            onPick={(d) => {
-              dispatch({ type: 'dataset', id: d.id, tags: allChipTags(d) });
-              close();
-            }}
-          />
-        )}
-      </Dropdown>
-      <span className="tsep" />
-      <Seg act="view" opts={viewOptions(dataset)} cur={state.view} pad="0 11px" onPick={(value) => dispatch({ type: 'view', value })} />
-      {state.view === 'latency' && (
-        <Seg act="metric" opts={LATENCY} cur={state.latencyMetric} pad="0 8px" onPick={(value) => dispatch({ type: 'metric', value })} />
+      {shows.dataset && (
+        <Dropdown act="dataset-menu" label={<DatasetLabel dataset={dataset} />} title="the dataset every number on the page is about" width={340}>
+          {(close) => (
+            <DatasetMenu
+              bench={bench}
+              dataset={dataset}
+              onPick={(d) => {
+                dispatch({ type: 'dataset', id: d.id, tags: allChipTags(d) });
+                close();
+              }}
+            />
+          )}
+        </Dropdown>
       )}
-      <span className="tnote">{state.view === 'throughput' ? '32 clients · QPS, higher is better' : `${latencyClients(dataset) ?? '—'} · ms, lower is better`}</span>
+      {shows.dataset && shows.view && <span className="tsep" />}
+      {shows.view && (
+        <>
+          <Seg act="view" opts={viewOptions(dataset)} cur={state.view} pad="0 11px" onPick={(value) => dispatch({ type: 'view', value })} />
+          {state.view === 'latency' && (
+            <Seg act="metric" opts={LATENCY} cur={state.latencyMetric} pad="0 8px" onPick={(value) => dispatch({ type: 'metric', value })} />
+          )}
+          <span className="tnote">{state.view === 'throughput' ? '32 clients · QPS, higher is better' : `${latencyClients(dataset) ?? '—'} · ms, lower is better`}</span>
+        </>
+      )}
 
+      {/* Kept without the Filter group too: it is what pushes Display right. */}
       <div className="pills">
-        {chips.map((tag) => (
+        {shows.filter && chips.map((tag) => (
           <button key={tag} type="button" className="pill" data-act="unchip" data-tag={tag} title="remove this filter" onClick={() => dispatch({ type: 'chip', tag })}>
             {pillText(tag)}
             <span className="x">×</span>
           </button>
         ))}
-        {hiddenHere.map((r) => (
+        {shows.filter && hiddenHere.map((r) => (
           <button
             key={r.id}
             type="button"
@@ -100,12 +117,16 @@ export function Toolbar({
           </button>
         ))}
       </div>
-      <Dropdown act="filter-menu" label="Filter" badge={active} align="right" width={400} title="rows by tag, participants by name">
-        {() => <FilterMenu dataset={dataset} chips={state.chips} everyone={everyone} hidden={state.hidden} shownCount={shownCount} dispatch={dispatch} />}
-      </Dropdown>
-      <Dropdown act="display-menu" label="Display" align="right" width={350} title="how the grid is cut into rows, and what a cell prints">
-        {() => <DisplayMenu state={state} dispatch={dispatch} />}
-      </Dropdown>
+      {shows.filter && (
+        <Dropdown act="filter-menu" label="Filter" badge={active} align="right" width={400} title="rows by tag, participants by name">
+          {() => <FilterMenu dataset={dataset} chips={state.chips} everyone={everyone} hidden={state.hidden} shownCount={shownCount} dispatch={dispatch} />}
+        </Dropdown>
+      )}
+      {shows.display && (
+        <Dropdown act="display-menu" label="Display" align="right" width={350} title="how the grid is cut into rows, and what a cell prints">
+          {() => <DisplayMenu state={state} dispatch={dispatch} />}
+        </Dropdown>
+      )}
     </div>
   );
 }

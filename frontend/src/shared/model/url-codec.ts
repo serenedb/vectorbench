@@ -7,7 +7,8 @@
      - a slot is written only when it deviates from the default, so the default
        link is `?s=eyJ2IjoxfQ`;
      - readable parameters next to `?s=` (`?view=latency&chips=k:10`) override
-       the packed state and are canonicalised back into it on the next render;
+       the packed state and are canonicalised back into it on the next render,
+       which makes `?s=…&hide=header,toolbar` practical for embeds;
      - a link with no state at all, no `?s=` the codec can read and no readable
        parameter, opens on LANDING_CHIPS and is canonicalised to the `?s=` that
        names them. It is the only link not read as written, so moving the
@@ -17,8 +18,8 @@
    argument and hands a restored one back to apply via `setTheme`. Its default
    here is `light`. */
 
-import type { BenchState, CellMode, LatencyMetric, RowMode, SortSection, View } from './state.ts';
-import { LANDING_CHIPS, isLatencyMetric } from './state.ts';
+import type { BenchState, CellMode, LatencyMetric, PanelId, RowMode, SortSection, View } from './state.ts';
+import { HIDEABLE_PANELS, LANDING_CHIPS, isLatencyMetric } from './state.ts';
 
 /** Mirrors @serenedb/ui's `Theme`, without importing it into a pure module. */
 export type ThemeName = 'dark' | 'light';
@@ -92,6 +93,7 @@ export function shortState(state: BenchState, env: CodecEnv, theme: ThemeName): 
   // everything unticked is a choice of its own, written as "-".
   put('g', state.graphRows === null ? '' : state.graphRows.length ? state.graphRows.join(',') : '-', '');
   put('th', theme, 'light');
+  put('p', csv(state.hiddenPanels), '');
   return compact;
 }
 
@@ -123,6 +125,7 @@ const FIELDS: Record<string, string> = {
   sort: 's',
   graph: 'g',
   theme: 'th',
+  hide: 'p',
   // Read, never written: the row whose graph opened under it, before the
   // graph moved beside the table. A link from then keeps that row ticked.
   row: 'r',
@@ -140,8 +143,10 @@ export function restoreUrlState(search: string, env: CodecEnv, initial: BenchSta
     const p = new URLSearchParams(search);
     const packed = base64UrlDecode(p.get('s'));
     // Nothing of ours to read: the bare path, or parameters someone else put
-    // there (`?utm_source=`).
-    const bare = packed === null && !Object.keys(FIELDS).some((key) => p.has(key));
+    // there (`?utm_source=`). `?hide=` alone still counts as bare: it says how
+    // the page is framed, not what it shows, so an embed of the bare link
+    // opens on the landing chips like the link it embeds.
+    const bare = packed === null && !Object.keys(FIELDS).some((key) => key !== 'hide' && p.has(key));
     const get = (key: string): unknown =>
       p.has(key) ? p.get(key) : packed ? packed[FIELDS[key]] : null;
     const oneOf = <T extends string>(key: string, allowed: readonly T[], fallback: T | null) => {
@@ -173,6 +178,7 @@ export function restoreUrlState(search: string, env: CodecEnv, initial: BenchSta
       const graph = ids.filter((id, i) => rows.has(id) && ids.indexOf(id) === i);
       patch.graphRows = graph.length ? graph : null;
     }
+    patch.hiddenPanels = new Set(split('hide').filter((id): id is PanelId => HIDEABLE_PANELS.has(id as PanelId)));
     theme = oneOf<ThemeName>('theme', ['dark', 'light'], null);
   } catch {
     /* a malformed link opens the default view rather than a blank page */
