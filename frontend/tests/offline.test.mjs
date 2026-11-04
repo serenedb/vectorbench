@@ -122,7 +122,15 @@ test('committed HTML renders, graphs and details work over file:// without netwo
     // The SVG mounts once the container has been measured, a render later.
     await graph.locator('svg.curve-graph').waitFor();
     assert.ok((await graph.locator('svg.curve-graph polyline').count()) >= 1, 'at least one curve');
-    assert.ok((await graph.locator('svg.curve-graph circle').count()) >= 2, 'measured points');
+    assert.ok((await graph.locator('svg.curve-graph g.hit').count()) >= 2, 'measured points');
+    // every point carries a target wider than its mark, under the plain arrow rather than the pan hand
+    const hit = await graph.locator('svg.curve-graph g.hit').first().evaluate((g) => ({
+      r: Number(g.querySelector('.hitarea').getAttribute('r')),
+      tip: !!g.querySelector('title'),
+      cursor: getComputedStyle(g.querySelector('.hitarea')).cursor,
+    }));
+    assert.ok(hit.r >= 8 && hit.tip, 'a target of its own, holding the tooltip');
+    assert.equal(hit.cursor, 'default');
     assert.equal(await graph.locator('[data-act="row"]').count(), 0, 'no row list inside the graph: the table is the list');
     // the plot is 80% of the screen wide, scrolls under a pinned y axis, and opens at recall 1
     const plot = await graph.locator('.graphscroll').evaluate((el) => ({ sw: el.scrollWidth, cw: el.clientWidth, left: el.scrollLeft }));
