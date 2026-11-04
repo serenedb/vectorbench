@@ -11,7 +11,8 @@
 
    A link can leave parts of the window out (`?hide=`, see state.ts): the
    title bar, the toolbar or its groups, the status bar, and either half of the
-   split — the other then takes the whole width, without the rule.
+   split — the other then takes the whole width, without the rule. With the
+   graph alone on it the page fits the screen rather than holding its 1280 px.
 
    Everything under the toolbar is a pure function of `state` and the
    benchmark: the grid is computed once per (dataset, view, metric), the scores
@@ -145,6 +146,8 @@ export function BenchPage() {
   const showToolbar = !isPanelHidden(state, 'toolbar') && !(['dataset', 'view', 'filter', 'display'] as const).every((id) => isPanelHidden(state, id));
   const showTable = !isPanelHidden(state, 'table');
   const showGraph = !isPanelHidden(state, 'graph');
+  // Only the graph: no strip, table or bar wants the page's width.
+  const graphAlone = showGraph && !showTable && !showToolbar && isPanelHidden(state, 'header') && isPanelHidden(state, 'status');
   const table = (
     <ResultsTable
       dataset={shown}
@@ -169,6 +172,7 @@ export function BenchPage() {
       plotted={plotted}
       ticked={ticked.length}
       onClear={() => dispatch({ type: 'plot', ids: [] })}
+      fitsScreen={graphAlone}
     />
   );
   const detail = state.detail;
@@ -176,7 +180,7 @@ export function BenchPage() {
   const detailRow = detail?.kind === 'cell' ? dataset.queries.find((q) => q.id === detail.qid) : undefined;
 
   return (
-    <div className="vb-app">
+    <div className={graphAlone ? 'vb-app fits' : 'vb-app'}>
       <Panel grow className="vb-window">
         {!isPanelHidden(state, 'header') && <BenchHeader />}
         {showToolbar && <Toolbar bench={BENCH} dataset={dataset} everyone={everyone} state={state} dispatch={dispatch} />}

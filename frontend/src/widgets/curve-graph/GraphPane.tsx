@@ -9,7 +9,9 @@
    1, which a plot squeezed to the pane would crowd into its last inch. It
    opens scrolled to that end and stays anchored there as the pane or the rows
    change, until the reader scrolls — by the scrollbar, the wheel, or dragging
-   the plot.
+   the plot. The graph alone on a screen narrower than the page's 1280 px (an
+   embed) keeps the plot that page would give it: the page fits the screen,
+   the y axis stays on it, and the plot scrolls the same way.
 
    A row is drawn the way the table reads it (graphData.ts): in the group
    reading a group stands at the common bar its cells are read at, in the bar
@@ -25,6 +27,10 @@ import { useSize } from './useSize';
 
 /** The plot and its axis together take this share of the screen's width. */
 const SCREEN_SHARE = 0.8;
+
+/** `.vb-app`'s min-width in vectorbench.css: the width the page is laid out at
+    on a narrower screen. */
+const PAGE_MIN_WIDTH = 1280;
 
 function useViewportWidth(): number {
   const [width, setWidth] = useState(() => window.innerWidth);
@@ -45,6 +51,7 @@ export function GraphPane({
   plotted,
   ticked,
   onClear,
+  fitsScreen = false,
 }: {
   /** The dataset with only the participants on screen. */
   dataset: DatasetModel;
@@ -59,6 +66,9 @@ export function GraphPane({
   /** Rows ticked in all, the ones the chips hide included. */
   ticked: number;
   onClear: () => void;
+  /** The graph is the whole page, and the page fits the screen (`.vb-app.fits`)
+      instead of holding PAGE_MIN_WIDTH. */
+  fitsScreen?: boolean;
 }): ReactNode {
   const rows = useMemo<PlotRow[]>(
     () =>
@@ -84,7 +94,9 @@ export function GraphPane({
      ticks would sit under it; measured, since a platform with overlay
      scrollbars takes none. */
   const [bar, setBar] = useState(0);
-  const plotWidth = Math.max(view.width - Y_AXIS_W, Math.round(screen * SCREEN_SHARE) - Y_AXIS_W);
+  // The width the page would have added to the pane, had it held PAGE_MIN_WIDTH.
+  const held = fitsScreen ? Math.max(0, PAGE_MIN_WIDTH - screen) : 0;
+  const plotWidth = Math.max(view.width + held - Y_AXIS_W, Math.round(screen * SCREEN_SHARE) - Y_AXIS_W);
   const plotHeight = Math.max(0, view.height - bar);
   const scale = useMemo(() => graphScale(data, plotWidth, plotHeight), [data, plotWidth, plotHeight]);
   const drawn = rows.length > 0 && view.width > 0 && plotHeight > 0;

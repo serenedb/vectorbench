@@ -84,6 +84,12 @@
        table and the graph to slivers. */
     min-width: 1280px;
 }
+/* The graph alone (`?hide=` leaving nothing else, as in an embed) needs none of
+   that width: the page fits the screen, so the y axis stays on it, and the
+   plot scrolls under the axis instead of the page scrolling (GraphPane). */
+[data-product='vectorbench'] .vb-app.fits {
+    min-width: 0;
+}
 
 [data-product='vectorbench'] .vb-app a {
     color: var(--link);
