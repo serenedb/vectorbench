@@ -50,13 +50,11 @@ test('committed HTML renders, graphs and details work over file:// without netwo
     for (const n of names) assert.ok(text.includes(n), n);
     if (results.sample) await page.locator('[data-role="sample-banner"]').waitFor();
 
-    // a link with no state opens on the payload's default dataset with k=10 on, and mints a link that says so
+    // a link with no state opens on the payload's default dataset with no chips on
     if (results.default_dataset) {
       assert.ok((await page.locator('[data-role="status"]').innerText()).includes(results.default_dataset), 'the default dataset');
     }
-    assert.equal(await page.locator('[data-act="unchip"][data-tag="k:10"]').count(), 1, 'k=10 is on, its pill in the toolbar');
-    const landed = JSON.parse(Buffer.from(new URL(page.url()).searchParams.get('s'), 'base64url').toString('utf8'));
-    assert.equal(landed.q, 'k:10', 'the address bar names the chip');
+    assert.equal(await page.locator('[data-act="unchip"]').count(), 0, 'no chip is on');
 
     // the window: table and graph side by side, the status bar one line, no sidebar
     const table = page.locator('[data-role="table"]');
@@ -212,11 +210,8 @@ test('committed HTML renders, graphs and details work over file:// without netwo
     assert.ok((await graph.locator('.panehead').innerText()).includes(`${barTicks.length} row`));
     await page.locator(`[data-act="sort"][data-section="${hasFiltered ? 'filtered' : 'nofilter'}"]`).first().click();
 
-    // chips narrow the rows; a pill names the chip while the menu is closed and removes it.
-    // k=10 is still on from the landing view.
+    // chips narrow the rows; a pill names the chip while the menu is closed and removes it
     const k100 = () => page.$$eval('[data-act="row"]', (ns) => ns.filter((n) => /k=100\b/.test(n.innerText)).length);
-    assert.equal(await k100(), 0, 'opened on k=10');
-    await page.locator('[data-act="unchip"][data-tag="k:10"]').click();
     assert.equal(await page.locator('[data-act="unchip"]').count(), 0);
     assert.ok((await k100()) > 0);
     await page.locator('[data-act="filter-menu"]').click();
@@ -256,7 +251,7 @@ test('committed HTML renders, graphs and details work over file:// without netwo
     await page.locator('.vb-app').waitFor();
     assert.deepEqual(await ticked(), tickedBefore, 'still ticked');
     assert.equal(await page.locator(`[data-act="unhide"][data-pid="${first}"]`).count(), 1, 'still hidden');
-    assert.equal(await page.locator('[data-act="unchip"]').count(), 0, 'a link with state is read as written: k=10 stays off');
+    assert.equal(await page.locator('[data-act="unchip"]').count(), 0, 'a link with state is read as written: no chips');
     assert.equal(await page.locator(`[data-act="view"][data-v="${hasLatency ? 'latency' : 'throughput'}"]`).getAttribute('class'), 'on');
     await page.locator('[data-act="display-menu"]').click();
     assert.equal(await page.locator('[data-act="cells"][data-v="absolute"]').getAttribute('class'), 'on');
@@ -292,7 +287,7 @@ test('?hide= takes panels off the page: either half of the split alone takes the
     assert.equal(await count('[data-role="graph"]'), 0, 'no graph');
     assert.equal(await count('.splitter'), 0, 'no rule without a second pane');
     assert.ok((await width('[data-role="table"]')) >= (await windowWidth()) - 1, 'the table takes the whole width');
-    assert.equal(await count('[data-act="unchip"]'), 1, '?hide= alone is still the bare link: it lands on k=10');
+    assert.equal(await count('[data-act="unchip"]'), 0, '?hide= alone puts no chip on');
     assert.match(page.url(), /[?&]s=/, 'canonicalised into ?s=');
     // The hidden panel is part of the link: a reload keeps it off.
     await page.reload();

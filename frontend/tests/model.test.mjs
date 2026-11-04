@@ -11,7 +11,7 @@ import { computeGrid, gridCell, failLabel, groupFor, metricFor } from '../src/en
 import { cellValue } from '../src/entities/results/model/frontier.ts';
 import { orderResults, ratioTo, sectionScores } from '../src/entities/results/model/scores.ts';
 import { allChipTags, chipTag, visibleRows } from '../src/entities/results/model/rows.ts';
-import { INITIAL_STATE, LANDING_CHIPS } from '../src/shared/model/state.ts';
+import { INITIAL_STATE } from '../src/shared/model/state.ts';
 import { restoreUrlState, shortState } from '../src/shared/model/url-codec.ts';
 import { readingSize, screenRows, tickedRows } from '../src/pages/bench/model/selection.ts';
 
@@ -275,11 +275,11 @@ test('?hide= takes panels off the page, and reads like searchbench', () => {
   assert.deepEqual(hide('?s=' + b64), ['graph']);
   assert.deepEqual(hide('?s=' + b64 + '&hide=table'), ['table']);
   assert.deepEqual(shortState({ ...INITIAL_STATE, hiddenPanels: new Set(['graph']) }, env, 'light'), { v: 1, p: 'graph' });
-  // Framing a bare link does not stop it being bare: it still lands on k=10.
-  assert.deepEqual([...restoreUrlState('?hide=header', env, INITIAL_STATE).patch.chips], [...LANDING_CHIPS].filter((t) => allChipTags(dataset(env.defaultDataset)).has(t)));
+  // Framing a link puts no chip on.
+  assert.deepEqual([...restoreUrlState('?hide=header', env, INITIAL_STATE).patch.chips], []);
 });
 
-test('a link with no state opens on k=10, a link with state reads as written', () => {
+test('a link with no state opens with no chips, a link with state reads as written', () => {
   const env = {
     datasets: bench.datasets.map((d) => d.id),
     defaultDataset: bench.defaultDataset,
@@ -287,23 +287,16 @@ test('a link with no state opens on k=10, a link with state reads as written', (
     rowsFor: (id) => new Set(dataset(id).family.queries.flatMap((q) => [q.id, q.key])),
     participants: bench.participants.map((p) => p.id),
   };
-  const chipsOf = (search, e = env) => [...restoreUrlState(search, e, INITIAL_STATE).patch.chips].sort();
-  assert.deepEqual(LANDING_CHIPS, ['k:10']);
-  assert.ok(allChipTags(dataset(bench.defaultDataset)).has('k:10'));
-  assert.deepEqual(chipsOf(''), ['k:10'], 'the bare path');
-  assert.deepEqual(chipsOf('?utm_source=x'), ['k:10'], 'a parameter that is not ours carries no state');
-  assert.deepEqual(chipsOf('?s=not-a-link'), ['k:10'], 'nor does an ?s= the codec cannot read');
-  // Every link minted before the landing view keeps its rows.
-  assert.deepEqual(chipsOf('?s=eyJ2IjoxfQ'), [], 'the default link has no chips');
-  assert.deepEqual(chipsOf('?s=eyJ2IjoxLCJ0aCI6ImRhcmsifQ'), [], 'nor does one that only pins a theme');
-  assert.deepEqual(chipsOf('?theme=dark'), [], 'a readable parameter is state');
+  const chipsOf = (search) => [...restoreUrlState(search, env, INITIAL_STATE).patch.chips].sort();
+  assert.deepEqual(chipsOf(''), [], 'the bare path');
+  assert.deepEqual(chipsOf('?utm_source=x'), [], 'a parameter that is not ours');
+  assert.deepEqual(chipsOf('?s=not-a-link'), [], 'an ?s= the codec cannot read');
+  assert.deepEqual(chipsOf('?s=eyJ2IjoxfQ'), [], 'the default link');
   assert.deepEqual(chipsOf('?chips=k:100'), ['k:100']);
-  // The landing view is minted as a link of its own, so a copy of the address bar keeps k=10.
+  assert.deepEqual(chipsOf('?s=' + Buffer.from(JSON.stringify({ v: 1, q: 'k:10' })).toString('base64url')), ['k:10'], 'a quoted k=10 link keeps its chip');
+  // The bare path is the default link: nothing to write.
   const landing = { ...INITIAL_STATE, ...restoreUrlState('', env, INITIAL_STATE).patch };
-  assert.deepEqual(shortState(landing, env, 'light'), { v: 1, q: 'k:10' });
-  assert.deepEqual(chipsOf('?s=' + Buffer.from(JSON.stringify({ v: 1, q: 'k:10' })).toString('base64url')), ['k:10']);
-  // A dataset with no k=10 row opens with no chip rather than an empty table.
-  assert.deepEqual(chipsOf('', { ...env, tagsFor: () => new Set(['k:100']) }), []);
+  assert.deepEqual(shortState(landing, env, 'light'), { v: 1 });
 });
 
 test('the ticked rows, read in either reading', () => {
