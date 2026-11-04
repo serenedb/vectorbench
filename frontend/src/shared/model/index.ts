@@ -1,6 +1,7 @@
 /* The state shape, its reducer and the URL codec. */
 
 export {
+  HIDEABLE_PANELS,
   INITIAL_STATE,
   LANDING_CHIPS,
   LATENCY_METRICS,
@@ -8,12 +9,15 @@ export {
   ROW_MODE_LABELS,
   VIEWS,
   VIEW_LABELS,
+  PANELS,
   isLatencyMetric,
+  isPanelHidden,
   type BenchState,
   type CellMode,
   type Detail,
   type HeaderRowKey,
   type LatencyMetric,
+  type PanelId,
   type RowMode,
   type SortSection,
   type View,

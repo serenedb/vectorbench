@@ -209,10 +209,20 @@ overrides work next to it and are canonicalised on the next render:
 ids or group keys in either reading, `-` for none ticked). Modals and the
 split are never encoded.
 
+`?hide=` takes parts of the window out, as in searchbench — for embeds, e.g.
+`?s=…&hide=header,toolbar,status`. It takes a comma-separated list of
+`header` (the title bar), `toolbar` (the whole strip), `dataset`, `view`,
+`filter` and `display` (one group of the strip each; with all four gone the
+strip goes too), `table`, `graph` and `status` (the status bar). With `table`
+or `graph` hidden the other one takes the whole width. Unknown names are
+ignored, and the list is kept in the link (`p` in `?s=`). Nothing on the page
+turns a panel back on.
+
 A link with no state, such as the product's bare path or this file opened as it
 is, opens on the payload's `default_dataset` with the k=10 chip on
 (`LANDING_CHIPS` in `src/shared/model/state.ts`), and the address bar then
-names the chip. Any other link is read exactly as written: an `?s=` without `q`
+names the chip. `?hide=` alone does not count as state: it frames the page
+rather than choosing what it shows. Any other link is read exactly as written: an `?s=` without `q`
 has no chips, so `?s=eyJ2IjoxfQ` and every link minted before the landing view
 keep their rows.
 

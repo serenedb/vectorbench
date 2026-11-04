@@ -9,6 +9,10 @@
    cell or a GENERAL row opens its detail as a modal, which shows more than a
    strip would hold.
 
+   A link can leave parts of the window out (`?hide=`, see state.ts): the
+   title bar, the toolbar or its groups, the status bar, and either half of the
+   split — the other then takes the whole width, without the rule.
+
    Everything under the toolbar is a pure function of `state` and the
    benchmark: the grid is computed once per (dataset, view, metric), the scores
    once per grid and visible rows, and the column order from the section the
@@ -32,7 +36,7 @@ import {
   type Section,
   type SectionScores,
 } from '../../entities/results';
-import { useBenchShortcuts, useBenchState, type BenchEnv, type BenchState } from '../../shared/model';
+import { isPanelHidden, useBenchShortcuts, useBenchState, type BenchEnv, type BenchState } from '../../shared/model';
 import { Panel, SplitPane } from '../../shared/ui';
 import { GraphPane } from '../../widgets/curve-graph/GraphPane';
 import { CellDetailModal } from '../../widgets/detail/CellDetailModal';
@@ -138,6 +142,35 @@ export function BenchPage() {
   }
 
   const { grid, rows, gRows, scores, results } = model;
+  const showToolbar = !isPanelHidden(state, 'toolbar') && !(['dataset', 'view', 'filter', 'display'] as const).every((id) => isPanelHidden(state, id));
+  const showTable = !isPanelHidden(state, 'table');
+  const showGraph = !isPanelHidden(state, 'graph');
+  const table = (
+    <ResultsTable
+      dataset={shown}
+      results={results}
+      rows={rows}
+      groups={gRows}
+      grid={grid}
+      scores={scores}
+      state={state}
+      onScreen={onScreen}
+      ticked={ticked}
+      dispatch={dispatch}
+    />
+  );
+  const graph = (
+    <GraphPane
+      dataset={shown}
+      results={results}
+      grid={grid}
+      mode={rowMode}
+      groups={gRows}
+      plotted={plotted}
+      ticked={ticked.length}
+      onClear={() => dispatch({ type: 'plot', ids: [] })}
+    />
+  );
   const detail = state.detail;
   const detailResult = detail?.kind === 'cell' ? dataset.results.find((r) => r.id === detail.pid) : undefined;
   const detailRow = detail?.kind === 'cell' ? dataset.queries.find((q) => q.id === detail.qid) : undefined;
@@ -145,8 +178,8 @@ export function BenchPage() {
   return (
     <div className="vb-app">
       <Panel grow className="vb-window">
-        <BenchHeader />
-        <Toolbar bench={BENCH} dataset={dataset} everyone={everyone} state={state} dispatch={dispatch} />
+        {!isPanelHidden(state, 'header') && <BenchHeader />}
+        {showToolbar && <Toolbar bench={BENCH} dataset={dataset} everyone={everyone} state={state} dispatch={dispatch} />}
         {BENCH.sample && (
           <div className="banner" data-role="sample-banner">
             <b>synthetic sample</b>
@@ -157,47 +190,29 @@ export function BenchPage() {
           </div>
         )}
         {/* Until the reader drags the rule, the table takes what its columns
-            want and the graph the rest, but never less than 38% of the width. */}
-        <SplitPane
-          storageKey="vb-split"
-          defaultLeft={`min(${tableWidth(results)}px, 62%)`}
-          minLeft={380}
-          minRight={340}
-          left={
-            <ResultsTable
-              dataset={shown}
-              results={results}
-              rows={rows}
-              groups={gRows}
-              grid={grid}
-              scores={scores}
-              state={state}
-              onScreen={onScreen}
-              ticked={ticked}
-              dispatch={dispatch}
-            />
-          }
-          right={
-            <GraphPane
-              dataset={shown}
-              results={results}
-              grid={grid}
-              mode={rowMode}
-              groups={gRows}
-              plotted={plotted}
-              ticked={ticked.length}
-              onClear={() => dispatch({ type: 'plot', ids: [] })}
-            />
-          }
-        />
-        <StatusBar
-          dataset={dataset}
-          shown={shown.results.length}
-          participants={dataset.results.length}
-          rows={onScreen.length}
-          total={readingSize(dataset, rowMode)}
-          state={state}
-        />
+            want and the graph the rest, but never less than 38% of the width.
+            With one half hidden the other is the whole split. */}
+        {showTable && showGraph ? (
+          <SplitPane storageKey="vb-split" defaultLeft={`min(${tableWidth(results)}px, 62%)`} minLeft={380} minRight={340} left={table} right={graph} />
+        ) : (
+          <div className="split">
+            {(showTable || showGraph) && (
+              <div className="pane" style={{ flex: 1 }}>
+                {showTable ? table : graph}
+              </div>
+            )}
+          </div>
+        )}
+        {!isPanelHidden(state, 'status') && (
+          <StatusBar
+            dataset={dataset}
+            shown={shown.results.length}
+            participants={dataset.results.length}
+            rows={onScreen.length}
+            total={readingSize(dataset, rowMode)}
+            state={state}
+          />
+        )}
       </Panel>
       {detail?.kind === 'header' && <HeaderDetailModal dataset={shown} results={results} row={detail.row} dispatch={dispatch} />}
       {detail?.kind === 'cell' && detailResult && detailRow && (

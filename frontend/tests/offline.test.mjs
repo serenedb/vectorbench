@@ -271,3 +271,59 @@ test('committed HTML renders, graphs and details work over file:// without netwo
     await browser.close();
   }
 });
+
+test('?hide= takes panels off the page: either half of the split alone takes the whole width', async () => {
+  const browser = await chromium.launch();
+  try {
+    const context = await browser.newContext({ offline: true, viewport: { width: 1440, height: 1000 } });
+    const page = await context.newPage();
+    const errors = [];
+    page.on('pageerror', (error) => errors.push(error.message));
+    const html = new URL('../index.html', import.meta.url);
+    const open = async (query) => {
+      await page.goto(html.href + query);
+      await page.locator('.vb-app').waitFor();
+    };
+    const count = (sel) => page.locator(sel).count();
+    const width = (sel) => page.locator(sel).evaluate((el) => el.getBoundingClientRect().width);
+    const windowWidth = () => width('.split');
+
+    await open('?hide=graph');
+    assert.equal(await count('[data-role="graph"]'), 0, 'no graph');
+    assert.equal(await count('.splitter'), 0, 'no rule without a second pane');
+    assert.ok((await width('[data-role="table"]')) >= (await windowWidth()) - 1, 'the table takes the whole width');
+    assert.equal(await count('[data-act="unchip"]'), 1, '?hide= alone is still the bare link: it lands on k=10');
+    assert.match(page.url(), /[?&]s=/, 'canonicalised into ?s=');
+    // The hidden panel is part of the link: a reload keeps it off.
+    await page.reload();
+    await page.locator('.vb-app').waitFor();
+    assert.equal(await count('[data-role="graph"]'), 0, 'still no graph after a reload');
+
+    await open('?hide=table');
+    assert.equal(await count('[data-role="table"]'), 0, 'no table');
+    assert.equal(await count('.splitter'), 0);
+    assert.ok((await width('[data-role="graph"]')) >= (await windowWidth()) - 1, 'the graph takes the whole width');
+
+    await open('?hide=header,toolbar,status');
+    assert.equal(await count('.vb-toolbar'), 0, 'no toolbar');
+    assert.equal(await count('[data-role="status"]'), 0, 'no status bar');
+    assert.equal(await count('[data-act="theme"]'), 0, 'no title bar');
+    assert.equal(await count('[data-role="table"]'), 1);
+    assert.equal(await count('[data-role="graph"]'), 1);
+
+    await open('?hide=dataset,filter');
+    assert.equal(await count('[data-act="dataset-menu"]'), 0, 'no dataset menu');
+    assert.equal(await count('[data-act="filter-menu"]'), 0, 'no filter menu');
+    assert.equal(await count('[data-act="unchip"]'), 0, 'no filter pills');
+    assert.equal(await count('[data-act="display-menu"]'), 1, 'the rest of the toolbar stays');
+    assert.equal(await count('[data-act="view"]') > 0, true);
+
+    await open('?hide=dataset,view,filter,display');
+    assert.equal(await count('.vb-toolbar'), 0, 'an empty toolbar is no toolbar');
+
+    assert.deepEqual(errors, []);
+    await context.close();
+  } finally {
+    await browser.close();
+  }
+});
