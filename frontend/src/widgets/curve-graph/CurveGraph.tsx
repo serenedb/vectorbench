@@ -102,6 +102,15 @@ export function CurveYAxis({ scale, metric }: { scale: GraphScale; metric: Metri
   );
 }
 
+/** Radius of the invisible target around a point: the mark itself is a few
+    pixels across, too small to land the pointer on for its tooltip. */
+const HIT_R = 10;
+
+/** The hover target of a mark. It paints nothing; its group holds the tooltip. */
+function HitArea({ cx, cy }: { cx: number; cy: number }): ReactNode {
+  return <circle className="hitarea" cx={cx} cy={cy} r={HIT_R} style={{ fill: 'none', stroke: 'none', pointerEvents: 'all' }} />;
+}
+
 export function CurveGraph({ data, metric, scale }: { data: GraphData; metric: Metric; scale: GraphScale }): ReactNode {
   const { X, Y, width, top, bottom } = scale;
   const empty = data.series.length === 0;
@@ -146,15 +155,16 @@ export function CurveGraph({ data, metric, scale }: { data: GraphData; metric: M
             />
           )}
           {s.points.map((p) => (
-            <circle
-              key={p.index}
-              cx={X(p.recall)}
-              cy={Y(p.value)}
-              r={3.4}
-              style={{ fill: p.onFrontier ? s.color : 'var(--card)', stroke: s.color, strokeWidth: 1.4 }}
-            >
+            <g key={p.index} className="hit">
               <title>{`${s.name} · ${s.groupTitle} · ${fmtKnobs(p.knobs)} · recall ${p.recall.toFixed(4)} · ${fmtMetric(metric, p.value)} ${metricUnit(metric)}${p.onFrontier ? '' : ' · dominated'}`}</title>
-            </circle>
+              <circle
+                cx={X(p.recall)}
+                cy={Y(p.value)}
+                r={3.4}
+                style={{ fill: p.onFrontier ? s.color : 'var(--card)', stroke: s.color, strokeWidth: 1.4 }}
+              />
+              <HitArea cx={X(p.recall)} cy={Y(p.value)} />
+            </g>
           ))}
         </g>
       ))}
@@ -170,16 +180,18 @@ export function CurveGraph({ data, metric, scale }: { data: GraphData; metric: M
             {c.status === 'above' && first && (
               <line x1={cx} x2={X(first.recall)} y1={cy} y2={Y(first.value)} style={{ stroke: c.color, strokeWidth: 1, strokeDasharray: '1 3' }} />
             )}
-            <rect
-              x={cx - 4.5}
-              y={cy - 4.5}
-              width={9}
-              height={9}
-              transform={`rotate(45 ${cx} ${cy})`}
-              style={{ fill: c.status === 'above' ? 'var(--card)' : c.color, stroke: 'var(--fg)', strokeWidth: 1.2 }}
-            >
+            <g className="hit">
               <title>{`${c.name} · ${c.label} · ${fmtMetric(metric, c.value)} ${metricUnit(metric)} at recall ${fmtBar(c.recall)} · ${c.status}`}</title>
-            </rect>
+              <rect
+                x={cx - 4.5}
+                y={cy - 4.5}
+                width={9}
+                height={9}
+                transform={`rotate(45 ${cx} ${cy})`}
+                style={{ fill: c.status === 'above' ? 'var(--card)' : c.color, stroke: 'var(--fg)', strokeWidth: 1.2 }}
+              />
+              <HitArea cx={cx} cy={cy} />
+            </g>
           </g>
         );
       })}

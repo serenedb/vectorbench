@@ -1019,6 +1019,14 @@
     cursor: grabbing;
     user-select: none;
 }
+/* A point or a crossing on the graph: the plain arrow while its tooltip is up,
+   not the pan hand of the plot around it. */
+[data-product='vectorbench'] .curve-graph .hit {
+    cursor: default;
+}
+[data-product='vectorbench'] .graphscroll.dragging .curve-graph .hit {
+    cursor: grabbing;
+}
 [data-product='vectorbench'] .graphscroll::-webkit-scrollbar {
     height: 9px;
 }
