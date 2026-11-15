@@ -9,6 +9,7 @@ point into a REST model, which costs 5.6 ms per query at k=1000, twice the searc
 from __future__ import annotations
 
 import json
+import math
 from dataclasses import dataclass
 from typing import Any
 
@@ -21,6 +22,8 @@ from qdrant_client import grpc as q
 class Handle:
     filter: dict[str, Any] | None  # REST-dialect filter template, placeholders left in
     params: q.SearchParams
+    two_stage: bool = False
+    oversample: float = 1.0
 
 
 def _arg(value: Any, args: dict[str, Any]) -> Any:
@@ -73,21 +76,38 @@ class Client:
             params.acorn.CopyFrom(q.AcornSearchParams(enable=True))
         if str(p.get("exact", False)).lower() == "true":
             params.exact = True
-        if p.get("quantization"):
-            qp = {k: float(v) if k == "oversampling" else str(v).lower() == "true" for k, v in p["quantization"].items()}
+        qp = {k: float(v) if k == "oversampling" else str(v).lower() == "true" for k, v in (p.get("quantization") or {}).items()}
+        if str(b.get("plan", "segment")) == "two_stage" and qp.get("rescore"):
+            # Qdrant's two-stage query: the prefetch walks every segment on the codes alone and keeps the
+            # best oversampling x k candidates of the whole collection, then the outer query rereads just
+            # those at full precision, once, instead of each segment rescoring its own oversampling x k.
+            params.quantization.CopyFrom(q.QuantizationSearchParams(rescore=False))
+            return Handle(b.get("filter"), params, True, qp.get("oversampling", 1.0))
+        if qp:
             params.quantization.CopyFrom(q.QuantizationSearchParams(**qp))
         return Handle(b.get("filter"), params)
 
     def search(self, handle: Handle, vec: np.ndarray, k: int, args: dict[str, Any]) -> list[int]:
         assert self.points is not None, "connect() first"
+        nearest = q.Query(nearest=q.VectorInput(dense=q.DenseVector(data=vec.tolist())))
+        flt = _filter(handle.filter, args) if handle.filter is not None else None
+        if handle.two_stage:
+            pf = q.PrefetchQuery(query=nearest, limit=math.ceil(handle.oversample * k), params=handle.params)
+            if flt is not None:
+                pf.filter.CopyFrom(flt)
+            req = q.QueryPoints(
+                collection_name=self.collection, prefetch=[pf], query=nearest,
+                limit=k, params=q.SearchParams(exact=True), timeout=self.timeout,
+                with_payload=q.WithPayloadSelector(enable=False), with_vectors=q.WithVectorsSelector(enable=False),
+            )
+            return [p.id.num for p in self.points.Query(req, timeout=self.timeout).result]
         req = q.QueryPoints(
-            collection_name=self.collection,
-            query=q.Query(nearest=q.VectorInput(dense=q.DenseVector(data=vec.tolist()))),
+            collection_name=self.collection, query=nearest,
             limit=k, params=handle.params, timeout=self.timeout,
             with_payload=q.WithPayloadSelector(enable=False), with_vectors=q.WithVectorsSelector(enable=False),
         )
-        if handle.filter is not None:
-            req.filter.CopyFrom(_filter(handle.filter, args))
+        if flt is not None:
+            req.filter.CopyFrom(flt)
         return [p.id.num for p in self.points.Query(req, timeout=self.timeout).result]
 
     def close(self) -> None:

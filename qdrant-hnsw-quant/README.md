@@ -66,6 +66,12 @@ A block is `{"filter": <REST filter> | null, "params": {...}}`. Filters use `mus
 | `hnsw_ef` | `params.hnsw_ef` | the beam of the graph walk in every segment |
 | `oversample` | `params.quantization.oversampling` | with `rescore`, `oversampling x k` candidates by code score are reread at full precision |
 
+The index setting `plan` picks the query shape. `segment` (the default) is one query: every segment
+rescores its own `oversampling x k` candidates. `two_stage` is Qdrant's prefetch query: the prefetch
+walks every segment on the codes and keeps the collection's best `oversampling x k` candidates, then
+the outer query rereads just those at full precision (`exact`), once. The label `qbest` at 247m uses
+`two_stage` with `async_scorer: true`.
+
 Filtered blocks set `params.acorn: true`, Qdrant's filtered walk, which expands a rejected node's
 neighbours in its place; Qdrant applies it below its own selectivity threshold. Exact groups set
 `params.exact: true`, Qdrant's brute-force path.
