@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+# Whole recipe: create the index, bulk ingest, settle. Blocks until the index is done moving.
+set -euo pipefail
+cd "$(dirname "$0")"
+python=${VECTORBENCH_PYTHON:-}
+if [[ -z "$python" ]]; then
+    if [[ -x ../.venv/bin/python ]]; then python=../.venv/bin/python; else python=python3; fi
+fi
+exec "$python" load.py
