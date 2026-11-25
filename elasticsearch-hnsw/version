@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+# The engine version string.
+set -euo pipefail
+: "${VB_PORT:=9200}"
+: "${VB_HOST:=127.0.0.1}"
+curl -sf --max-time 10 "http://${VB_HOST}:${VB_PORT}/" | python3 -c 'import json,sys; print(json.load(sys.stdin)["version"]["number"])'

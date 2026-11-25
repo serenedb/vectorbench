@@ -1,0 +1,69 @@
+# Elasticsearch participant: Lucene's HNSW through the dense_vector field, one shard merged to 8 segments.
+participant: {name: Elasticsearch HNSW, system: Elasticsearch, family: hnsw, tags: [Java, Lucene, Elasticsearch]}
+
+env:
+  port: 9200
+  container: vectorbench-elasticsearch-hnsw
+  image: docker.elastic.co/elasticsearch/elasticsearch:9.5.6
+  heap: 31g
+  index_name: items
+
+# Lucene memory-maps its files; the full-precision vectors a rescore reads are the .vec files.
+evict_mapped: [.vec]
+
+connection: {host: 127.0.0.1, port: 9200, index_name: items, timeout: 3600}
+
+# Lucene names its kNN query in the profile output; a filtered query that fell back to a full scan would not carry it.
+plan_rules:
+  approximate: [Knn]
+  exact_not: [Knn]
+
+defaults:
+  # type: hnsw | int8_hnsw | int4_hnsw | bbq_hnsw. filter_heuristic: acorn | fanout (index.dense_vector.hnsw_filter_heuristic).
+  index: {type: int8_hnsw, m: 16, ef_construction: 256, shards: 1, segments: 8, filter_heuristic: acorn}
+  # num_candidates is the beam per segment, floored at k. oversample 0 answers from the codes; >= 1 rescores
+  # ceil(k x oversample) candidates per shard with the full vectors.
+  ladder: {num_candidates: [16, 32, 48, 64, 96, 128, 256, 512, 1024, 2048, 3072, 4096, 4300, 4400, 4500, 4600, 4650, 4700, 4750, 4800, 5120, 6144, 8192, 10000], oversample: [0.0]}
+  groups:
+    "*/100":  {ladder: {num_candidates: [100, 200, 400, 1024, 2048, 3072, 4096, 4300, 4400, 4500, 4525, 4550, 4575, 4600, 4650, 4700, 4750, 4800, 5120, 6144, 8192, 10000], oversample: [0.0]}}
+    "*/1000": {ladder: {num_candidates: [1000, 2048, 3072, 4096, 4300, 4400, 4500, 4525, 4550, 4575, 4600, 4650, 4700, 4750, 4800, 5120, 6144, 8192, 10000], oversample: [0.0]}}
+
+datasets:
+  wiki-v3-1024:
+    1m: {}
+    10m: {}
+    # 1-bit BBQ is the only graph format whose codes fit in RAM at this size (8-bit would be 253 GB, 4-bit 126 GB);
+    # the full vectors stay on disk and the rescore reads ceil(k x oversample) of them per query. Elasticsearch caps
+    # num_candidates at 10000, so k = 1000 rescores at most oversample 10.
+    247m:
+      index: {type: bbq_hnsw}
+      groups:
+        "none/10":       {ladder: {num_candidates: [1024, 2048, 4096, 10000], oversample: [3.0, 4.0, 5.0, 6.0, 8.0, 10.0, 12.0, 24.0]}}
+        "none/100":      {ladder: {num_candidates: [800, 1600, 3200, 10000], oversample: [3.0, 4.0, 5.0, 6.0, 8.0, 24.0]}}
+        "none/1000":     {ladder: {num_candidates: [2000, 4000, 8000], oversample: [3.0, 4.0, 5.0, 6.0, 8.0, 10.0]}}
+        "eq-10/10":      {ladder: {num_candidates: [4096, 6144, 8192, 10000], oversample: [8.0, 10.0, 12.0, 16.0]}}
+        "eq-10/100":     {ladder: {num_candidates: [3200, 6400, 10000], oversample: [8.0, 10.0, 12.0, 16.0]}}
+        "eq-10/1000":    {ladder: {num_candidates: [10000], oversample: [10.0]}}
+        "eq-1/10":       {ladder: {num_candidates: [10000], oversample: [12.0, 32.0]}}
+        "eq-1/100":      {ladder: {num_candidates: [10000], oversample: [12.0, 16.0]}}
+        "eq-1/1000":     {ladder: {num_candidates: [10000], oversample: [10.0]}}
+        "eq-0.1/10":     {ladder: {num_candidates: [16, 64, 256, 1024], oversample: [3.0, 3.5, 4.0, 4.5, 5.0, 8.0]}}
+        "eq-0.1/100":    {ladder: {num_candidates: [200, 400, 800, 1600, 3200], oversample: [2.0, 2.5, 3.0, 3.5, 4.0]}}
+        "eq-0.1/1000":   {ladder: {num_candidates: [1000, 2000, 4000], oversample: [2.0, 2.2, 2.4, 2.5, 3.0, 3.5, 4.0]}}
+        "range-10/10":   {ladder: {num_candidates: [2048, 4096, 8192, 10000], oversample: [8.0, 12.0, 16.0]}}
+        "range-10/100":  {ladder: {num_candidates: [3200, 6400, 10000], oversample: [8.0, 10.0, 12.0, 16.0]}}
+        "range-10/1000": {ladder: {num_candidates: [10000], oversample: [10.0]}}
+        "range-1/10":    {ladder: {num_candidates: [10000], oversample: [12.0, 32.0]}}
+        "range-1/100":   {ladder: {num_candidates: [10000], oversample: [12.0, 16.0]}}
+        "range-1/1000":  {ladder: {num_candidates: [10000], oversample: [10.0]}}
+        "and-1/10":      {ladder: {num_candidates: [10000], oversample: [12.0, 32.0]}}
+        "and-1/100":     {ladder: {num_candidates: [10000], oversample: [12.0, 16.0]}}
+        "and-1/1000":    {ladder: {num_candidates: [10000], oversample: [10.0]}}
+        "corr/10":       {ladder: {num_candidates: [1024, 2048, 4096], oversample: [5.0, 6.0, 8.0, 10.0]}}
+        "corr/100":      {ladder: {num_candidates: [1600, 3200, 6400], oversample: [3.0, 4.0, 5.0, 6.0]}}
+        "corr/1000":     {ladder: {num_candidates: [2000, 4000, 8000], oversample: [3.0, 4.0, 5.0, 6.0]}}
+        "xcorr/10":      {ladder: {num_candidates: [1024, 10000], oversample: [32.0, 48.0, 64.0]}}
+        "xcorr/100":     {ladder: {num_candidates: [6400, 10000], oversample: [16.0, 20.0, 24.0, 32.0]}}
+        "xcorr/1000":    {ladder: {num_candidates: [2000, 4000, 8000], oversample: [5.0, 6.0, 7.0, 8.0]}}
+        "lang/10":       {ladder: {num_candidates: [512, 1024, 2048, 4096], oversample: [5.0, 6.0, 8.0]}}
+        "xlang/10":      {ladder: {num_candidates: [4096, 8192, 10000], oversample: [8.0, 10.0, 12.0, 16.0]}}
