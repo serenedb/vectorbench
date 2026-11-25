@@ -18,7 +18,7 @@ Method: [docs/methodology.md](docs/methodology.md). Formats every part agrees on
 ## Current run: wiki-v3-1024-10m
 
 - **Data:** the first 10,000,000 rows of the same stream, with the same 10,000 queries and filter cases; vectors, graphs and codes all fit in RAM.
-- **Participants:** the same three, built the same way (m=16, ef_construction=256, 8 segments; Qdrant ends at 11) but with 8-bit codes and no reranking: SereneDB `usq8` at `sdb_ann_rescore_width = 0`, Qdrant scalar int8 with `rescore` false, Elasticsearch `int8_hnsw` with `oversample` 0. Queries never touch the float vectors. Elasticsearch also runs V04, exact search without a filter.
+- **Participants:** the same three, built the same way (m=16, ef_construction=256, 8 segments; Qdrant ends at 11) but with 8-bit codes and no reranking: SereneDB `usq8` at `sdb_ann_rescore_width = 0`, Qdrant scalar int8 with `rescore` false, Elasticsearch `int8_hnsw` with `oversample` 0. Queries never touch the float vectors. SereneDB and Elasticsearch also run V04, exact search without a filter. SereneDB's pass was rerun on 2026-11-25 with the same 26.11.1 image and procedure and a denser ladder, 19 to 30 points per group instead of 5 to 16, with k=100 and 1000 starting below a beam of k (the engine floors the beam at each segment's share of k).
 - **Measurement:** the engine's files are read into the page cache before its pass and nothing is evicted; every point times all 10,000 queries (repeats between points cost nothing when everything is in RAM), every query runs. Without reranking 8-bit codes cap recall near 0.98, so the 0.99 rows are not reached by either engine.
 
 ## Layout
