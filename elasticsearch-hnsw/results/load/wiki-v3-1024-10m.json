@@ -1,0 +1,37 @@
+{
+ "dataset": "wiki-v3-1024-10m",
+ "participant": "elasticsearch-hnsw",
+ "load_time": 3164.451977949,
+ "load_phases": {
+  "ingest": 1555.11,
+  "index": 1609.004
+ },
+ "disk_bytes": 52851934948,
+ "disk_info": {
+  "segments": 8,
+  "index_bytes": 52851821275,
+  "index": {
+   "type": "int8_hnsw",
+   "m": 16,
+   "ef_construction": 256,
+   "shards": 1,
+   "segments": 8,
+   "filter_heuristic": "acorn"
+  }
+ },
+ "memory_peak_load": 117422792704,
+ "version": "9.5.6",
+ "date": "2026-11-15",
+ "index": {
+  "params": {
+   "type": "int8_hnsw",
+   "m": 16,
+   "ef_construction": 256,
+   "shards": 1,
+   "segments": 8,
+   "filter_heuristic": "acorn",
+   "dims": 1024,
+   "metric": "ip"
+  }
+ }
+}
